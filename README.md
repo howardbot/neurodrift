@@ -110,6 +110,19 @@ server {
 
 then `sudo certbot --nginx -d neurodrift.example.com`.
 
+**Private access over Tailscale (no public exposure).** Bind NeuroDrift to localhost and let
+Tailscale terminate HTTPS for your tailnet only:
+
+```bash
+# .env: HTTP_BIND=127.0.0.1  HTTP_PORT=8088
+docker compose up -d --build
+sudo tailscale serve --bg --https=8443 http://127.0.0.1:8088   # tailnet only (not Funnel)
+# → https://<machine>.<tailnet>.ts.net:8443 ; undo with: sudo tailscale serve --https=8443 off
+```
+
+The serve configuration persists across reboots. Nothing listens on the public interface, so
+no firewall changes are needed.
+
 Resource use is deliberately small: one uvicorn process, one RQ worker (one job at a time), BLAS/OpenMP
 limited to one thread (`OMP_NUM_THREADS=1` etc.), container memory limits in
 `docker-compose.yml`.
