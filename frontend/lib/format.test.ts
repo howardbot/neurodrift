@@ -1,0 +1,36 @@
+import { describe, expect, it } from "vitest";
+import { binCenters, formatBytes, formatDuration, formatNumber } from "@/lib/format";
+import { parseErrorBody } from "@/lib/api";
+import { suggestSessionName } from "@/components/UploadSessionForm";
+
+describe("format", () => {
+  it("formats bytes, numbers and durations", () => {
+    expect(formatBytes(512)).toBe("512 B");
+    expect(formatBytes(5 * 1024 * 1024)).toBe("5.0 MB");
+    expect(formatNumber(8000)).toBe("8,000");
+    expect(formatNumber(0.12345)).toBe("0.123");
+    expect(formatNumber(null)).toBe("—");
+    expect(formatDuration(159.98)).toBe("2 min 40 s");
+  });
+
+  it("computes histogram bin centres", () => {
+    expect(binCenters([0, 1, 3])).toEqual([0.5, 2]);
+  });
+
+  it("suggests safe session names", () => {
+    expect(suggestSessionName("R1_D01.npz")).toBe("R1_D01");
+    expect(suggestSessionName("../day 3 (good).npz")).toBe("day 3 _good_");
+  });
+});
+
+describe("parseErrorBody", () => {
+  it("handles string, dataset-validation and pydantic error shapes", () => {
+    expect(parseErrorBody(404, { detail: "Project not found" }).message).toBe("Project not found");
+    const v = parseErrorBody(422, { detail: { message: "bad file", errors: ["Missing required array 'X'."] } });
+    expect(v.message).toBe("bad file");
+    expect(v.details).toEqual(["Missing required array 'X'."]);
+    const p = parseErrorBody(422, { detail: [{ loc: ["body", "name"], msg: "Field required" }] });
+    expect(p.details).toEqual(["name: Field required"]);
+    expect(parseErrorBody(502, null).message).toBe("Request failed (502)");
+  });
+});

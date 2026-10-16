@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Data and secrets
+data/
+backend/data/
+.env
+*.npz
+!backend/tests/fixtures/*.npz
+
+.DS_Store
