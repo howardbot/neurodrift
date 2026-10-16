@@ -124,3 +124,54 @@ def test_pair_comparison(client: TestClient) -> None:
 
     other = client.post("/api/projects", json={"name": "x"}).json()
     assert client.get(f"/api/experiments/{exp['id']}/compare/{a}/{other['id']}").status_code == 404
+
+
+def test_too_short_sessions_rejected_up_front(client: TestClient, rng: np.random.Generator) -> None:
+    p = client.post("/api/projects", json={"name": "short"}).json()
+    r = client.post(
+        f"/api/projects/{p['id']}/sessions",
+        data={"name": "tiny"},
+        files={"file": ("s.npz", npz_bytes(X=rng.poisson(1, (12, 4)).astype(float), Y=rng.standard_normal((12, 2))))},
+    )
+    assert r.status_code == 201 and any("too few for decoding" in w for w in r.json()["warnings"])
+    r = client.post(f"/api/projects/{p['id']}/experiments", json={})
+    assert r.status_code == 422 and "tiny (12 bins)" in r.json()["detail"]
+
+
+def test_project_with_running_experiment_cannot_be_deleted(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.db.session import get_sessionmaker
+    from app.models import Experiment, ExperimentStatus
+
+    pid, _ = _demo(client)
+    monkeypatch.setattr(service, "enqueue", lambda experiment: None)
+    exp = client.post(f"/api/projects/{pid}/experiments", json={}).json()
+    db = get_sessionmaker()()
+    db.get(Experiment, __import__("uuid").UUID(exp["id"])).status = ExperimentStatus.running
+    db.commit()
+    db.close()
+    assert client.delete(f"/api/projects/{pid}").status_code == 409
+
+
+def test_orphaned_experiments_are_requeued(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Simulates Redis losing a queued job: the worker's start-up recovery re-queues it."""
+    pid, _ = _demo(client)
+    monkeypatch.setattr(service, "enqueue", lambda experiment: None)  # job "lost"
+    exp = client.post(f"/api/projects/{pid}/experiments", json={}).json()
+    assert client.get(f"/api/experiments/{exp['id']}/status").json()["status"] == "pending"
+
+    class FakeQueue:
+        job_ids: list[str] = []
+        connection = None
+
+    class FakeJob:
+        @staticmethod
+        def exists(job_id, connection=None):
+            return False
+
+    import rq.job
+
+    monkeypatch.setattr(service, "_queue", lambda: FakeQueue())
+    monkeypatch.setattr(rq.job, "Job", FakeJob)
+    monkeypatch.setattr(service, "enqueue", lambda experiment: service.run_experiment(str(experiment.id)))
+    assert service.recover_orphaned_experiments() == 1
+    assert client.get(f"/api/experiments/{exp['id']}/status").json()["status"] == "completed"

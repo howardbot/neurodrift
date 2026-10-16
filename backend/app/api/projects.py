@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import func, select
 
 from app.api.deps import DB, get_project_or_404
-from app.models import Project, RecordingSession
+from app.models import ExperimentStatus, Project, RecordingSession
 from app.schemas import ProjectCreate, ProjectDetail, ProjectOut, ProjectUpdate
 from app.services import storage
 
@@ -78,6 +78,10 @@ def update_project(project_id: uuid.UUID, body: ProjectUpdate, db: DB) -> Projec
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_project(project_id: uuid.UUID, db: DB) -> Response:
     project = get_project_or_404(db, project_id)
+    if any(e.status == ExperimentStatus.running for e in project.experiments):
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "An experiment in this project is running; delete it after it finishes"
+        )
     db.delete(project)
     db.commit()
     storage.remove_tree(storage.project_relpath(project_id))

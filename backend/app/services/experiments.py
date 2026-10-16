@@ -25,6 +25,7 @@ from app.analysis.cross_session import (
 )
 from app.analysis.dataset import SessionData
 from app.analysis.decoding import DecoderConfig
+from app.analysis.preprocessing import contiguous_split
 from app.core.config import get_settings
 from app.db.base import utcnow
 from app.db.session import get_sessionmaker
@@ -66,6 +67,24 @@ def validate_sessions(sessions: list[RecordingSession], config: dict[str, Any]) 
     if not sessions:
         raise ValueError("Select at least one session")
     check_outputs([s.n_outputs for s in sessions], decoder_config(config).outputs)
+    too_short = []
+    for s in sessions:
+        try:
+            contiguous_split(s.n_samples, float(config["train_fraction"]))
+        except ValueError:
+            too_short.append(f"{s.name} ({s.n_samples} bins)")
+    if too_short:
+        raise ValueError(
+            "Too few time bins for a train/test split in: " + ", ".join(too_short)
+            + ". Each block needs at least 5 bins."
+        )
+
+
+def _queue():
+    from redis import Redis
+    from rq import Queue
+
+    return Queue(QUEUE_NAME, connection=Redis.from_url(get_settings().redis_url))
 
 
 def enqueue(experiment: Experiment) -> None:
@@ -74,13 +93,10 @@ def enqueue(experiment: Experiment) -> None:
     if settings.jobs_inline:
         run_experiment(str(experiment.id))
         return
-    from redis import Redis
     from redis.exceptions import RedisError
-    from rq import Queue
 
     try:
-        queue = Queue(QUEUE_NAME, connection=Redis.from_url(settings.redis_url))
-        job = queue.enqueue(
+        job = _queue().enqueue(
             "app.services.experiments.run_experiment",
             str(experiment.id),
             job_id=str(experiment.id),
@@ -91,6 +107,43 @@ def enqueue(experiment: Experiment) -> None:
     except RedisError as exc:
         raise QueueUnavailableError(f"Job queue unavailable: {exc}") from exc
     experiment.job_id = job.id
+
+
+def recover_orphaned_experiments() -> int:
+    """Re-queue experiments whose job no longer exists or was interrupted.
+
+    Called when the worker starts. With a single worker, nothing can legitimately be
+    running at that moment, so ``running`` rows were interrupted (e.g. the container was
+    killed). ``pending`` rows whose job is missing from Redis (e.g. Redis restarted
+    before the worker picked the job up) would otherwise wait forever. The analysis is
+    deterministic given its stored configuration and seed, so re-running is safe.
+    """
+    from rq.job import Job
+
+    queue = _queue()
+    db = get_sessionmaker()()
+    recovered = 0
+    try:
+        stuck = db.query(Experiment).filter(
+            Experiment.status.in_([ExperimentStatus.pending, ExperimentStatus.running])
+        )
+        for experiment in stuck:
+            job_id = str(experiment.id)
+            if experiment.status == ExperimentStatus.pending and job_id in queue.job_ids:
+                continue
+            if Job.exists(job_id, connection=queue.connection):
+                Job.fetch(job_id, connection=queue.connection).delete()
+            experiment.status = ExperimentStatus.pending
+            experiment.progress = 0.0
+            experiment.started_at = None
+            db.commit()
+            enqueue(experiment)
+            db.commit()
+            recovered += 1
+            logger.warning("experiment_requeued", extra={"experiment_id": job_id})
+    finally:
+        db.close()
+    return recovered
 
 
 class _SessionCache:

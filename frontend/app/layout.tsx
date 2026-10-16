@@ -4,8 +4,9 @@ import { MobileHeader, Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "NeuroDrift", template: "%s · NeuroDrift" },
-  description: "Measure neural representation drift and decoder stability across recording sessions.",
+  title: { default: "Qin Liu — Neuroscience research", template: "%s · Qin Liu" },
+  description:
+    "Neuroscience research explained for everyone: decoding movement across days, shared variability between brain areas, 3D vision, and spike sorting — plus NeuroDrift, a tool for measuring decoder stability.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

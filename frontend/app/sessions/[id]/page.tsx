@@ -40,11 +40,11 @@ function MetadataForm({ session, onSaved }: { session: Session; onSaved: () => v
 
   return (
     <form onSubmit={save} className="grid grid-cols-2 gap-3 text-sm">
-      <div><label className="label">Subject</label><input className="input" value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
-      <div><label className="label">Recording date</label><input type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-      <div><label className="label">Bin size (ms)</label><input type="number" min="0" step="any" className="input" value={bin} onChange={(e) => setBin(e.target.value)} /></div>
-      <div><label className="label">Session order</label><input type="number" min="0" step="1" className="input" value={order} onChange={(e) => setOrder(e.target.value)} /></div>
-      <div className="col-span-2"><label className="label">Notes</label><textarea className="input" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
+      <div><label className="label" htmlFor="md-subject">Subject</label><input id="md-subject" className="input" value={subject} onChange={(e) => setSubject(e.target.value)} /></div>
+      <div><label className="label" htmlFor="md-date">Recording date</label><input id="md-date" type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)} /></div>
+      <div><label className="label" htmlFor="md-bin">Bin size (ms)</label><input id="md-bin" type="number" min="0" step="any" className="input" value={bin} onChange={(e) => setBin(e.target.value)} /></div>
+      <div><label className="label" htmlFor="md-order">Session order</label><input id="md-order" type="number" min="0" step="1" className="input" value={order} onChange={(e) => setOrder(e.target.value)} /></div>
+      <div className="col-span-2"><label className="label" htmlFor="md-notes">Notes</label><textarea id="md-notes" className="input" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} /></div>
       {error && <div className="col-span-2"><ErrorBox error={error} /></div>}
       <div className="col-span-2"><Button type="submit" variant="primary">Save metadata</Button></div>
     </form>

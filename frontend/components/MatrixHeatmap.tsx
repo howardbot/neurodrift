@@ -40,8 +40,8 @@ export function MatrixHeatmap({
   const { data, layout } = useMemo(() => {
     const finite = z.flat().filter((v): v is number => v !== null && Number.isFinite(v));
     // Colour range spans the observed values so differences stay visible.
-    const zmin = Math.max(spec.clipMin ?? -Infinity, Math.min(...finite));
-    const zmax = Math.max(...finite);
+    const zmin = finite.length ? Math.max(spec.clipMin ?? -Infinity, Math.min(...finite)) : 0;
+    const zmax = finite.length ? Math.max(...finite) : 1;
     const trace = {
       type: "heatmap",
       x: names,

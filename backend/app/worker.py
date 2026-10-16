@@ -10,12 +10,13 @@ from rq import Queue, Worker
 
 from app.core.config import get_settings
 from app.core.logging import configure_logging
-from app.services.experiments import QUEUE_NAME
+from app.services.experiments import QUEUE_NAME, recover_orphaned_experiments
 
 
 def main() -> None:
     settings = get_settings()
     configure_logging(settings.log_level)
+    recover_orphaned_experiments()
     connection = Redis.from_url(settings.redis_url)
     Worker([Queue(QUEUE_NAME, connection=connection)], connection=connection).work()
 

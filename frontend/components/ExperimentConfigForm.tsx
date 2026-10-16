@@ -13,7 +13,10 @@ export function ExperimentConfigForm({ projectId, sessions }: { projectId: strin
   const router = useRouter();
   const minOutputs = Math.min(...sessions.map((s) => s.n_outputs));
   const [decoder, setDecoder] = useState<DecoderSettings>(() => defaultDecoderSettings(minOutputs));
-  const [nComponents, setNComponents] = useState<3 | 5 | 10 | 20>(10);
+  const minNeuronsAll = Math.min(...sessions.map((s) => s.n_neurons));
+  const [nComponents, setNComponents] = useState<3 | 5 | 10 | 20>(() =>
+    ([10, 5, 3] as const).find((k) => k < minNeuronsAll) ?? 3,
+  );
   const [selected, setSelected] = useState<string[]>(() => sessions.map((s) => s.id));
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);

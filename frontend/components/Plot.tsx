@@ -78,6 +78,10 @@ export function Plot({
   clickRef.current = onClick;
   const dark = usePrefersDark();
   const [failed, setFailed] = useState(false);
+  // Layouts and configs are usually inline object literals; compare them by value so a
+  // parent re-render (e.g. typing in a form) does not re-draw every plot on the page.
+  const layoutKey = JSON.stringify(layout);
+  const configKey = JSON.stringify(config ?? {});
 
   useEffect(() => {
     let cancelled = false;
@@ -106,7 +110,8 @@ export function Plot({
     return () => {
       cancelled = true;
     };
-  }, [data, layout, config, height, dark]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- layout/config compared by value
+  }, [data, layoutKey, configKey, height, dark]);
 
   useEffect(() => {
     const el = ref.current;

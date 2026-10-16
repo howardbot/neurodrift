@@ -24,6 +24,7 @@ import numpy as np
 REQUIRED_KEYS = ("X", "Y")
 OPTIONAL_KEYS = ("timestamps", "trial_ids", "neuron_ids")
 MIN_SAMPLES = 10
+MIN_DECODING_SAMPLES = 25  # 80/20 split with at least 5 bins in each block
 
 _NUMERIC_KINDS = "biuf"  # bool, signed int, unsigned int, float
 
@@ -183,6 +184,11 @@ def load_session(path: str | Path, max_uncompressed_bytes: int = 4 * 1024**3) ->
     n_samples, n_neurons = X.shape
     if n_samples < MIN_SAMPLES:
         errors.append(f"At least {MIN_SAMPLES} samples are required; got {n_samples}.")
+    elif n_samples < MIN_DECODING_SAMPLES:
+        warnings.append(
+            f"Only {n_samples} samples: enough for QC, but too few for decoding with an 80/20 split "
+            f"(needs {MIN_DECODING_SAMPLES})."
+        )
 
     timestamps = arrays.get("timestamps")
     if timestamps is not None and _check_numeric("timestamps", timestamps, errors):

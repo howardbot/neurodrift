@@ -2,6 +2,11 @@
 
 **Measure neural representation drift and decoder stability across recording sessions.**
 
+The site also hosts a plain-language research showcase (`/` and `/research/*`): four
+projects explained for readers outside neuroscience, each with an interactive toy
+illustration. Only already-public results are shown; unpublished projects describe
+questions and methods.
+
 NeuroDrift is a lightweight web application for studying the cross-session stability of
 neural population representations and linear neural decoders. Upload one `.npz` file per
 recording session (binned neural activity `X` and behaviour `Y`), inspect quality control,

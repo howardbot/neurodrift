@@ -31,7 +31,11 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb"]
+    # Append-only persistence so queued jobs survive a Redis restart; the worker also
+    # re-queues orphaned experiments when it starts.
+    command: ["redis-server", "--save", "", "--appendonly", "yes", "--maxmemory", "128mb"]
+    volumes:
+      - redisdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -100,3 +104,4 @@ services:
 volumes:
   pgdata:
   datasets:
+  redisdata:

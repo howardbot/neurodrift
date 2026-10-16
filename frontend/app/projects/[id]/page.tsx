@@ -143,7 +143,8 @@ export default function ProjectPage() {
             ) : (
               <>
                 <div className="mb-4"><Notice>{alignment.detail}</Notice></div>
-                <ExperimentConfigForm projectId={project.id} sessions={sessions} />
+                {/* Remount when sessions change so new uploads are selected by default. */}
+                <ExperimentConfigForm key={sessions.map((s) => s.id).join()} projectId={project.id} sessions={sessions} />
               </>
             )}
           </Card>
