@@ -139,6 +139,63 @@ def summarise_matrix(matrix: list[list[float | None]]) -> dict[str, float | None
     return {"mean_diagonal": nanmean(diag), "mean_off_diagonal": nanmean(off)}
 
 
+def per_session_summary(
+    decoder_r: list[list[float | None]], angles: list[list[float | None]] | None = None
+) -> list[dict[str, float | None]]:
+    """Per-session view of the train × test matrices (rows train, columns test).
+
+    For session *i*: the within-session value (diagonal), the mean over the other
+    sessions when *i* is the training session (row, "out") and when *i* is the test
+    session (column, "in"). Diagonal cells are excluded from the transfer means and
+    missing cells are ignored. ``angles`` (mean principal angle, degrees) is optional
+    because experiments run before subspace analysis existed have none.
+    """
+
+    def mean(values: list[float | None]) -> float | None:
+        finite = [float(v) for v in values if v is not None and np.isfinite(v)]
+        return float(np.mean(finite)) if finite else None
+
+    n = len(decoder_r)
+    rows: list[dict[str, float | None]] = []
+    for i in range(n):
+        row: dict[str, float | None] = {
+            "within_r": decoder_r[i][i],
+            "out_transfer_r": mean([decoder_r[i][j] for j in range(n) if j != i]),
+            "in_transfer_r": mean([decoder_r[j][i] for j in range(n) if j != i]),
+            "within_angle": None,
+            "out_mean_angle": None,
+            "in_mean_angle": None,
+        }
+        if angles is not None:
+            row.update(
+                within_angle=angles[i][i],
+                out_mean_angle=mean([angles[i][j] for j in range(n) if j != i]),
+                in_mean_angle=mean([angles[j][i] for j in range(n) if j != i]),
+            )
+        rows.append(row)
+    return rows
+
+
+def summarise_by_distance(matrix: list[list[float | None]]) -> list[dict[str, Any]]:
+    """Mean value of the cells at each session distance ``d = |i - j|``.
+
+    Distance counts positions in the experiment's session order (not days). Distance 0
+    is the diagonal (within-session reference). Missing cells are excluded; a distance
+    with no available cells has ``mean is None``. Cells at the same distance share
+    sessions, so the means are descriptive, not independent samples.
+    """
+    arr = np.array([[np.nan if v is None else v for v in row] for row in matrix], dtype=float)
+    n = arr.shape[0]
+    rows, cols = np.indices((n, n))
+    distance = np.abs(rows - cols)
+    out: list[dict[str, Any]] = []
+    for d in range(n):
+        values = arr[distance == d]
+        values = values[np.isfinite(values)]
+        out.append({"distance": d, "mean": float(values.mean()) if values.size else None, "n_pairs": int(values.size)})
+    return out
+
+
 SUBSPACE_KEYS = ("mean_angle", "max_angle", "projection_distance", "alignment_index", "chance_mean_angle", "n_used")
 
 

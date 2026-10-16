@@ -3,7 +3,13 @@
 import numpy as np
 import pytest
 
-from app.analysis.cross_session import check_outputs, cross_session_decoding, summarise_matrix
+from app.analysis.cross_session import (
+    check_outputs,
+    cross_session_decoding,
+    per_session_summary,
+    summarise_by_distance,
+    summarise_matrix,
+)
 from app.analysis.dataset import SessionData
 from app.analysis.decoding import DecoderConfig
 
@@ -87,3 +93,21 @@ def test_subspace_matrix_tracks_tuning_rotation(rng: np.random.Generator) -> Non
     out = cross_session_subspaces(lambda i: [sessions[0], other][i], 2, n_components=2)
     assert out["matrices"]["mean_angle"][0][1] > 30
     assert out["cells"][0][1]["chance_mean_angle"] > out["matrices"]["mean_angle"][0][0]
+
+
+def test_per_session_summary_and_distance_profile() -> None:
+    r = [[0.9, 0.7, None], [0.6, 0.8, 0.5], [0.4, 0.6, 0.85]]
+    angles = [[10.0, 20.0, 30.0], [22.0, 12.0, 18.0], [35.0, 19.0, 11.0]]
+    rows = per_session_summary(r, angles)
+    assert rows[0]["within_r"] == 0.9
+    assert rows[0]["out_transfer_r"] == pytest.approx(0.7)  # missing cell ignored, diagonal excluded
+    assert rows[2]["in_transfer_r"] == pytest.approx(0.5)  # column 2 without its diagonal; None ignored
+    assert rows[1]["out_mean_angle"] == pytest.approx(20.0) and rows[1]["in_mean_angle"] == pytest.approx(19.5)
+    assert per_session_summary(r)[0]["within_angle"] is None  # older experiments: no subspace
+
+    by_d = summarise_by_distance(r)
+    assert [d["distance"] for d in by_d] == [0, 1, 2]
+    assert by_d[0]["mean"] == pytest.approx(0.85) and by_d[0]["n_pairs"] == 3
+    assert by_d[1]["mean"] == pytest.approx((0.7 + 0.6 + 0.5 + 0.6) / 4)
+    assert by_d[2] == {"distance": 2, "mean": 0.4, "n_pairs": 1}
+    assert summarise_by_distance([[None]]) == [{"distance": 0, "mean": None, "n_pairs": 0}]

@@ -1,14 +1,16 @@
 import logging
 import uuid
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, HTTPException, Response, status
+from fastapi.responses import HTMLResponse
 from sqlalchemy import select
 
 from app.api.deps import DB, get_project_or_404, get_session_or_404
-from app.models import Experiment, ExperimentStatus
+from app.models import Experiment, ExperimentResult, ExperimentStatus, RecordingSession
 from app.schemas import ExperimentCreate, ExperimentOut, ExperimentStatusOut
 from app.services import experiments as service
+from app.services import exports, report
 from app.services.compare import compare_pair
 
 router = APIRouter(tags=["experiments"])
@@ -20,6 +22,24 @@ def get_experiment_or_404(db: DB, experiment_id: uuid.UUID) -> Experiment:
     if experiment is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Experiment not found")
     return experiment
+
+
+def get_result_or_409(experiment: Experiment) -> ExperimentResult:
+    if experiment.status != ExperimentStatus.completed or experiment.result is None:
+        raise HTTPException(status.HTTP_409_CONFLICT, f"Experiment is {experiment.status.value}")
+    return experiment.result
+
+
+def enqueue_or_503(db: DB, experiment: Experiment) -> None:
+    """Queue the experiment; if the queue is down, record the failure and answer 503."""
+    try:
+        service.enqueue(experiment)
+        db.commit()
+    except service.QueueUnavailableError as exc:
+        experiment.status = ExperimentStatus.failed
+        experiment.error_message = str(exc)
+        db.commit()
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from None
 
 
 @router.get("/experiments", response_model=list[ExperimentOut])
@@ -70,14 +90,7 @@ def create_experiment(project_id: uuid.UUID, body: ExperimentCreate, db: DB) -> 
         "experiment_created",
         extra={"experiment_id": str(experiment.id), "n_sessions": len(sessions), "n_pairs": len(sessions) ** 2},
     )
-    try:
-        service.enqueue(experiment)
-        db.commit()
-    except service.QueueUnavailableError as exc:
-        experiment.status = ExperimentStatus.failed
-        experiment.error_message = str(exc)
-        db.commit()
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(exc)) from None
+    enqueue_or_503(db, experiment)
     db.refresh(experiment)
     return experiment
 
@@ -94,11 +107,83 @@ def get_experiment_status(experiment_id: uuid.UUID, db: DB) -> Experiment:
 
 @router.get("/experiments/{experiment_id}/matrix")
 def get_experiment_matrix(experiment_id: uuid.UUID, db: DB) -> dict[str, Any]:
-    experiment = get_experiment_or_404(db, experiment_id)
-    if experiment.status != ExperimentStatus.completed or experiment.result is None:
-        raise HTTPException(status.HTTP_409_CONFLICT, f"Experiment is {experiment.status.value}")
-    result = experiment.result
+    result = get_result_or_409(get_experiment_or_404(db, experiment_id))
     return {"decoder": result.decoder, "subspace": result.subspace, "summary": result.summary}
+
+
+@router.post("/experiments/{experiment_id}/rerun", response_model=ExperimentOut, status_code=status.HTTP_202_ACCEPTED)
+def rerun_experiment(experiment_id: uuid.UUID, db: DB) -> Experiment:
+    """Reset a failed experiment to pending and queue it again with its stored configuration and seed."""
+    experiment = get_experiment_or_404(db, experiment_id)
+    if experiment.status != ExperimentStatus.failed:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, f"Only failed experiments can be re-run (this one is {experiment.status.value})"
+        )
+    sessions = [db.get(RecordingSession, uuid.UUID(ref["id"])) for ref in experiment.sessions]
+    missing = [ref["name"] for ref, s in zip(experiment.sessions, sessions, strict=True) if s is None]
+    if missing:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"Sessions no longer exist: {', '.join(missing)}. Create a new experiment instead.",
+        )
+    try:
+        service.validate_sessions([s for s in sessions if s is not None], experiment.config)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
+
+    service.reset_for_rerun(db, experiment)
+    logger.info("experiment_rerun", extra={"experiment_id": str(experiment.id)})
+    enqueue_or_503(db, experiment)
+    db.refresh(experiment)
+    return experiment
+
+
+ExportArtifact = Literal[
+    "decoder_matrix.csv", "subspace_angles.csv", "session_summary.csv", "experiment_config.json", "all.zip"
+]
+
+
+@router.get(
+    "/experiments/{experiment_id}/export/{artifact}",
+    response_class=Response,
+    responses={200: {"content": {t: {} for t in sorted(set(exports.MEDIA_TYPES.values()))}}},
+)
+def export_experiment(experiment_id: uuid.UUID, artifact: ExportArtifact, db: DB) -> Response:
+    """Download stored results: matrices (rows train, columns test) and session summary as CSV,
+    configuration/seed/sessions/versions as JSON, or everything (plus the HTML report) as ZIP."""
+    experiment = get_experiment_or_404(db, experiment_id)
+    get_result_or_409(experiment)
+    metadata = exports.session_metadata(db, experiment)
+    if artifact == "all.zip":
+        files = exports.export_files(experiment, metadata)
+        files["report.html"] = report.render_report(experiment, metadata).encode("utf-8")
+        content = exports.zip_bytes(files, folder=exports.download_name(experiment, "export"))
+    else:
+        try:
+            content = exports.export_file(experiment, artifact, metadata)
+        except exports.ArtifactUnavailable as exc:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from None
+    return Response(
+        content,
+        media_type=exports.MEDIA_TYPES[artifact],
+        headers={"Content-Disposition": f'attachment; filename="{exports.download_name(experiment, artifact)}"'},
+    )
+
+
+@router.get("/experiments/{experiment_id}/report.html", response_class=HTMLResponse)
+def experiment_report(experiment_id: uuid.UUID, db: DB, download: bool = False) -> HTMLResponse:
+    """Self-contained HTML report (inline CSS and SVG, no external requests)."""
+    experiment = get_experiment_or_404(db, experiment_id)
+    get_result_or_409(experiment)
+    html = report.render_report(experiment, exports.session_metadata(db, experiment))
+    disposition = "attachment" if download else "inline"
+    return HTMLResponse(
+        html,
+        headers={
+            "Content-Disposition": f'{disposition}; filename="{exports.download_name(experiment, "report.html")}"',
+            "Content-Security-Policy": report.REPORT_CSP,
+        },
+    )
 
 
 @router.delete("/experiments/{experiment_id}", status_code=status.HTTP_204_NO_CONTENT)

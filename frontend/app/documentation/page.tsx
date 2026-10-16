@@ -18,7 +18,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function Documentation() {
   return (
     <div className="max-w-3xl space-y-8 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-      <PageHeader title="Documentation" description="Data format and analysis conventions." />
+      <PageHeader title="Documentation" description="Data format, analysis conventions and exports." />
 
       <Section title="Session file format">
         <p>One NumPy <code>.npz</code> archive per recording session. Rows of <code>X</code> and <code>Y</code> are aligned time bins.</p>
@@ -108,6 +108,36 @@ np.savez("R1_D01.npz", X=X, Y=Y, timestamps=t, trial_ids=trial_ids, neuron_ids=u
           actual traces, principal angles against chance, variance-capture curves, per-neuron mean activity and behavioural
           distributions. The Kolmogorov–Smirnov statistic is shown without a p-value because bins are autocorrelated.
         </p>
+      </Section>
+
+      <Section title="Decoder stability explorer">
+        <p>
+          On a completed experiment, pick a training session to plot its decoder r against session distance |i − j|, counted in
+          positions of the experiment&apos;s session order (not days). Test sessions before and after the training session are
+          drawn separately, and a dashed line averages all training sessions at each distance. When the experiment has subspace
+          results, the mean principal angle of the same pairs is shown underneath, next to its chance level. The plot is
+          descriptive: there are no uncertainty estimates.
+        </p>
+      </Section>
+
+      <Section title="Exports and reports">
+        <p>
+          Completed experiments can be downloaded from their page, built from the stored results without recomputation:
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li><code>decoder_matrix.csv</code> (mean Pearson r) and <code>subspace_angles.csv</code> (mean principal angle, °): rows are training sessions, columns test sessions, labelled with session names; cells that could not be computed are empty.</li>
+          <li><code>session_summary.csv</code>: metadata, block sizes, within-session values and transfer means per session.</li>
+          <li><code>experiment_config.json</code>: configuration, random seed, ordered session snapshot and software versions.</li>
+          <li><code>all.zip</code>: all of the above plus the HTML report.</li>
+        </ul>
+        <p>
+          <strong>Generate report</strong> opens a single self-contained HTML file (inline CSS and SVG, no external requests) with
+          the configuration, session summary, both matrices, within- vs cross-session means and interpretation notes. Print it
+          from the browser if you need a PDF. A failed experiment can be <strong>re-run</strong> with its stored configuration
+          and seed.
+        </p>
+        <Code>{`curl -OJ http://<host>/api/experiments/<id>/export/all.zip
+curl -o report.html http://<host>/api/experiments/<id>/report.html`}</Code>
       </Section>
     </div>
   );
