@@ -1,3 +1,5 @@
+import { PAIRED_FORGET, PAIRED_INTERFERENCE } from "@/content/marmosetPairs";
+
 /** Experimental design: recording block 1 → in-between experience → recording block 2. */
 export function CrossDayDesign() {
   return (
@@ -72,5 +74,135 @@ export function GapChart() {
         );
       })}
     </svg>
+  );
+}
+
+
+function SlopePanel({ pairs, title, colour, x0 }: { pairs: [number, number, string][]; title: string; colour: string; x0: number }) {
+  const top = 40;
+  const bottom = 250;
+  const lo = 0.15;
+  const hi = 0.65;
+  const y = (r: number) => bottom - ((r - lo) / (hi - lo)) * (bottom - top);
+  const xa = x0 + 40;
+  const xb = x0 + 220;
+  const up = pairs.filter(([f, r]) => r > f).length;
+  const meanF = pairs.reduce((s, p) => s + p[0], 0) / pairs.length;
+  const meanR = pairs.reduce((s, p) => s + p[1], 0) / pairs.length;
+  return (
+    <g>
+      <text x={(xa + xb) / 2} y={16} textAnchor="middle" className="fill-zinc-800 text-[13px] font-semibold dark:fill-zinc-100">{title}</text>
+      <text x={(xa + xb) / 2} y={32} textAnchor="middle" className="fill-zinc-500 text-[11px]">reverse better in {up} of {pairs.length} day pairs</text>
+      {pairs.map(([f, r], i) => (
+        <line key={i} x1={xa} y1={y(f)} x2={xb} y2={y(r)} stroke={r > f ? colour : "#a1a1aa"} strokeWidth={1} opacity={0.45} />
+      ))}
+      <line x1={xa} y1={y(meanF)} x2={xb} y2={y(meanR)} className="stroke-zinc-900 dark:stroke-zinc-100" strokeWidth={3} />
+      <circle cx={xa} cy={y(meanF)} r={4.5} className="fill-zinc-900 dark:fill-zinc-100" />
+      <circle cx={xb} cy={y(meanR)} r={4.5} className="fill-zinc-900 dark:fill-zinc-100" />
+      <text x={xa - 8} y={y(meanF) + 4} textAnchor="end" className="fill-zinc-700 text-[11px] dark:fill-zinc-300">{meanF.toFixed(2)}</text>
+      <text x={xb + 8} y={y(meanR) + 4} className="fill-zinc-700 text-[11px] dark:fill-zinc-300">{meanR.toFixed(2)}</text>
+      <text x={xa} y={bottom + 20} textAnchor="middle" className="fill-[#c2410c] text-[11px] font-medium">forward</text>
+      <text x={xb} y={bottom + 20} textAnchor="middle" className="fill-[#2f5d9e] text-[11px] font-medium">reverse</text>
+    </g>
+  );
+}
+
+/** Slope chart: each line is one pair of recording days; left = forward, right = reverse accuracy. */
+export function PairSlopes() {
+  return (
+    <svg viewBox="0 0 600 280" className="w-full" role="img" aria-label="Decoding accuracy forward and reverse for every pair of recording days">
+      {[0.2, 0.3, 0.4, 0.5, 0.6].map((t) => {
+        const yy = 250 - ((t - 0.15) / 0.5) * 210;
+        return (
+          <g key={t}>
+            <line x1={30} x2={590} y1={yy} y2={yy} className="stroke-zinc-100 dark:stroke-zinc-800" />
+            <text x={26} y={yy + 4} textAnchor="end" className="fill-zinc-400 text-[10px]">{t.toFixed(1)}</text>
+          </g>
+        );
+      })}
+      <text x={10} y={145} textAnchor="middle" transform="rotate(-90 10 145)" className="fill-zinc-500 text-[10px]">accuracy (r)</text>
+      <SlopePanel pairs={PAIRED_INTERFERENCE} title="New training in between (TS)" colour="#2f5d9e" x0={30} />
+      <SlopePanel pairs={PAIRED_FORGET} title="No task in between (TS control)" colour="#2f5d9e" x0={310} />
+    </svg>
+  );
+}
+
+// Output perturbation energy (matched28 protocol): how strongly real neural input pushes the
+// decoder's prediction away from a calibrated reference. Rows: decoder learned on; columns: activity from.
+// Source: Results/current/mechanism/directional_input_readout_replication/absolute_summary.csv
+const ENERGY = [
+  { title: "Animal TS · new training", cells: { R1_R1: 0.76, R1_R2: 3.367, R2_R1: 1.612, R2_R2: 0.604 } },
+  { title: "Animal TY · new training", cells: { R1_R1: 0.683, R1_R2: 3.792, R2_R1: 2.149, R2_R2: 0.812 } },
+  { title: "Animal TS · no task (control)", cells: { R1_R1: 0.52, R1_R2: 1.803, R2_R1: 4.847, R2_R2: 1.541 } },
+];
+
+function shade(v: number): string {
+  const t = Math.min(1, v / 5);
+  // light sand → deep red
+  const r = Math.round(254 - t * 120);
+  const g = Math.round(240 - t * 205);
+  const b = Math.round(200 - t * 170);
+  return `rgb(${r},${g},${b})`;
+}
+
+export function InputReadoutGrids() {
+  return (
+    <div className="grid gap-6 sm:grid-cols-3">
+      {ENERGY.map((e) => (
+        <div key={e.title}>
+          <div className="mb-2 text-center text-xs font-semibold text-zinc-700 dark:text-zinc-300">{e.title}</div>
+          <div className="grid grid-cols-[auto_1fr_1fr] gap-1 text-[11px]">
+            <div />
+            <div className="text-center text-zinc-500">activity before</div>
+            <div className="text-center text-zinc-500">activity after</div>
+            {(["R1", "R2"] as const).map((readout) => (
+              <div key={readout} className="contents">
+                <div className="flex items-center pr-1 text-right text-zinc-500">decoder learned {readout === "R1" ? "before" : "after"}</div>
+                {(["R1", "R2"] as const).map((input) => {
+                  const v = e.cells[`${readout}_${input}` as keyof typeof e.cells];
+                  return (
+                    <div key={input} className="flex h-14 items-center justify-center rounded font-mono text-sm font-semibold" style={{ background: shade(v), color: v > 2.8 ? "white" : "#3f3f46" }}>
+                      {v.toFixed(2)}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const TESTED: { idea: string; test: string; verdict: "ruled out" | "partial" | "sensitive" }[] = [
+  { idea: "After-training days are just noisier", test: "Matched trial-to-trial variability and trial counts between days", verdict: "ruled out" },
+  { idea: "The arm started in different postures", test: "Matched starting posture across day pairs", verdict: "ruled out" },
+  { idea: "Different neurons were recorded", test: "Matched electrodes, unit quality and firing rates", verdict: "ruled out" },
+  { idea: "Neurons fluctuate together differently", test: "Shuffled trials independently per unit during training", verdict: "ruled out" },
+  { idea: "It depends on the reach time window", test: "Restricted and refitted the evaluation window", verdict: "ruled out" },
+  { idea: "The behaviour itself changed", test: "Matched training behaviour using calibration data only", verdict: "partial" },
+  { idea: "Activity drifts slowly within a day", test: "Corrected for chronological drift", verdict: "partial" },
+  { idea: "The decoding algorithm is responsible", test: "Varied decoder and alignment training data, regularisation and noise models", verdict: "partial" },
+  { idea: "It depends on which 'before' days are used", test: "Used only the last three days before the training", verdict: "sensitive" },
+];
+
+const VERDICT_STYLE = {
+  "ruled out": { label: "didn't explain it", cls: "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" },
+  partial: { label: "explains part, or unclear", cls: "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300" },
+  sensitive: { label: "result changes", cls: "bg-red-50 text-red-800 dark:bg-red-950 dark:text-red-300" },
+};
+
+export function ExplanationsTested() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {TESTED.map((t) => (
+        <div key={t.idea} className="card p-4">
+          <div className="text-sm font-semibold leading-snug">{t.idea}?</div>
+          <div className="mt-1.5 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">{t.test}</div>
+          <span className={`mt-3 inline-block rounded px-2 py-0.5 text-[11px] font-medium ${VERDICT_STYLE[t.verdict].cls}`}>{VERDICT_STYLE[t.verdict].label}</span>
+        </div>
+      ))}
+    </div>
   );
 }

@@ -1,4 +1,6 @@
 import { DisparityDemo } from "@/components/showcase/DisparityDemo";
+import { DisparityModelPipeline } from "@/components/showcase/MethodFigures";
+import { StereoRendererDemo } from "@/components/showcase/StereoRendererDemo";
 import { Callout, Figure, NextProject, ProjectHero, Section, SkillList, Steps, Term } from "@/components/showcase/Story";
 import { projectBySlug } from "@/content/research";
 
@@ -45,7 +47,18 @@ export default function ThreeDVision() {
             { title: "Captures and presents stimulus sets", body: "Batch-renders every rotation and display mode, then presents them in random order with timing synchronised to the neural recording system." },
           ]}
         />
+        <p>
+          The demo below re-creates the same ideas in your browser on a stand-in shape. If you have red–cyan glasses, the 3D mode pops out
+          of the screen; without them, compare the left- and right-eye views to see how little the two images differ.
+        </p>
       </Section>
+
+      <Figure
+        label="Interactive · browser version of the renderer"
+        caption="Drag to rotate. Like the lab renderer, the model is scaled to a unit sphere, the virtual eyes converge on its centre at twice its size, and eye separation defaults to 1/30 of the viewing distance. Turning off smooth shading switches from averaged vertex normals to one normal per face. The lab's own 3D models are not reproduced here."
+      >
+        <StereoRendererDemo />
+      </Figure>
 
       <Section eyebrow="Part 2" title="A model of how neurons could read 3D pose">
         <p>
@@ -54,20 +67,54 @@ export default function ThreeDVision() {
           Their responses are combined with information about where the eyes are pointing and then normalised against one another —
           a common operation in the brain — to produce model neurons that signal a surface&apos;s tilt and distance.
         </p>
-        <p>
-          A key test is whether model neurons keep their preferences when the eyes look at different distances. Detectors that see raw,
-          absolute disparity should not (a built-in control), while detectors further along the model should. A related analysis asks when
-          moving an object and moving the eyes produce matching disparity patterns, comparing a numerical search with an analytic
-          prediction.
-        </p>
+      </Section>
+
+      <Figure label="Model design" caption="Each model neuron compares the disparity pattern a surface produces across a 20 cm strip with its own preferred pattern; responses are then weighted by where the eyes point, normalised against the rest of the population, and weighted by preferred distance.">
+        <DisparityModelPipeline />
+      </Figure>
+
+      <Section eyebrow="Model details" title="What the model covers, and how it is tested">
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            A grid of 21 surface distances (44–84 cm) × 61 slants (−60° to +60°) × 16 fixation distances (50–80 cm), with disparity
+            sampled at 81 positions across the surface — about 20,000 disparity profiles.
+          </li>
+          <li>
+            How sharply detectors are tuned shrinks with viewing distance, because disparities get smaller for far surfaces; the bandwidths
+            are interpolated from measured values.
+          </li>
+          <li>
+            A vectorised implementation replaces the original nested loops for speed, and is validated against the reference version before
+            being used.
+          </li>
+          <li>
+            <strong>Gaze invariance test:</strong> for each model neuron, its tuning to surface orientation is measured at several fixation
+            distances, and two numbers summarise the result — how similar the tuning shapes are, and how much the overall response gain
+            changes. Absolute-disparity detectors should fail this test (a built-in control); relative-disparity and pose detectors should
+            pass. The same test is repeated with added response noise.
+          </li>
+          <li>
+            <strong>Object or eyes?</strong> A related analysis searches for pairs of situations — moving the object versus changing where
+            the eyes look — that produce matching disparity patterns, and checks the numerical matches against an analytic prediction.
+          </li>
+        </ul>
       </Section>
 
       <Section eyebrow="Part 3" title="When does a decision appear in the brain?">
         <p>
-          With recordings from V3A and CIP, I developed an iterative procedure to estimate when choice-related activity emerges in each
-          area: it repeatedly re-estimates each neuron&apos;s preferred tilt from a time window, pools neurons, and tests across time until
-          the estimated onset stops changing.
+          In the surface-orientation task the animal reports a tilt by moving its eyes. With recordings from V3A and CIP, I built a
+          three-script procedure to estimate when choice-related activity emerges in each area, without fixing the analysis window in
+          advance:
         </p>
+        <Steps
+          items={[
+            { title: "Precompute", body: "Store each neuron's spike counts for every possible window start at 1 ms resolution, so later steps never reload the raw data." },
+            { title: "Re-label trials", body: "Within the current window, find each neuron's preferred tilt and express every trial's reported tilt relative to it, keeping all eight direction categories." },
+            { title: "Pool fairly", body: "Normalise each neuron's activity within each fixation distance so depth-related gain changes do not dominate, then pool neurons by area." },
+            { title: "Find the onset", body: "Test at every millisecond whether the eight categories differ, and take the earliest sustained difference as the new window start." },
+            { title: "Repeat until stable", body: "Iterate until the onset stops moving, then write the converged window back into the data files for later analyses." },
+          ]}
+        />
       </Section>
 
       <div className="mb-12 max-w-3xl">
@@ -80,7 +127,7 @@ export default function ThreeDVision() {
         <SkillList
           groups={[
             { label: "Graphics and experiments", items: ["OpenGL rendering through Psychtoolbox", "Stereo display modes and per-eye image control", "Mesh normals, lighting and camera geometry", "Stimulus presentation synchronised with recording hardware"] },
-            { label: "Modelling and analysis", items: ["Population model of disparity processing with divisive normalisation", "Gaze-invariance tests at several model stages", "Vectorised MATLAB for large parameter sweeps", "Iterative onset estimation for choice signals"] },
+            { label: "Modelling and analysis", items: ["Population model of disparity processing with divisive normalisation", "Gaze-invariance tests at several model stages, with and without noise", "Vectorised MATLAB validated against a reference implementation", "Iterative, data-driven onset estimation for choice signals"] },
           ]}
         />
       </Section>

@@ -84,6 +84,8 @@ export function SpikeSortingDemo() {
               opacity={0.55}
             />
           ))}
+          <line x1={sx(0.35)} x2={sx(0.35)} y1={10} y2={H - 26} className="stroke-zinc-400" strokeDasharray="4 3" />
+          <text x={sx(0.35) + 4} y={18} className="fill-zinc-500 text-[8.5px]">350 µs cut-off: narrow | broad</text>
           <text x={(W + 24) / 2} y={H - 6} textAnchor="middle" className="fill-zinc-500 text-[9px]">spike width (trough-to-peak)</text>
           <text x={12} y={H / 2} textAnchor="middle" transform={`rotate(-90 12 ${H / 2})`} className="fill-zinc-500 text-[9px]">spike size</text>
         </svg>

@@ -1,3 +1,4 @@
+import { RFQualityDemo } from "@/components/showcase/RFQualityDemo";
 import { SpikeSortingDemo } from "@/components/showcase/SpikeSortingDemo";
 import { Callout, Figure, NextProject, ProjectHero, Section, SkillList, Steps, Term } from "@/components/showcase/Story";
 import { projectBySlug } from "@/content/research";
@@ -41,9 +42,12 @@ export default function SpikeSorting() {
         </p>
         <Steps
           items={[
-            { title: "Line up both outputs", body: "Built matching neuron-level tables from the manual and automated sorts of the same recordings, tetrode by tetrode." },
-            { title: "Check receptive fields", body: <>Mapped each neuron&apos;s <Term def="The patch of the visual field where a stimulus makes a neuron fire. A well-isolated visual neuron usually has a compact, clearly defined receptive field.">receptive field</Term> from responses to briefly flashed patterns, classified fields as clear or weak with explicit criteria, and fitted 2D Gaussians to compare their size and position.</> },
-            { title: "Compare spike shapes", body: "Measured each neuron's waveform width and timing to separate narrow-spiking from broad-spiking cell types, and compared the proportions each method finds." },
+            { title: "Phase 1 · Line up the automated output", body: "Built a neuron-level master table from the Kilosort results: trial quality, firing statistics, recording channel and position, joined with each unit's receptive-field data." },
+            { title: "Phase 2 · Check receptive fields", body: <>Mapped each neuron&apos;s <Term def="The patch of the visual field where a stimulus makes a neuron fire. A well-isolated visual neuron usually has a compact, clearly defined receptive field.">receptive field</Term> from responses to briefly flashed patterns and labelled it clear or weak with explicit, interpretable rules: a large enough responsive area, a peak that stands out from the average without being a single noisy spike, and enough stimulus exposure.</> },
+            { title: "Phase 3 · Line up the manual output", body: "Built the same table from the traditional sort, robustly matching per-tetrode, per-unit files so no neuron is silently overwritten." },
+            { title: "Phase 4 · Compare head to head", body: "Neuron counts per tetrode, how often each method yields a clear receptive field, the distributions of receptive-field properties, waveform features, and task tuning where available." },
+            { title: "Phase 5 · Fit the receptive fields", body: "Fitted a 2D Gaussian to every map to compare receptive-field centre, size and fit quality between the two methods." },
+            { title: "Spike shapes", body: "Measured trough-to-peak time and half-width, and split neurons into narrow-spiking (often inhibitory) and broad-spiking types at 350 µs, comparing the proportions each method finds." },
             { title: "Audit channel by channel", body: "Flagged tetrodes where one method reports many neurons with poor receptive fields, a sign of over-splitting or noise." },
           ]}
         />
@@ -52,6 +56,13 @@ export default function SpikeSorting() {
           of check decides how much those results can be trusted.
         </p>
       </Section>
+
+      <Figure
+        label="Interactive · toy receptive-field check"
+        caption="A simulated receptive-field map judged with the two quality rules from the analysis (responsive area and peak-to-mean ratio). Real maps come from responses to flashed sparse-noise stimuli; the exposure rule is omitted here."
+      >
+        <RFQualityDemo />
+      </Figure>
 
       <div className="mb-12 max-w-3xl">
         <Callout title="Status">An internal methods comparison for the lab; results are not shown here.</Callout>

@@ -1,9 +1,19 @@
+import { BlockedValidation, NuisancePipeline } from "@/components/showcase/MethodFigures";
 import { SharedDriftDemo } from "@/components/showcase/SharedDriftDemo";
 import { Callout, Figure, NextProject, ProjectHero, Section, SkillList, Steps, Term } from "@/components/showcase/Story";
 import { projectBySlug } from "@/content/research";
 
 const project = projectBySlug("shared-variability");
 export const metadata = { title: project.title };
+
+const TOOLKIT = [
+  { title: "Decoding with support vector machines", body: "Early in the project I trained linear classifiers to tell the stimulus, and even the recorded area, apart from population firing rates — a first check of what information the recordings carry." },
+  { title: "Who fires first?", body: "Estimated each neuron's response latency after the stimulus and built directed graphs from earlier- to later-responding neurons, scanning analysis parameters systematically rather than picking one." },
+  { title: "Noise-correlation maps", body: "For every pair of neurons, removed the average response to each stimulus condition and correlated what was left, producing neuron-by-neuron matrices for different task phases." },
+  { title: "Correlation across time lags", body: "Computed how pairs of neurons co-vary at different time offsets, rendered as 3D surfaces (neuron pair × lag) and stitched into side-by-side videos across recordings and task phases." },
+  { title: "Rasters and firing-rate curves", body: "Spike rasters and coverage-aware firing-rate curves for the periods before, during and after the stimulus, correcting for trials that end early instead of silently biasing the average downwards." },
+  { title: "Slow-component forensics", body: "Audited event codes, export order and per-unit quality to understand where slow changes in activity come from, separating recording artefacts from task history where the data allow." },
+];
 
 export default function SharedVariability() {
   return (
@@ -16,8 +26,10 @@ export default function SharedVariability() {
           <Term def="A visual area in the back of the brain that helps process three-dimensional structure, such as depth and surface orientation.">V3A</Term>{" "}
           and the{" "}
           <Term def="Caudal intraparietal area: a region in parietal cortex, further along the visual pathway, involved in perceiving the 3D orientation of surfaces and linking vision to action.">CIP</Term>.
-          In these experiments a monkey looked at a plane made of dots, shown at different tilts and distances, and reported its
-          orientation by moving its eyes to a target. Neurons in both areas were recorded at the same time, trial after trial.
+          In these experiments a monkey looked at a plane made of dots, shown at different tilts, slants and distances, and reported its
+          orientation by moving its eyes to a target. Neurons in both areas were recorded at the same time with{" "}
+          <Term def="An electrode bundle of four closely spaced wires; each neuron's spike looks slightly different on each wire, which helps tell neurons apart.">tetrodes</Term>,
+          trial after trial.
         </p>
       </Section>
 
@@ -43,21 +55,68 @@ export default function SharedVariability() {
         <SharedDriftDemo />
       </Figure>
 
-      <Section eyebrow="What I did" title="Building an analysis that is hard to fool">
+      <Section eyebrow="The approach" title="Subtract everything that is expected, then look at what is left">
+        <p>
+          The core analysis summarises each area by its average firing rate on every trial, then removes three things that could link the
+          areas without any communication: the response to each of the 96 stimulus combinations, slow trends over the session, and activity
+          just before the stimulus appeared. Only the leftovers — the{" "}
+          <Term def="What remains of a measurement after subtracting everything a model predicts. If two areas' residuals still move together, something beyond the modelled factors links them.">residuals</Term>{" "}
+          — are compared, in three independent ways.
+        </p>
+      </Section>
+
+      <Figure label="Analysis design" caption="Every model is fitted only on the data it is allowed to see; uncertainty estimates refit the whole model rather than reusing a single fit.">
+        <NuisancePipeline />
+      </Figure>
+
+      <Section eyebrow="A detail that matters" title="Why you can't shuffle trials">
+        <p>
+          A common way to test a model is to hide some trials, fit on the rest and predict the hidden ones. But neighbouring trials are
+          similar, so hiding random single trials lets the model &ldquo;peek&rdquo; at the answer through their neighbours. Instead I hid whole
+          blocks of 25 consecutive trials, and also left out five trials on each side of every hidden block. Click through the folds to see
+          how every block gets its turn as test data.
+        </p>
+      </Section>
+
+      <Figure label="Interactive · blocked cross-validation (illustration)">
+        <BlockedValidation />
+      </Figure>
+
+      <Section eyebrow="Knowing the limits" title="Could this dataset even see a small effect?">
+        <p>
+          A negative result only means something if the analysis could have detected the effect. So I took the real recordings, planted
+          artificial shared signals of known size — from 0.5% to 10% of the leftover variability — and ran the full pipeline on them,
+          100 times per size and direction. A separate set of 1,000 calibration and 500 validation runs without any planted signal checked
+          how often the method raises a false alarm.
+        </p>
         <Steps
           items={[
-            { title: "Extract spikes carefully", body: "Converted the raw recordings into spike counts per trial with integrity checks for out-of-order, duplicated or out-of-range timestamps and for trials that were cut short." },
-            { title: "Model what is expected", body: "Accounted for every stimulus condition, slow trends across the session and pre-stimulus activity in both areas, then studied what was left over." },
-            { title: "Measure uncertainty honestly", body: <>Used a <Term def="A resampling method that redraws whole blocks of consecutive trials, so the slow structure in the data is preserved when estimating how uncertain a result is.">block bootstrap</Term> that refits the entire model each time, plus several null tests and corrections for testing multiple recordings.</> },
-            { title: "Test prediction on unseen trials", body: "Checked whether one area's activity improves prediction of the other's on held-out blocks of trials, leaving buffer trials between training and test data so neighbouring trials cannot leak information." },
-            { title: "Ask what the data could detect", body: "Ran simulations with known, planted effects to see how large a coupling would need to be before this dataset could reliably reveal it." },
+            { title: "Keep the real data's structure", body: "Resample whole blocks of real leftover activity so slow structure and noise stay realistic." },
+            { title: "Plant a signal of known size", body: "Add a shared component at a chosen fraction of the variability." },
+            { title: "Run the identical pipeline", body: "Refit every model exactly as for the real data, including all nuisance terms." },
+            { title: "Count how often it is found", body: "The detection rate at each size shows what the data can and cannot reveal." },
           ]}
         />
-        <p>
-          Earlier parts of the project included decoding the stimulus and the recorded area from population activity with support
-          vector machines, time-lagged correlations between the areas, response-latency analyses and visualisations of single-neuron
-          activity (rasters, firing-rate curves and animated response surfaces).
-        </p>
+      </Section>
+
+      <Section eyebrow="Exploration" title="The wider toolkit">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {TOOLKIT.map((t) => (
+            <div key={t.title} className="card p-4">
+              <div className="text-sm font-semibold">{t.title}</div>
+              <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{t.body}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section eyebrow="Ground rules" title="How I kept the analysis honest">
+        <ul className="list-disc space-y-2 pl-5">
+          <li>The main measurement and time window were written down in an analysis plan before the publication-stage analysis (after early exploration, so it is not a preregistration), and every recording is reported — including ones that disagree.</li>
+          <li>No exclusion threshold is chosen to improve a p-value; quality-control decisions are run as labelled sensitivity analyses with the original estimates kept.</li>
+          <li>Earlier, less favourable results are kept alongside newer ones rather than replaced.</li>
+          <li>Every run records SHA-256 fingerprints of the raw files and the software environment, and the numerical methods have their own unit tests.</li>
+        </ul>
       </Section>
 
       <div className="mb-12 max-w-3xl">
@@ -70,8 +129,8 @@ export default function SharedVariability() {
       <Section eyebrow="What I built" title="Skills behind the project">
         <SkillList
           groups={[
-            { label: "Statistics", items: ["Nuisance-controlled correlation analysis", "Moving-block bootstrap with full model refitting", "Sign-flip and circular-shift null tests, Benjamini–Hochberg correction", "Cross-validated prediction with temporal buffers"] },
-            { label: "Data and code", items: ["Python pipeline from MATLAB exports to figures", "Unit tests for the numerical methods", "Reproducibility metadata and file fingerprints for every run", "SVM decoding, latency and connectivity analyses"] },
+            { label: "Statistics", items: ["Nuisance-controlled correlation analysis", "Moving-block bootstrap with full model refitting", "Sign-flip and circular-shift null tests, Benjamini–Hochberg correction", "Cross-validated prediction with temporal buffers", "Semi-synthetic detectability simulations"] },
+            { label: "Data and code", items: ["Python pipeline from MATLAB exports to figures", "Unit tests for the numerical methods", "Reproducibility metadata and file fingerprints for every run", "SVM decoding, latency, connectivity and lag-correlation analyses", "3D surface plots and video rendering of time-resolved results"] },
           ]}
         />
       </Section>
