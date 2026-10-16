@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { useSetCurrentProject } from "@/components/CurrentProject";
+import { ExperimentConfigForm } from "@/components/ExperimentConfigForm";
+import { ExperimentsTable } from "@/components/ExperimentsTable";
 import { Plot } from "@/components/Plot";
 import { UploadSessionForm } from "@/components/UploadSessionForm";
 import { Badge, Button, Card, EmptyState, ErrorBox, Notice, PageHeader, Spinner, Stat } from "@/components/ui";
@@ -48,6 +50,7 @@ export default function ProjectPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { data: project, error, loading, reload } = useApi(() => api.getProject(id), id);
+  const experiments = useApi(() => api.listProjectExperiments(id), id);
   useSetCurrentProject(project);
 
   async function removeProject() {
@@ -68,7 +71,6 @@ export default function ProjectPage() {
 
   const sessions = project.sessions;
   const alignment = neuronAlignment(sessions);
-  const nPairs = sessions.length * sessions.length;
 
   return (
     <div className="space-y-6">
@@ -135,17 +137,22 @@ export default function ProjectPage() {
             </Card>
           )}
 
-          <Card id="analysis" title="Cross-session analysis">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Trains a decoder on each session and tests it on every session: {sessions.length} sessions →{" "}
-              <span className="num font-mono">{nPairs}</span> train/test combinations.
-            </p>
-            <div className="mt-3"><Notice>{alignment.detail}</Notice></div>
-            <div className="mt-3">
-              <Button variant="primary" disabled title="Cross-session experiments are implemented in Milestone 5.">Run Cross-Session Analysis</Button>
-              <span className="ml-3 text-xs text-zinc-500">Not yet available in this build.</span>
-            </div>
+          <Card id="analysis" title="Run Cross-Session Analysis" subtitle="Train a decoder on each session and evaluate it on every session.">
+            {sessions.length === 0 ? (
+              <p className="text-sm text-zinc-500">Upload sessions first.</p>
+            ) : (
+              <>
+                <div className="mb-4"><Notice>{alignment.detail}</Notice></div>
+                <ExperimentConfigForm projectId={project.id} sessions={sessions} />
+              </>
+            )}
           </Card>
+
+          {experiments.data && experiments.data.length > 0 && (
+            <Card title="Experiments">
+              <ExperimentsTable experiments={experiments.data} />
+            </Card>
+          )}
         </div>
 
         <Card title="Upload session" subtitle="Max 500 MB · .npz only · arrays are never unpickled">

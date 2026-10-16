@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, utcnow
 
 if TYPE_CHECKING:
+    from app.models.experiment import Experiment
     from app.models.session import RecordingSession
 
 
@@ -27,4 +28,9 @@ class Project(Base):
         back_populates="project",
         cascade="all, delete-orphan",
         order_by="(RecordingSession.session_order, RecordingSession.created_at)",
+    )
+    experiments: Mapped[list["Experiment"]] = relationship(
+        back_populates="project",
+        cascade="all, delete-orphan",
+        order_by="Experiment.created_at.desc()",
     )

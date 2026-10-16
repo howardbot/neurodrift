@@ -11,6 +11,7 @@ def _isolated_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Itera
     """Every test gets its own SQLite database and data directory."""
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'test.db'}")
     monkeypatch.setenv("DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("JOBS_INLINE", "true")
     from app.core.config import get_settings
     from app.db.session import get_engine, get_sessionmaker
 

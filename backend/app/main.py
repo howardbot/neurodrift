@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
-from app.api import demo, health, projects, sessions
+from app.api import demo, experiments, health, projects, sessions
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 
@@ -28,7 +28,7 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PATCH", "DELETE"],
         allow_headers=["Content-Type"],
     )
-    for module in (health, projects, sessions, demo):
+    for module in (health, projects, sessions, demo, experiments):
         app.include_router(module.router, prefix="/api")
 
     logging.getLogger(__name__).info(

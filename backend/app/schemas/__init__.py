@@ -2,9 +2,11 @@
 
 import uuid
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.models.experiment import ExperimentStatus
 
 SESSION_NAME_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9_.\- ]{0,99}$"
 
@@ -90,3 +92,59 @@ class HealthOut(BaseModel):
     status: str
     database: str
     version: str
+
+
+# --- Experiments ----------------------------------------------------------------------
+
+
+class ExperimentCreate(BaseModel):
+    name: str | None = Field(default=None, max_length=200)
+    session_ids: list[uuid.UUID] | None = Field(
+        default=None, description="Sessions to include, in analysis order; default: all, by session_order"
+    )
+    decoder: Literal["ridge", "linear"] = "ridge"
+    alpha: float = Field(default=1.0, gt=0, le=1e6)
+    zscore: bool = True
+    n_components: Literal[3, 5, 10, 20] = 10
+    outputs: list[int] | None = Field(default=None, min_length=1)
+    train_fraction: float = Field(default=0.8, ge=0.5, le=0.95)
+    random_seed: int = Field(default=42, ge=0, le=2**32 - 1)
+
+    @field_validator("outputs")
+    @classmethod
+    def unique_sorted(cls, v: list[int] | None) -> list[int] | None:
+        if v is None:
+            return None
+        if any(o < 0 for o in v):
+            raise ValueError("output indices must be non-negative")
+        return sorted(set(v))
+
+    @field_validator("session_ids")
+    @classmethod
+    def unique_sessions(cls, v: list[uuid.UUID] | None) -> list[uuid.UUID] | None:
+        if v is not None and len(set(v)) != len(v):
+            raise ValueError("session_ids contains duplicates")
+        return v
+
+
+class ExperimentOut(ORMModel):
+    id: uuid.UUID
+    project_id: uuid.UUID
+    name: str
+    status: ExperimentStatus
+    config: dict[str, Any]
+    sessions: list[dict[str, Any]]
+    random_seed: int
+    software: dict[str, Any]
+    progress: float
+    error_message: str | None
+    created_at: datetime
+    started_at: datetime | None
+    finished_at: datetime | None
+
+
+class ExperimentStatusOut(BaseModel):
+    id: uuid.UUID
+    status: ExperimentStatus
+    progress: float
+    error_message: str | None

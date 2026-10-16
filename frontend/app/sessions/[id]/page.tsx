@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
 import type { Data } from "plotly.js";
 import { useSetCurrentProject } from "@/components/CurrentProject";
+import { DecodingPanel } from "@/components/DecodingPanel";
 import { Plot } from "@/components/Plot";
 import { Badge, Button, Card, ErrorBox, Notice, PageHeader, Spinner, Stat } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -233,6 +234,10 @@ export default function SessionPage() {
           </Card>
         </>
       )}
+
+      <Card title="Within-session decoding" subtitle="Linear decoder from neural activity X to behaviour Y, evaluated on a held-out contiguous block.">
+        <DecodingPanel sessionId={s.id} nOutputs={s.n_outputs} />
+      </Card>
 
       <Card title="PCA">
         <p className="text-sm text-zinc-500">Per-session PCA (explained variance, PC trajectories) is implemented in a later milestone.</p>

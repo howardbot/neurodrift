@@ -9,9 +9,9 @@ and — as the milestones below land — train decoders on one session, test the
 session, and compare that generalisation with changes in neural subspaces, activity levels
 and behaviour.
 
-> Status: **Milestones 1–3 of 8 are implemented** (foundation, data ingestion + QC, synthetic
-> demo). Decoding, cross-session matrices, subspace drift and the pair-comparison view are
-> next. See [Roadmap](#roadmap).
+> Status: **Milestones 1–5 of 8 are implemented** (foundation, data ingestion + QC, synthetic
+> demo, ridge/OLS decoding, cross-session train × test matrix via RQ). Subspace drift, the
+> pair-comparison view and exports are next. See [Roadmap](#roadmap).
 
 <!-- Screenshots: add docs/img/project.png and docs/img/session.png once captured. -->
 
@@ -35,7 +35,7 @@ representational drift, and the software makes no causal claims.
 Browser ──► nginx ──► /        Next.js 15 (TypeScript, Tailwind, Plotly)
                   └─► /api/*   FastAPI ──► PostgreSQL   (metadata, compact JSON results)
                                   │    ──► filesystem   (/data/projects/<uuid>/sessions/<uuid>/raw.npz)
-                                  └──► Redis ──► RQ worker (cross-session jobs, Milestone 5)
+                                  └──► Redis ──► RQ worker (cross-session experiments)
                                                      └─ NumPy / SciPy / scikit-learn
 ```
 
@@ -110,7 +110,7 @@ server {
 
 then `sudo certbot --nginx -d neurodrift.example.com`.
 
-Resource use is deliberately small: one uvicorn process, one (future) RQ worker, BLAS/OpenMP
+Resource use is deliberately small: one uvicorn process, one RQ worker (one job at a time), BLAS/OpenMP
 limited to one thread (`OMP_NUM_THREADS=1` etc.), container memory limits in
 `docker-compose.yml`.
 
@@ -163,20 +163,31 @@ Implemented:
 * **QC** — per-neuron mean, variance and fraction of zero bins; zero-variance (flat) and
   silent units; target mean/variance/SD; duration from timestamps. Trace plots show a
   contiguous window (first 2,000 bins), not a decimated session.
-* **Neuron identity** — with `neuron_ids` in both sessions comparisons use the intersection;
-  without IDs equal counts are required and identity is assumed (shown in the UI); never
-  silently truncated.
+* **Neuron identity** — with `neuron_ids` in both sessions comparisons use the intersection
+  (IDs compared as strings, ordered by ID); without IDs equal counts are required and identity
+  is assumed (shown in the UI); IDs in only one session → the pair is marked unavailable.
+  Dimensions are never silently truncated, and the number of shared/used neurons is reported
+  for every cell.
+* **Preprocessing** — features with zero variance in the training block are dropped;
+  optional z-scoring uses training-block μ/σ only, applied unchanged to test data (no
+  test-set statistics, no per-session re-normalisation).
+* **Decoder** — `sklearn.linear_model.Ridge` (α = 1 default) or ordinary least squares, with
+  intercept, single bin → same bin (no lags). Metrics per output and averaged: Pearson r
+  (headline), R², RMSE. Undefined values (constant signals) are reported as missing and
+  excluded from means, never propagated as NaN.
+* **Splits** — contiguous, never shuffled. Within a session: first 80 % train, last 20 % test.
+  Across sessions: decoders for row *i* are trained on the first 80 % of session *i*; every
+  cell in column *j* is evaluated on the last 20 % of session *j*. The diagonal is therefore a
+  held-out within-session estimate, all cells share training-set size, and each column shares
+  one test block.
+* **Jobs** — experiments are saved with their configuration, seed, session snapshot and
+  package versions, queued in Redis and run by a single RQ worker that keeps at most ~1 GB of
+  session arrays resident. Failures are stored on the experiment (`status = failed`,
+  `error_message`); the worker keeps serving later jobs. Completed results reopen without
+  recomputation.
 
 Specified and coming next (details in [`docs/DESIGN.md`](docs/DESIGN.md)):
 
-* **Preprocessing** — drop features with zero variance in the training block; z-score with
-  training-block μ/σ only, applied unchanged to test data (no test-set statistics).
-* **Decoder** — `sklearn.linear_model.Ridge` (α = 1 default) or ordinary least squares,
-  single-bin (no lags). Metrics per output and averaged: Pearson r (headline), R², RMSE.
-* **Splits** — contiguous, never shuffled: decoders for row *i* are trained on the first
-  80 % of session *i*; every cell in column *j* is evaluated on the last 20 % of session *j*.
-  The diagonal is therefore an honest held-out within-session estimate and all cells share
-  training-set size.
 * **Subspaces** — PCA fit independently per session (restricted to shared neurons for each
   pair); principal angles via `scipy.linalg.subspace_angles`, reported in degrees with a
   Monte-Carlo chance level for random subspaces of the same dimension.
@@ -192,8 +203,8 @@ loss across pairs is descriptive only.
 | 1 Foundation | repo, Docker, Postgres, FastAPI, Next.js, project CRUD | ✅ |
 | 2 Data ingestion | `.npz` upload, validation, storage, session pages, QC | ✅ |
 | 3 Demo dataset | seeded synthetic six-session project | ✅ |
-| 4 Decoder | preprocessing, ridge, within-session evaluation | ⏳ |
-| 5 Cross-session matrix | RQ jobs, train × test heatmap | ⏳ |
+| 4 Decoder | preprocessing, ridge, within-session evaluation | ✅ |
+| 5 Cross-session matrix | RQ jobs, train × test heatmap | ✅ |
 | 6 Representation drift | PCA, principal angles, drift-vs-decoding scatter | ⏳ |
 | 7 Pair comparison | click-through pair view | ⏳ |
 | 8 Polish | exports, report, docs, deployment hardening | ⏳ |
@@ -201,6 +212,6 @@ loss across pairs is descriptive only.
 ## Tests
 
 ```bash
-cd backend && pytest          # validation, QC, API lifecycle, synthetic-data sanity checks
+cd backend && pytest          # validation, QC, decoding sanity checks, experiment lifecycle
 cd frontend && npm test       # formatting and API error handling
 ```

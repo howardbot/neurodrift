@@ -1,4 +1,14 @@
-import type { Project, ProjectDetail, Session, SessionQc } from "@/types/api";
+import type {
+  DecodeParams,
+  DecodeResult,
+  Experiment,
+  ExperimentCreate,
+  ExperimentMatrix,
+  Project,
+  ProjectDetail,
+  Session,
+  SessionQc,
+} from "@/types/api";
 
 export class ApiError extends Error {
   constructor(
@@ -61,6 +71,20 @@ export const api = {
   updateSession: (id: string, body: Partial<Pick<Session, "name" | "subject" | "recording_date" | "bin_size_ms" | "notes" | "session_order">>) =>
     request<Session>(`/sessions/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   deleteSession: (id: string) => request<void>(`/sessions/${id}`, { method: "DELETE" }),
+
+  decodeSession: (id: string, p: DecodeParams) => {
+    const q = new URLSearchParams({ decoder: p.decoder, alpha: String(p.alpha), zscore: String(p.zscore) });
+    p.outputs.forEach((o) => q.append("outputs", String(o)));
+    return request<DecodeResult>(`/sessions/${id}/decode?${q.toString()}`);
+  },
+
+  listExperiments: () => request<Experiment[]>("/experiments"),
+  listProjectExperiments: (projectId: string) => request<Experiment[]>(`/projects/${projectId}/experiments`),
+  createExperiment: (projectId: string, body: ExperimentCreate) =>
+    request<Experiment>(`/projects/${projectId}/experiments`, { method: "POST", body: JSON.stringify(body) }),
+  getExperiment: (id: string) => request<Experiment>(`/experiments/${id}`),
+  getExperimentMatrix: (id: string) => request<ExperimentMatrix>(`/experiments/${id}/matrix`),
+  deleteExperiment: (id: string) => request<void>(`/experiments/${id}`, { method: "DELETE" }),
 
   createDemo: () => request<Project>("/demo", { method: "POST" }),
 };

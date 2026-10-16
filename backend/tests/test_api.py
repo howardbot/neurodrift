@@ -148,3 +148,17 @@ def test_demo_project(client: TestClient) -> None:
     # A second click returns the existing demo instead of duplicating it.
     again = client.post("/api/demo")
     assert again.status_code == 200 and again.json()["id"] == project["id"]
+
+
+def test_within_session_decode_endpoint(client: TestClient) -> None:
+    project = client.post("/api/demo").json()
+    sid = client.get(f"/api/projects/{project['id']}/sessions").json()[0]["id"]
+    r = client.get(f"/api/sessions/{sid}/decode")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["metrics"]["mean_r"] > 0.75
+    assert body["split"]["n_train"] == 6400 and body["config"]["decoder"] == "ridge"
+    r = client.get(f"/api/sessions/{sid}/decode", params={"decoder": "linear", "zscore": "false", "outputs": [1]})
+    assert r.status_code == 200 and r.json()["config"]["outputs"] == [1]
+    assert client.get(f"/api/sessions/{sid}/decode", params={"outputs": [7]}).status_code == 422
+    assert client.get(f"/api/sessions/{sid}/decode", params={"alpha": -1}).status_code == 422

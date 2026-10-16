@@ -1,5 +1,6 @@
 import logging
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import func, select
@@ -13,9 +14,17 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 logger = logging.getLogger(__name__)
 
 
+def latest_experiment(project: Project) -> dict[str, Any] | None:
+    if not project.experiments:
+        return None
+    e = project.experiments[0]
+    return {"id": str(e.id), "name": e.name, "status": e.status.value, "created_at": e.created_at.isoformat()}
+
+
 def _project_out(project: Project, n_sessions: int) -> ProjectOut:
     out = ProjectOut.model_validate(project)
     out.n_sessions = n_sessions
+    out.latest_experiment = latest_experiment(project)
     return out
 
 
@@ -48,6 +57,7 @@ def get_project(project_id: uuid.UUID, db: DB) -> ProjectDetail:
     project = get_project_or_404(db, project_id)
     out = ProjectDetail.model_validate(project)
     out.n_sessions = len(out.sessions)
+    out.latest_experiment = latest_experiment(project)
     return out
 
 

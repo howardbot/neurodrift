@@ -28,6 +28,16 @@ services:
       timeout: 5s
       retries: 20
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
   backend:
     build: ./backend
     restart: unless-stopped
@@ -38,6 +48,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
       interval: 10s
@@ -47,6 +59,22 @@ services:
       resources:
         limits:
           memory: 2g
+
+  # One worker = one analysis at a time; jobs run in a forked child process.
+  worker:
+    build: ./backend
+    restart: unless-stopped
+    command: ["worker"]
+    environment: *backend-env
+    volumes:
+      - datasets:/data
+    depends_on:
+      backend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 3g
 
   frontend:
     build: ./frontend

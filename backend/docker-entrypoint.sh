@@ -8,7 +8,7 @@ case "$1" in
       --forwarded-allow-ips='*' --no-access-log
     ;;
   worker)
-    exec rq worker --url "$REDIS_URL" neurodrift
+    exec python -m app.worker
     ;;
   *)
     exec "$@"

@@ -15,6 +15,10 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://neurodrift:neurodrift@localhost:5432/neurodrift"
     redis_url: str = "redis://localhost:6379/0"
+    # Run analysis jobs synchronously in the API process instead of via RQ (tests, demos
+    # without Redis). Never enable in production: requests would block.
+    jobs_inline: bool = False
+    job_timeout_s: int = 3600
     data_dir: Path = Path("./data")
 
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])

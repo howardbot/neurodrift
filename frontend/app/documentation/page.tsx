@@ -58,11 +58,35 @@ np.savez("R1_D01.npz", X=X, Y=Y, timestamps=t, trial_ids=trial_ids, neuron_ids=u
         </p>
       </Section>
 
+      <Section title="Decoding">
+        <p>
+          The decoder maps one bin of neural features to the same bin of behaviour (no lags): ridge regression
+          (<code>sklearn.linear_model.Ridge</code>, α = 1 by default) or ordinary least squares, both with an intercept.
+          Features with zero variance in the training block are dropped; optional z-scoring uses the training block&apos;s mean
+          and SD only, applied unchanged to test data. Metrics are reported per output and averaged: Pearson r (headline), R²
+          and RMSE. Undefined values (constant signals) are shown as missing rather than NaN.
+        </p>
+        <p>
+          Splits are contiguous and never shuffled, because neighbouring bins are autocorrelated. Within a session the first
+          80 % of bins train and the last 20 % test.
+        </p>
+      </Section>
+
+      <Section title="Cross-session generalisation">
+        <p>
+          For sessions S<sub>1</sub>…S<sub>N</sub>, the decoder for row <em>i</em> is trained on the first 80 % of S<sub>i</sub>, and
+          every cell in column <em>j</em> is evaluated on the last 20 % of S<sub>j</sub>, restricted to the neurons the two
+          sessions share. The diagonal is therefore a held-out within-session estimate and all cells use the same amount of
+          training data. Lower off-diagonal performance is not by itself evidence of neural representational drift:
+          behaviour, recording quality and neuron turnover also differ between sessions, and NeuroDrift reports these
+          separately.
+        </p>
+      </Section>
+
       <Section title="Planned analyses">
         <p>
-          Ridge decoding with contiguous 80/20 splits and training-session normalisation, cross-session train × test matrices,
-          per-session PCA and principal angles between PCA subspaces are described in the repository README and arrive in later
-          milestones.
+          Per-session PCA and principal angles between PCA subspaces (with a chance level for random subspaces), the
+          pair-comparison view, and CSV/JSON exports arrive in the next milestones.
         </p>
       </Section>
     </div>

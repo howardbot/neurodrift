@@ -135,11 +135,15 @@ def create_session_from_file(
     return session
 
 
+def load_session_data(session: RecordingSession) -> SessionData:
+    """Load a stored session's arrays (re-validated on every load)."""
+    return load_session(storage.resolve(session.file_path), get_settings().max_uncompressed_bytes)
+
+
 def load_qc(session: RecordingSession) -> dict[str, Any]:
     """QC payload for a session; recomputed from the raw file if the cache is missing."""
     session_dir = storage.resolve(Path(session.file_path).parent)
     qc_path = session_dir / storage.QC_FILENAME
     if qc_path.exists():
         return json.loads(qc_path.read_text())
-    data = load_session(storage.resolve(session.file_path), get_settings().max_uncompressed_bytes)
-    return write_qc(session_dir, data)
+    return write_qc(session_dir, load_session_data(session))

@@ -1,14 +1,25 @@
-import { EmptyState, PageHeader } from "@/components/ui";
+"use client";
 
-export const metadata = { title: "Experiments" };
+import { ExperimentsTable } from "@/components/ExperimentsTable";
+import { Card, EmptyState, ErrorBox, PageHeader, Spinner } from "@/components/ui";
+import { api } from "@/lib/api";
+import { useApi } from "@/lib/useApi";
 
 export default function ExperimentsPage() {
+  const { data, error, loading } = useApi(api.listExperiments, "experiments");
   return (
     <div>
-      <PageHeader title="Experiments" description="Saved cross-session analyses across all projects." />
-      <EmptyState title="Cross-session experiments are not available in this build yet">
-        They are implemented in Milestone 5 (decoder matrix) and Milestone 6 (subspace drift).
-      </EmptyState>
+      <PageHeader title="Experiments" description="Saved cross-session analyses across all projects. Completed results reopen without recomputation." />
+      {loading && !data && <Spinner />}
+      {error && <ErrorBox error={error} title="Could not load experiments" />}
+      {data && data.length === 0 && (
+        <EmptyState title="No experiments yet">Open a project and choose “Run Cross-Session Analysis”.</EmptyState>
+      )}
+      {data && data.length > 0 && (
+        <Card>
+          <ExperimentsTable experiments={data} showProject />
+        </Card>
+      )}
     </div>
   );
 }
