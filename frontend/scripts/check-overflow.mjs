@@ -11,7 +11,8 @@
 //   1. document.scrollWidth is wider than the viewport, or
 //   2. a visible element sticks out past the right edge without an ancestor that scrolls
 //      or clips it (overflow-x auto/scroll/hidden) inside the viewport, or
-//   3. a glossary tooltip ([role=tooltip]) extends past either edge once it is opened.
+//   3. a glossary term does not open on tap, its bubble leaves the viewport or is covered,
+//      or a second tap, Escape or a tap elsewhere does not close it.
 // The layout's own `overflow-x-clip` safety net is switched off while measuring, so
 // overflow it would merely hide still counts.
 
@@ -99,24 +100,43 @@ function measure() {
 }
 
 async function checkTooltips(page) {
-  const triggers = await page.locator("[role=tooltip]").evaluateAll((tips) => tips.length);
+  const count = await page.locator("[data-term-trigger]").count();
   const bad = [];
-  for (let i = 0; i < triggers; i++) {
-    const tip = page.locator("[role=tooltip]").nth(i);
-    const trigger = page.locator("[data-term-trigger]").nth(i);
-    if (!(await trigger.count())) break;
-    await trigger.scrollIntoViewIfNeeded();
-    await trigger.click();
-    await page.waitForTimeout(260);
-    const box = await tip.evaluate((t) => {
+  const state = (i) =>
+    page.locator("[role=tooltip]").nth(i).evaluate((t) => {
       const r = t.getBoundingClientRect();
-      return { left: r.left, right: r.right, vw: document.documentElement.clientWidth, visible: getComputedStyle(t).visibility !== "hidden" };
+      const open = t.matches(":popover-open") || (r.width > 0 && getComputedStyle(t).visibility !== "hidden");
+      const hit = open ? document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(12, r.height / 2)) : null;
+      return { open, left: r.left, right: r.right, top: r.top, bottom: r.bottom, vw: document.documentElement.clientWidth, vh: window.innerHeight, covered: open && !t.contains(hit) };
     });
-    if (!box.visible) bad.push(`tooltip ${i} did not open on tap`);
-    else if (box.left < -0.5 || box.right > box.vw + 0.5) bad.push(`tooltip ${i} spans ${Math.round(box.left)}–${Math.round(box.right)} px of ${box.vw}`);
+  for (let i = 0; i < count; i++) {
+    const trigger = page.locator("[data-term-trigger]").nth(i);
+    const word = (await trigger.textContent())?.trim();
+    await trigger.scrollIntoViewIfNeeded();
+    await trigger.tap();
+    await page.waitForTimeout(220);
+    let s = await state(i);
+    if (!s.open) {
+      bad.push(`"${word}": tooltip did not open on tap`);
+      continue;
+    }
+    if (s.left < -0.5 || s.right > s.vw + 0.5) bad.push(`"${word}": tooltip spans x ${Math.round(s.left)}–${Math.round(s.right)} of ${s.vw}px`);
+    if (s.top < -0.5 || s.bottom > s.vh + 0.5) bad.push(`"${word}": tooltip spans y ${Math.round(s.top)}–${Math.round(s.bottom)} of ${s.vh}px`);
+    if (s.covered) bad.push(`"${word}": tooltip is covered by another element`);
+    await trigger.tap();
+    await page.waitForTimeout(120);
+    if ((await state(i)).open) bad.push(`"${word}": second tap did not close it`);
+    await trigger.tap();
     await page.keyboard.press("Escape");
+    await page.waitForTimeout(120);
+    if ((await state(i)).open) bad.push(`"${word}": Escape did not close it`);
+    await trigger.tap();
+    await page.waitForTimeout(120);
+    await page.touchscreen.tap(4, s.vh - 4);
+    await page.waitForTimeout(120);
+    if ((await state(i)).open) bad.push(`"${word}": tapping elsewhere did not close it`);
   }
-  return { count: triggers, bad };
+  return { count, bad };
 }
 
 const { chromium } = await loadPlaywright();
