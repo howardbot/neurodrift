@@ -50,10 +50,14 @@ Browser ──► nginx ──► /        Next.js (standalone server, client-re
    (order of the training session). Without ids, equal feature counts are required
    and the UI warns that identity is assumed. Mixed cases (ids in one session only)
    are rejected for that pair rather than guessed.
-5. **Subspace comparisons are pair-specific.** PCA bases for the angle between Sᵢ
-   and Sⱼ are fit independently on each session, restricted to the shared neurons
-   of that pair. When all sessions share the same neuron set, per-session fits are
-   computed once and reused.
+5. **Subspace comparisons use the decoder's data blocks.** Cell (i, j) compares a PCA
+   fit on the training block of Sᵢ with an independent PCA fit on the test block of
+   Sⱼ, restricted to the neurons the pair shares and that vary in both blocks. Each
+   subspace cell therefore describes exactly the data behind the matching decoder
+   cell, which keeps the drift-vs-decoding scatter like-for-like. The matrix is not
+   symmetric, and its diagonal is a within-session reference (block-to-block
+   estimation noise plus within-session non-stationarity) rather than a trivial 0°.
+   Each fit centres/scales with its own statistics because the fits are independent.
 6. **Chance level for principal angles.** Angles between random k-dimensional
    subspaces of ℝⁿ are not 90°; they depend on k/n. A Monte-Carlo chance level
    for random subspaces of the same (k, n) is reported next to every angle.

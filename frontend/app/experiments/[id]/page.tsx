@@ -2,17 +2,32 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSetCurrentProject } from "@/components/CurrentProject";
-import { DecoderHeatmap, METRICS } from "@/components/DecoderHeatmap";
+import { DriftScatter } from "@/components/DriftScatter";
 import { StatusBadge } from "@/components/ExperimentsTable";
+import { MatrixHeatmap, type MatrixSpec } from "@/components/MatrixHeatmap";
 import { Button, Card, ErrorBox, Notice, PageHeader, Spinner, Stat } from "@/components/ui";
 import { api } from "@/lib/api";
-import { formatNumber, outputLabel } from "@/lib/format";
+import { formatNumber } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
-import type { DecoderResult, Experiment, MatrixKey } from "@/types/api";
+import type { DecoderResult, Experiment, MatrixKey, SubspaceKey, SubspaceResult } from "@/types/api";
 
 const POLL_MS = 1500;
+
+const DECODER_SPECS: Record<Exclude<MatrixKey, "n_used">, MatrixSpec> = {
+  mean_r: { label: "Mean Pearson r", better: "high", fmt: ".2f" },
+  mean_r2: { label: "Mean R²", better: "high", fmt: ".2f", clipMin: -1 },
+  mean_rmse: { label: "Mean RMSE", better: "low", fmt: ".2f" },
+  n_shared: { label: "Shared neurons", better: "high", fmt: "d" },
+};
+
+const SUBSPACE_SPECS: Partial<Record<SubspaceKey, MatrixSpec>> = {
+  mean_angle: { label: "Mean principal angle (°)", better: "low", fmt: ".0f" },
+  max_angle: { label: "Largest principal angle (°)", better: "low", fmt: ".0f" },
+  projection_distance: { label: "Projection distance", better: "low", fmt: ".2f" },
+  alignment_index: { label: "Alignment index", better: "high", fmt: ".2f" },
+};
 
 function useExperiment(id: string) {
   const state = useApi(() => api.getExperiment(id), id);
@@ -49,60 +64,16 @@ function ConfigSummary({ e }: { e: Experiment }) {
   );
 }
 
-function CellDetail({ result, cell, outputs, nAll }: { result: DecoderResult; cell: [number, number]; outputs: number[]; nAll: number }) {
-  const [i, j] = cell;
-  const c = result.cells[i]?.[j];
-  const train = result.sessions[i]!;
-  const test = result.sessions[j]!;
-  if (!c) return null;
-  return (
-    <div className="space-y-3">
-      <div className="text-sm">
-        Train <span className="font-mono font-medium">{train.name}</span> → test <span className="font-mono font-medium">{test.name}</span>
-        {i === j && <span className="ml-2 text-xs text-zinc-500">(within-session, held-out block)</span>}
-      </div>
-      {c.status === "unavailable" ? (
-        <Notice>Not computed: {c.reason}</Notice>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-            <Stat label="Mean r" value={formatNumber(c.metrics.mean_r)} />
-            <Stat label="Mean R²" value={formatNumber(c.metrics.mean_r2)} />
-            <Stat label="Mean RMSE" value={formatNumber(c.metrics.mean_rmse)} />
-            <Stat label="Shared neurons" value={c.n_shared} hint={`${train.n_neurons} in ${train.name}, ${test.n_neurons} in ${test.name}`} />
-            <Stat label="Used in decoder" value={c.n_used} hint="Shared neurons with non-zero training variance" />
-          </div>
-          <table className="table-base max-w-lg">
-            <thead><tr><th>Output</th><th className="text-right">r</th><th className="text-right">R²</th><th className="text-right">RMSE</th></tr></thead>
-            <tbody>
-              {c.metrics.r.map((_, k) => (
-                <tr key={k}>
-                  <td>{outputLabel(outputs[k] ?? k, nAll)}</td>
-                  <td className="num text-right font-mono">{formatNumber(c.metrics.r[k])}</td>
-                  <td className="num text-right font-mono">{formatNumber(c.metrics.r2[k])}</td>
-                  <td className="num text-right font-mono">{formatNumber(c.metrics.rmse[k])}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="text-xs text-zinc-500">
-            {formatNumber(c.n_train)} training bins from {train.name}; {formatNumber(c.n_test)} test bins from {test.name}. Neurons matched by{" "}
-            {c.alignment === "neuron_ids" ? "neuron_ids" : "column index"}.
-            {c.warning && <span className="text-amber-700"> {c.warning}.</span>}
-          </p>
-        </>
-      )}
-    </div>
-  );
-}
-
-function SessionSummary({ result }: { result: DecoderResult }) {
-  const r = result.matrices.mean_r;
-  const n = result.sessions.length;
-  const mean = (vals: (number | null)[]) => {
-    const v = vals.filter((x): x is number => x !== null);
+function SessionSummary({ decoder, subspace }: { decoder: DecoderResult; subspace: SubspaceResult | null }) {
+  const r = decoder.matrices.mean_r;
+  const ang = subspace?.matrices.mean_angle;
+  const n = decoder.sessions.length;
+  const mean = (vals: (number | null | undefined)[]) => {
+    const v = vals.filter((x): x is number => x !== null && x !== undefined);
     return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
   };
+  const offRow = (m: (number | null)[][] | undefined, i: number) => mean((m?.[i] ?? []).filter((_, j) => j !== i));
+  const offCol = (m: (number | null)[][] | undefined, i: number) => mean(Array.from({ length: n }, (_, k) => (k === i ? null : m?.[k]?.[i])));
   return (
     <div className="-mx-4 -my-4 overflow-x-auto">
       <table className="table-base">
@@ -112,17 +83,21 @@ function SessionSummary({ result }: { result: DecoderResult }) {
             <th className="text-right">Within r</th>
             <th className="text-right" title="Mean r when this session's decoder is tested on other sessions">Out-transfer r</th>
             <th className="text-right" title="Mean r when other sessions' decoders are tested on this session">In-transfer r</th>
+            <th className="text-right" title="First vs last block of the same session">Within angle</th>
+            <th className="text-right" title="Mean angle to the other sessions (as training session)">Mean angle to others</th>
           </tr>
         </thead>
         <tbody>
-          {result.sessions.map((s, i) => (
+          {decoder.sessions.map((s, i) => (
             <tr key={s.id}>
               <td className="font-mono">{s.name}</td>
               <td className="num text-right font-mono">{formatNumber(s.n_samples)}</td>
               <td className="num text-right font-mono">{s.n_neurons}</td>
               <td className="num text-right font-mono">{formatNumber(r[i]?.[i] ?? null)}</td>
-              <td className="num text-right font-mono">{formatNumber(mean((r[i] ?? []).filter((_, j) => j !== i)))}</td>
-              <td className="num text-right font-mono">{formatNumber(mean(Array.from({ length: n }, (_, k) => (k === i ? null : (r[k]?.[i] ?? null)))))}</td>
+              <td className="num text-right font-mono">{formatNumber(offRow(r, i))}</td>
+              <td className="num text-right font-mono">{formatNumber(offCol(r, i))}</td>
+              <td className="num text-right font-mono">{ang ? `${formatNumber(ang[i]?.[i] ?? null, 1)}°` : "—"}</td>
+              <td className="num text-right font-mono">{ang ? `${formatNumber(offRow(ang, i), 1)}°` : "—"}</td>
             </tr>
           ))}
         </tbody>
@@ -139,23 +114,48 @@ export default function ExperimentPage() {
   const project = useApi(() => api.getProject(e!.project_id), e?.project_id ?? null);
   useSetCurrentProject(project.data);
   const matrix = useApi(() => api.getExperimentMatrix(id), e?.status === "completed" ? id : null);
-  const [metric, setMetric] = useState<MatrixKey>("mean_r");
-  const [selected, setSelected] = useState<[number, number] | null>(null);
+  const [decoderMetric, setDecoderMetric] = useState<keyof typeof DECODER_SPECS>("mean_r");
+  const [subspaceMetric, setSubspaceMetric] = useState<SubspaceKey>("mean_angle");
+
+  const decoder = matrix.data?.decoder;
+  const subspace = matrix.data?.subspace ?? null;
+  const names = useMemo(() => decoder?.sessions.map((s) => s.name) ?? [], [decoder]);
+
+  const decoderCustom = useMemo(
+    () =>
+      decoder?.cells.map((row) =>
+        row.map((c) => (c.status === "ok" ? [c.metrics.mean_r ?? NaN, c.metrics.mean_r2 ?? NaN, c.metrics.mean_rmse, c.n_shared] : [NaN, NaN, NaN, "n/a"])),
+      ) ?? [],
+    [decoder],
+  );
+  const subspaceCustom = useMemo(
+    () =>
+      subspace?.cells.map((row) =>
+        row.map((c) =>
+          c.status === "ok" ? [c.mean_angle, c.max_angle, c.chance_mean_angle, c.alignment_index, c.n_neurons_used, c.k] : [NaN, NaN, NaN, NaN, "n/a", "n/a"],
+        ),
+      ) ?? [],
+    [subspace],
+  );
 
   if (exp.loading && !e) return <Spinner />;
   if (exp.error && !e) return <ErrorBox error={exp.error} title="Could not load experiment" />;
   if (!e) return null;
 
-  const decoder = matrix.data?.decoder;
-  const summary = matrix.data?.summary.decoder.mean_r;
-  const nAll = project.data?.sessions.length ? Math.min(...project.data.sessions.map((s) => s.n_outputs)) : 2;
-  const outputs = e.config.outputs ?? Array.from({ length: nAll }, (_, k) => k);
+  const openPair = ([i, j]: [number, number]) => {
+    const train = e.sessions[i];
+    const test = e.sessions[j];
+    if (train && test) router.push(`/projects/${e.project_id}/compare/${train.id}/${test.id}?experiment=${e.id}`);
+  };
 
   async function remove() {
     if (!e || !window.confirm(`Delete experiment "${e.name}"?`)) return;
     await api.deleteExperiment(e.id);
     router.push(`/projects/${e.project_id}`);
   }
+
+  const dSummary = matrix.data?.summary.decoder.mean_r;
+  const sSummary = matrix.data?.summary.subspace?.mean_angle;
 
   return (
     <div className="space-y-6">
@@ -177,50 +177,96 @@ export default function ExperimentPage() {
             <div className="h-full bg-accent-600 transition-all" style={{ width: `${Math.round(e.progress * 100)}%` }} />
           </div>
           <p className="mt-2 text-xs text-zinc-500">
-            {Math.round(e.progress * 100)} % — one training session at a time on a single worker. This page updates automatically.
+            {Math.round(e.progress * 100)} % — decoder matrix, then subspace matrix, on a single worker. This page updates automatically.
           </p>
         </Card>
       )}
       {e.status === "failed" && <ErrorBox error={e.error_message ?? "Unknown error"} title="Experiment failed" />}
       {matrix.error && <ErrorBox error={matrix.error} title="Could not load results" />}
+      {e.status === "completed" && matrix.loading && !decoder && <Spinner label="Loading results…" />}
 
-      {decoder && summary && (
+      {decoder && dSummary && (
         <>
-          <div className="card grid grid-cols-2 gap-4 p-4 sm:grid-cols-4">
-            <Stat label="Mean within-session r" value={formatNumber(summary.mean_diagonal)} hint="Diagonal: train and test blocks from the same session" />
-            <Stat label="Mean cross-session r" value={formatNumber(summary.mean_off_diagonal)} hint="Off-diagonal cells" />
+          <div className="card grid grid-cols-2 gap-4 p-4 sm:grid-cols-5">
+            <Stat label="Within-session r" value={formatNumber(dSummary.mean_diagonal)} hint="Mean of the diagonal" />
+            <Stat label="Cross-session r" value={formatNumber(dSummary.mean_off_diagonal)} hint="Mean of off-diagonal cells" />
+            <Stat label="Within-session angle" value={sSummary ? `${formatNumber(sSummary.mean_diagonal, 1)}°` : "—"} hint="First vs last block of the same session" />
+            <Stat label="Cross-session angle" value={sSummary ? `${formatNumber(sSummary.mean_off_diagonal, 1)}°` : "—"} />
             <Stat label="Unavailable pairs" value={matrix.data!.summary.n_unavailable} hint="Pairs whose neurons could not be aligned" />
-            <Stat label="Duration" value={e.started_at && e.finished_at ? `${((Date.parse(e.finished_at) - Date.parse(e.started_at)) / 1000).toFixed(1)} s` : "—"} />
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="grid gap-6 2xl:grid-cols-2">
             <Card
               title="Decoder generalisation"
-              subtitle="Rows: training session. Columns: test session. Click a cell for details."
+              subtitle="Rows train, columns test. Click a cell to open the pair comparison."
               actions={
-                <select className="input w-auto py-1 text-xs" value={metric} onChange={(ev) => setMetric(ev.target.value as MatrixKey)} aria-label="Matrix metric">
-                  {METRICS.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}
+                <select className="input w-auto py-1 text-xs" value={decoderMetric} onChange={(ev) => setDecoderMetric(ev.target.value as keyof typeof DECODER_SPECS)} aria-label="Decoder metric">
+                  {Object.entries(DECODER_SPECS).map(([k, s]) => <option key={k} value={k}>{s.label}</option>)}
                 </select>
               }
             >
-              <DecoderHeatmap result={decoder} metric={metric} selected={selected} onSelect={setSelected} />
+              <MatrixHeatmap
+                names={names}
+                z={decoder.matrices[decoderMetric]}
+                spec={DECODER_SPECS[decoderMetric]}
+                customdata={decoderCustom}
+                hover="r %{customdata[0]:.3f}<br>R² %{customdata[1]:.3f}<br>RMSE %{customdata[2]:.3f}<br>shared neurons %{customdata[3]}"
+                onSelect={openPair}
+              />
             </Card>
-            <div className="space-y-6">
-              <Card title="Selected pair">
-                {selected ? <CellDetail result={decoder} cell={selected} outputs={outputs} nAll={nAll} /> : <p className="text-sm text-zinc-500">Click a heatmap cell.</p>}
-              </Card>
-              <Card title="Configuration">
-                <ConfigSummary e={e} />
-              </Card>
-            </div>
+
+            <Card
+              title="Neural subspace drift"
+              subtitle={
+                subspace
+                  ? `Top-${subspace.n_components} PCA subspaces fit independently: rows on the training block, columns on the test block. Lower angle = more similar.`
+                  : undefined
+              }
+              actions={
+                subspace && (
+                  <select className="input w-auto py-1 text-xs" value={subspaceMetric} onChange={(ev) => setSubspaceMetric(ev.target.value as SubspaceKey)} aria-label="Subspace metric">
+                    {Object.entries(SUBSPACE_SPECS).map(([k, s]) => <option key={k} value={k}>{s.label}</option>)}
+                  </select>
+                )
+              }
+            >
+              {subspace ? (
+                <>
+                  <MatrixHeatmap
+                    names={names}
+                    z={subspace.matrices[subspaceMetric]}
+                    spec={SUBSPACE_SPECS[subspaceMetric]!}
+                    customdata={subspaceCustom}
+                    hover="mean angle %{customdata[0]:.1f}°<br>largest angle %{customdata[1]:.1f}°<br>chance %{customdata[2]:.1f}°<br>alignment index %{customdata[3]:.2f}<br>neurons %{customdata[4]} · k %{customdata[5]}"
+                    onSelect={openPair}
+                  />
+                  <p className="mt-2 text-xs text-zinc-500" title="Random k-dimensional subspaces of the same neuron space are not orthogonal on average.">
+                    Chance level (random subspaces, same k and neuron count) ≈ {formatNumber(subspace.matrices.chance_mean_angle[0]?.[0] ?? null, 1)}°. The diagonal
+                    is the within-session reference: same session, different time blocks.
+                  </p>
+                </>
+              ) : (
+                <Notice>This experiment was run before subspace analysis was available. Run a new experiment to compute it.</Notice>
+              )}
+            </Card>
           </div>
 
-          <Card title="Session summaries" subtitle="Transfer means exclude the diagonal. Lower transfer does not by itself indicate neural drift: behaviour and recording quality also differ between sessions.">
-            <SessionSummary result={decoder} />
-          </Card>
+          {subspace && (
+            <Card title="Performance vs representation drift" subtitle="One point per train → test pair. Click a point to open the pair.">
+              <DriftScatter decoder={decoder} subspace={subspace} onSelect={openPair} />
+            </Card>
+          )}
+
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <Card title="Session summaries" subtitle="Transfer means exclude the diagonal. Lower transfer does not by itself indicate neural drift: behaviour and recording quality also differ.">
+              <SessionSummary decoder={decoder} subspace={subspace} />
+            </Card>
+            <Card title="Configuration">
+              <ConfigSummary e={e} />
+            </Card>
+          </div>
         </>
       )}
-      {e.status === "completed" && matrix.loading && !decoder && <Spinner label="Loading results…" />}
     </div>
   );
 }

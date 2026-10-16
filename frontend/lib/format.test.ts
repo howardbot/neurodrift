@@ -34,3 +34,14 @@ describe("parseErrorBody", () => {
     expect(parseErrorBody(502, null).message).toBe("Request failed (502)");
   });
 });
+
+import { ranks, spearman } from "@/lib/stats";
+
+describe("stats", () => {
+  it("ranks with ties and computes Spearman", () => {
+    expect(ranks([10, 20, 20, 5])).toEqual([2, 3.5, 3.5, 1]);
+    expect(spearman([1, 2, 3, 4], [10, 20, 30, 40])).toBeCloseTo(1);
+    expect(spearman([1, 2, 3, 4], [4, 3, 2, 1])).toBeCloseTo(-1);
+    expect(spearman([1, 2], [1, 2])).toBeNull();
+  });
+});

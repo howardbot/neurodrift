@@ -5,10 +5,11 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy import select
 
-from app.api.deps import DB, get_project_or_404
+from app.api.deps import DB, get_project_or_404, get_session_or_404
 from app.models import Experiment, ExperimentStatus
 from app.schemas import ExperimentCreate, ExperimentOut, ExperimentStatusOut
 from app.services import experiments as service
+from app.services.compare import compare_pair
 
 router = APIRouter(tags=["experiments"])
 logger = logging.getLogger(__name__)
@@ -108,3 +109,15 @@ def delete_experiment(experiment_id: uuid.UUID, db: DB) -> Response:
     db.delete(experiment)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/experiments/{experiment_id}/compare/{train_id}/{test_id}")
+def compare(experiment_id: uuid.UUID, train_id: uuid.UUID, test_id: uuid.UUID, db: DB) -> dict[str, Any]:
+    """Detailed comparison of one train → test pair under this experiment's settings."""
+    experiment = get_experiment_or_404(db, experiment_id)
+    in_experiment = {ref["id"] for ref in experiment.sessions}
+    if str(train_id) not in in_experiment or str(test_id) not in in_experiment:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Session is not part of this experiment")
+    train = get_session_or_404(db, train_id)
+    test = get_session_or_404(db, test_id)
+    return compare_pair(experiment, train, test)

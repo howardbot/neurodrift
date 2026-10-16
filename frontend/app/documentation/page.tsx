@@ -83,10 +83,30 @@ np.savez("R1_D01.npz", X=X, Y=Y, timestamps=t, trial_ids=trial_ids, neuron_ids=u
         </p>
       </Section>
 
-      <Section title="Planned analyses">
+      <Section title="PCA and subspace drift">
         <p>
-          Per-session PCA and principal angles between PCA subspaces (with a chance level for random subspaces), the
-          pair-comparison view, and CSV/JSON exports arrive in the next milestones.
+          PCA is fit with <code>sklearn.decomposition.PCA</code> after dropping zero-variance neurons and centring (optionally
+          z-scoring) with the data&apos;s own statistics. For the subspace matrix, cell (i, j) compares a PCA fit on the training
+          block of session i with an independent fit on the test block of session j, using shared neurons only — the same data
+          as decoder cell (i, j). The diagonal is a within-session reference, not 0°.
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li><strong>Principal angles</strong> (<code>scipy.linalg.subspace_angles</code>), in degrees; mean and largest.</li>
+          <li><strong>Chance level</strong>: mean angle between random k-dimensional subspaces of the same neuron space (seeded Monte Carlo). Random subspaces are not orthogonal on average.</li>
+          <li><strong>Projection distance</strong> ‖P<sub>A</sub> − P<sub>B</sub>‖<sub>F</sub> / √(2k) = √(Σ sin²θ<sub>i</sub> / k), in [0, 1].</li>
+          <li><strong>Alignment index</strong> (Elsayed et al., 2016): fraction of B&apos;s top-k variance captured by A&apos;s top-k PCs.</li>
+        </ul>
+        <p>
+          The drift-vs-decoding scatter reports Spearman ρ across off-diagonal pairs as a description only: pairs share sessions
+          and are not independent, and an association does not show that representational change causes decoder degradation.
+        </p>
+      </Section>
+
+      <Section title="Pair comparison">
+        <p>
+          Clicking a matrix cell opens the train → test pair: decoder metrics next to within-session references, predicted vs
+          actual traces, principal angles against chance, variance-capture curves, per-neuron mean activity and behavioural
+          distributions. The Kolmogorov–Smirnov statistic is shown without a p-value because bins are autocorrelated.
         </p>
       </Section>
     </div>

@@ -6,8 +6,9 @@ import { useMemo, useState, type FormEvent } from "react";
 import type { Data } from "plotly.js";
 import { useSetCurrentProject } from "@/components/CurrentProject";
 import { DecodingPanel } from "@/components/DecodingPanel";
+import { SessionPcaPanel } from "@/components/SessionPcaPanel";
 import { Plot } from "@/components/Plot";
-import { Badge, Button, Card, ErrorBox, Notice, PageHeader, Spinner, Stat } from "@/components/ui";
+import { Button, Card, ErrorBox, Notice, PageHeader, Spinner, Stat } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { binCenters, formatBytes, formatDuration, formatNumber, outputLabel } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
@@ -239,9 +240,8 @@ export default function SessionPage() {
         <DecodingPanel sessionId={s.id} nOutputs={s.n_outputs} />
       </Card>
 
-      <Card title="PCA">
-        <p className="text-sm text-zinc-500">Per-session PCA (explained variance, PC trajectories) is implemented in a later milestone.</p>
-        <div className="mt-2"><Badge>planned</Badge></div>
+      <Card title="PCA" subtitle="Neural population structure within this session.">
+        <SessionPcaPanel sessionId={s.id} nNeurons={s.n_neurons} />
       </Card>
     </div>
   );

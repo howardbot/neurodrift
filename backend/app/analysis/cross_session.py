@@ -137,3 +137,54 @@ def summarise_matrix(matrix: list[list[float | None]]) -> dict[str, float | None
         a = a[np.isfinite(a)]
         return float(a.mean()) if a.size else None
     return {"mean_diagonal": nanmean(diag), "mean_off_diagonal": nanmean(off)}
+
+
+SUBSPACE_KEYS = ("mean_angle", "max_angle", "projection_distance", "alignment_index", "chance_mean_angle", "n_used")
+
+
+def cross_session_subspaces(
+    load: SessionLoader,
+    n_sessions: int,
+    n_components: int,
+    zscore: bool = True,
+    train_fraction: float = 0.8,
+    seed: int = 42,
+    progress: ProgressCallback | None = None,
+) -> dict[str, Any]:
+    """N × N neural-subspace comparison using the same data blocks as the decoder matrix.
+
+    Cell (i, j) compares a PCA fit on the *training* block of session i with an
+    independent PCA fit on the *test* block of session j, restricted to their shared
+    neurons. Each cell therefore describes exactly the data behind decoder cell (i, j),
+    and the diagonal (first vs last block of the same session) is a within-session
+    reference that includes estimation noise and within-session non-stationarity.
+    """
+    from app.analysis.subspace import compare_subspaces
+
+    matrices: dict[str, list[list[Any]]] = {k: [[None] * n_sessions for _ in range(n_sessions)] for k in SUBSPACE_KEYS}
+    cells: list[list[dict[str, Any]]] = [[{} for _ in range(n_sessions)] for _ in range(n_sessions)]
+    for i in range(n_sessions):
+        a = load(i)
+        train, _ = contiguous_split(a.n_samples, train_fraction)
+        for j in range(n_sessions):
+            b = a if j == i else load(j)
+            _, test = contiguous_split(b.n_samples, train_fraction)
+            try:
+                al = align_neurons(a.neuron_ids, b.neuron_ids, a.n_neurons, b.n_neurons)
+                out = compare_subspaces(
+                    a.X[train][:, al.idx_a], b.X[test][:, al.idx_b], n_components, zscore=zscore, seed=seed
+                )
+            except (AlignmentError, ValueError) as exc:
+                cells[i][j] = {"status": "unavailable", "reason": str(exc)}
+                continue
+            out.pop("explained_variance_a")
+            out.pop("explained_variance_b")
+            cells[i][j] = {"status": "ok", "n_shared": al.n_shared, "alignment": al.method, **out}
+            for key in SUBSPACE_KEYS:
+                value = out["n_neurons_used"] if key == "n_used" else out[key]
+                matrices[key][i][j] = round(float(value), 4) if key != "n_used" else int(value)
+            del b
+        del a
+        if progress is not None:
+            progress((i + 1) / n_sessions)
+    return {"matrices": matrices, "cells": cells, "n_components": n_components, "zscore": zscore}

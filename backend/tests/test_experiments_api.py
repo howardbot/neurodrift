@@ -37,6 +37,12 @@ def test_full_experiment_lifecycle(client: TestClient) -> None:
     assert matrix["summary"]["decoder"]["mean_r"]["mean_diagonal"] > matrix["summary"]["decoder"]["mean_r"]["mean_off_diagonal"]
     assert matrix["decoder"]["sessions"][0]["name"] == "R1_D01"
 
+    angles = np.array(matrix["subspace"]["matrices"]["mean_angle"], dtype=float)
+    assert angles.shape == (6, 6)
+    assert angles[0, 0] < angles[0, 5]  # distant sessions' subspaces differ more
+    assert np.all(angles < np.array(matrix["subspace"]["matrices"]["chance_mean_angle"], dtype=float))
+    assert matrix["subspace"]["n_components"] == 10
+
     projects = client.get("/api/projects").json()
     assert projects[0]["latest_experiment"]["status"] == "completed"
     assert len(client.get(f"/api/projects/{pid}/experiments").json()) == 1
@@ -96,3 +102,25 @@ def test_queue_unavailable_returns_503(client: TestClient) -> None:
     r = client.post(f"/api/projects/{pid}/experiments", json={})
     assert r.status_code == 503
     assert client.get(f"/api/projects/{pid}/experiments").json()[0]["status"] == "failed"
+
+
+def test_pair_comparison(client: TestClient) -> None:
+    pid, sessions = _demo(client)
+    exp = client.post(f"/api/projects/{pid}/experiments", json={"n_components": 5}).json()
+    matrix = client.get(f"/api/experiments/{exp['id']}/matrix").json()
+    a, b = sessions[0]["id"], sessions[5]["id"]
+    r = client.get(f"/api/experiments/{exp['id']}/compare/{a}/{b}")
+    assert r.status_code == 200, r.text
+    body = r.json()
+    # Recomputed metrics match the stored matrix cell.
+    assert body["decoder"]["metrics"]["mean_r"] == pytest.approx(matrix["decoder"]["matrices"]["mean_r"][0][5], abs=1e-5)
+    assert body["representation"]["mean_angle"] == pytest.approx(matrix["subspace"]["matrices"]["mean_angle"][0][5], abs=1e-3)
+    assert body["alignment"]["n_shared"] == matrix["decoder"]["matrices"]["n_shared"][0][5]
+    assert body["reference"]["within_test_r"] == matrix["decoder"]["matrices"]["mean_r"][5][5]
+    assert body["activity"]["unit"] == "Hz" and len(body["activity"]["diff"]) == body["alignment"]["n_shared"]
+    assert len(body["behaviour"]["outputs"]) == 2
+    curves = body["representation"]["variance_capture"]
+    assert all(x <= y + 1e-9 for x, y in zip(curves["captured_by_a"], curves["captured_by_own"]))
+
+    other = client.post("/api/projects", json={"name": "x"}).json()
+    assert client.get(f"/api/experiments/{exp['id']}/compare/{a}/{other['id']}").status_code == 404

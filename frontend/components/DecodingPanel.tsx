@@ -13,8 +13,15 @@ import type { DecodeResult } from "@/types/api";
 const ACTUAL = "#c2410c";
 const PREDICTED = "#2f5d9e";
 
-function DecodePlots({ result, nOutputs }: { result: DecodeResult; nOutputs: number }) {
-  const outputs = result.config.outputs;
+export function PredictionPlots({
+  result,
+  outputs,
+  nOutputs,
+}: {
+  result: Pick<DecodeResult, "traces" | "scatter">;
+  outputs: number[];
+  nOutputs: number;
+}) {
   const traces = useMemo(
     () =>
       outputs.map((o, j): Data[] => [
@@ -101,7 +108,7 @@ export function DecodingPanel({ sessionId, nOutputs }: { sessionId: string; nOut
               ))}
             </tbody>
           </table>
-          <div className="mt-4"><DecodePlots result={data} nOutputs={nOutputs} /></div>
+          <div className="mt-4"><PredictionPlots result={data} outputs={data.config.outputs} nOutputs={nOutputs} /></div>
         </div>
       )}
     </div>

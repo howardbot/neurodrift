@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.analysis.dataset import DatasetValidationError
 from app.analysis.decoding import DecoderConfig, evaluate_within_session
+from app.analysis.pca import session_pca_summary
 from app.api.deps import DB, get_project_or_404, get_session_or_404
 from app.core.config import get_settings
 from app.models import RecordingSession
@@ -187,5 +188,22 @@ def decode_session(
     data = ingest.load_session_data(session)
     try:
         return evaluate_within_session(data, config, train_fraction=train_fraction)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
+
+
+@router.get("/sessions/{session_id}/pca")
+def session_pca(
+    session_id: uuid.UUID,
+    db: DB,
+    n_components: int = 10,
+    zscore: bool = True,
+) -> dict[str, Any]:
+    """PCA of the whole session (zero-variance neurons dropped; capped by data size)."""
+    if n_components not in (3, 5, 10, 20):
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "n_components must be 3, 5, 10 or 20")
+    session = get_session_or_404(db, session_id)
+    try:
+        return session_pca_summary(ingest.load_session_data(session), n_components, zscore)
     except ValueError as exc:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None

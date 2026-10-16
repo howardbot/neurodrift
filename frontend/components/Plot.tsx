@@ -28,7 +28,8 @@ function baseLayout(dark: boolean): Partial<Layout> {
     margin: { l: 50, r: 16, t: 28, b: 44 },
     xaxis: axis,
     yaxis: axis,
-    legend: { orientation: "h", y: -0.2, font: { size: 11 } },
+    // Legends sit above the plotting area so they never collide with x-axis titles.
+    legend: { orientation: "h", x: 0, xanchor: "left", y: 1.02, yanchor: "bottom", font: { size: 11 } },
     hoverlabel: { font: { family: "ui-monospace, monospace", size: 11 } },
     colorway: ["#2f5d9e", "#c2410c", "#15803d", "#7e22ce", "#b91c1c", "#0e7490", "#a16207", "#4d7c0f"],
   };
@@ -46,6 +47,11 @@ function mergeLayout(base: Partial<Layout>, layout: Partial<Layout>): Partial<La
   // Extra axes (xaxis2, yaxis2, ...) inherit the base axis styling.
   for (const key of Object.keys(layout)) {
     if (/^[xy]axis\d+$/.test(key)) merged[key] = { ...(base.xaxis as object), ...((layout as Record<string, object>)[key]) };
+  }
+  const legendAbove = layout.showlegend !== false && !(layout.legend && "orientation" in layout.legend && layout.legend.orientation === "v");
+  if (legendAbove) {
+    const margin = (merged.margin ?? {}) as { t?: number };
+    merged.margin = { ...margin, t: Math.max(margin.t ?? 0, 34) };
   }
   return merged as Partial<Layout>;
 }

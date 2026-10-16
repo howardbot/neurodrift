@@ -9,9 +9,9 @@ and — as the milestones below land — train decoders on one session, test the
 session, and compare that generalisation with changes in neural subspaces, activity levels
 and behaviour.
 
-> Status: **Milestones 1–5 of 8 are implemented** (foundation, data ingestion + QC, synthetic
-> demo, ridge/OLS decoding, cross-session train × test matrix via RQ). Subspace drift, the
-> pair-comparison view and exports are next. See [Roadmap](#roadmap).
+> Status: **Milestones 1–7 of 8 are implemented** (foundation, data ingestion + QC, synthetic
+> demo, ridge/OLS decoding, cross-session decoder matrix via RQ, PCA subspace drift, pair
+> comparison). Exports, report generation and deployment polish are next. See [Roadmap](#roadmap).
 
 <!-- Screenshots: add docs/img/project.png and docs/img/session.png once captured. -->
 
@@ -186,11 +186,27 @@ Implemented:
   `error_message`); the worker keeps serving later jobs. Completed results reopen without
   recomputation.
 
-Specified and coming next (details in [`docs/DESIGN.md`](docs/DESIGN.md)):
-
-* **Subspaces** — PCA fit independently per session (restricted to shared neurons for each
-  pair); principal angles via `scipy.linalg.subspace_angles`, reported in degrees with a
-  Monte-Carlo chance level for random subspaces of the same dimension.
+* **PCA** — per session: zero-variance neurons dropped, centred and optionally z-scored with
+  the data's own statistics, `sklearn.decomposition.PCA`; k ∈ {3, 5, 10, 20}, capped by data
+  size. The session page shows the spectrum, PC time courses and the PC1–PC2 trajectory
+  (smoothing is display-only).
+* **Subspace drift** — cell (i, j) compares a PCA fit on the *training block* of session i
+  with an independent PCA fit on the *test block* of session j, on the neurons both share and
+  that vary in both blocks — exactly the data behind decoder cell (i, j). The diagonal is a
+  within-session reference (estimation noise + within-session non-stationarity), not 0°.
+  Reported: principal angles (`scipy.linalg.subspace_angles`, degrees; mean and largest), a
+  seeded Monte-Carlo chance level for random k-dimensional subspaces of the same neuron space,
+  the normalised projection distance ‖P_A − P_B‖_F / √(2k) = √(Σ sin²θᵢ / k), and the alignment
+  index of Elsayed et al. (2016) — the fraction of B's top-k variance captured by A's top-k
+  PCs. Cases with 2k > n (angles forced to 0°) are flagged.
+* **Drift vs decoding** — scatter of mean principal angle against decoder r per pair, coloured
+  by session distance, with Spearman ρ over off-diagonal pairs labelled descriptive (pairs
+  share sessions and are not independent; association is not causation).
+* **Pair comparison** — for any train → test pair: decoder metrics with within-session
+  references, predicted vs actual traces, principal angles against chance and the
+  within-session reference, variance-capture curves, per-neuron mean activity (Hz when bin
+  size is known and data are counts), and behaviour distributions (mean, SD, variance change,
+  two-sample KS statistic reported without p-values because bins are autocorrelated).
 
 Limitations: no uncertainty estimates yet (no bootstrap CIs), no lagged/Wiener decoders, no
 alignment methods (CCA/Procrustes), and correlation between representation drift and decoder
@@ -205,8 +221,8 @@ loss across pairs is descriptive only.
 | 3 Demo dataset | seeded synthetic six-session project | ✅ |
 | 4 Decoder | preprocessing, ridge, within-session evaluation | ✅ |
 | 5 Cross-session matrix | RQ jobs, train × test heatmap | ✅ |
-| 6 Representation drift | PCA, principal angles, drift-vs-decoding scatter | ⏳ |
-| 7 Pair comparison | click-through pair view | ⏳ |
+| 6 Representation drift | PCA, principal angles, drift-vs-decoding scatter | ✅ |
+| 7 Pair comparison | click-through pair view | ✅ |
 | 8 Polish | exports, report, docs, deployment hardening | ⏳ |
 
 ## Tests

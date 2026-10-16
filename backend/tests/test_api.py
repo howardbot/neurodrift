@@ -162,3 +162,11 @@ def test_within_session_decode_endpoint(client: TestClient) -> None:
     assert r.status_code == 200 and r.json()["config"]["outputs"] == [1]
     assert client.get(f"/api/sessions/{sid}/decode", params={"outputs": [7]}).status_code == 422
     assert client.get(f"/api/sessions/{sid}/decode", params={"alpha": -1}).status_code == 422
+
+
+def test_session_pca_endpoint(client: TestClient) -> None:
+    project = client.post("/api/demo").json()
+    sid = client.get(f"/api/projects/{project['id']}/sessions").json()[0]["id"]
+    body = client.get(f"/api/sessions/{sid}/pca", params={"n_components": 5}).json()
+    assert body["n_components"] == 5 and body["cumulative_explained_variance"][-1] <= 1.0 + 1e-9
+    assert client.get(f"/api/sessions/{sid}/pca", params={"n_components": 7}).status_code == 422

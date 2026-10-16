@@ -17,7 +17,12 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app import __version__
-from app.analysis.cross_session import check_outputs, cross_session_decoding, summarise_matrix
+from app.analysis.cross_session import (
+    check_outputs,
+    cross_session_decoding,
+    cross_session_subspaces,
+    summarise_matrix,
+)
 from app.analysis.dataset import SessionData
 from app.analysis.decoding import DecoderConfig
 from app.core.config import get_settings
@@ -151,25 +156,38 @@ def run_experiment(experiment_id: str) -> None:
             config = decoder_config(experiment.config)
             loader = _SessionCache(sessions)
 
-            def progress(fraction: float) -> None:
-                experiment.progress = round(0.99 * fraction, 4)
-                db.commit()
+            train_fraction = float(experiment.config["train_fraction"])
+
+            def progress(offset: float):
+                def update(fraction: float) -> None:
+                    experiment.progress = round(0.99 * (offset + 0.5 * fraction), 4)
+                    db.commit()
+
+                return update
 
             decoder = cross_session_decoding(
+                loader, len(sessions), config, train_fraction=train_fraction, progress=progress(0.0)
+            )
+            subspace = cross_session_subspaces(
                 loader,
                 len(sessions),
-                config,
-                train_fraction=float(experiment.config["train_fraction"]),
-                progress=progress,
+                n_components=int(experiment.config["n_components"]),
+                zscore=bool(experiment.config["zscore"]),
+                train_fraction=train_fraction,
+                seed=experiment.random_seed,
+                progress=progress(0.5),
             )
             for ref, info in zip(experiment.sessions, decoder["sessions"], strict=True):
                 info.update(id=ref["id"], name=ref["name"])
             summary = {
                 "decoder": {k: summarise_matrix(decoder["matrices"][k]) for k in ("mean_r", "mean_r2", "mean_rmse")},
+                "subspace": {k: summarise_matrix(subspace["matrices"][k]) for k in ("mean_angle", "alignment_index")},
                 "n_unavailable": sum(c.get("status") != "ok" for row in decoder["cells"] for c in row),
                 "session_loads": loader.loads,
             }
-            db.add(ExperimentResult(experiment_id=experiment.id, decoder=decoder, summary=summary))
+            db.add(
+                ExperimentResult(experiment_id=experiment.id, decoder=decoder, subspace=subspace, summary=summary)
+            )
             experiment.status = ExperimentStatus.completed
             experiment.progress = 1.0
             experiment.finished_at = utcnow()

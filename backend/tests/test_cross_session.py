@@ -71,3 +71,19 @@ def test_output_checks_and_summary() -> None:
         check_outputs([2, 3], (2,))
     s = summarise_matrix([[0.9, 0.5], [None, 0.8]])
     assert s["mean_diagonal"] == pytest.approx(0.85) and s["mean_off_diagonal"] == pytest.approx(0.5)
+
+
+def test_subspace_matrix_tracks_tuning_rotation(rng: np.random.Generator) -> None:
+    from app.analysis.cross_session import cross_session_subspaces
+
+    W = rng.standard_normal((2, 30))
+    sessions = [_session(rng, _rot(t) @ W) for t in (0.0, 0.0, 1.4)]
+    # Rotating within the 2-D velocity plane leaves the *subspace* unchanged.
+    out = cross_session_subspaces(lambda i: sessions[i], 3, n_components=2)
+    angles = np.array(out["matrices"]["mean_angle"], dtype=float)
+    assert np.all(angles < 10)
+    # A genuinely different readout space gives large angles.
+    other = _session(rng, rng.standard_normal((2, 30)))
+    out = cross_session_subspaces(lambda i: [sessions[0], other][i], 2, n_components=2)
+    assert out["matrices"]["mean_angle"][0][1] > 30
+    assert out["cells"][0][1]["chance_mean_angle"] > out["matrices"]["mean_angle"][0][0]

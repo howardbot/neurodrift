@@ -4,9 +4,11 @@ import type {
   Experiment,
   ExperimentCreate,
   ExperimentMatrix,
+  PairComparison,
   Project,
   ProjectDetail,
   Session,
+  SessionPca,
   SessionQc,
 } from "@/types/api";
 
@@ -85,6 +87,11 @@ export const api = {
   getExperiment: (id: string) => request<Experiment>(`/experiments/${id}`),
   getExperimentMatrix: (id: string) => request<ExperimentMatrix>(`/experiments/${id}/matrix`),
   deleteExperiment: (id: string) => request<void>(`/experiments/${id}`, { method: "DELETE" }),
+
+  getSessionPca: (id: string, nComponents: number, zscore: boolean) =>
+    request<SessionPca>(`/sessions/${id}/pca?n_components=${nComponents}&zscore=${zscore}`),
+  comparePair: (experimentId: string, trainId: string, testId: string) =>
+    request<PairComparison>(`/experiments/${experimentId}/compare/${trainId}/${testId}`),
 
   createDemo: () => request<Project>("/demo", { method: "POST" }),
 };

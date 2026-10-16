@@ -174,12 +174,119 @@ export interface DecoderResult {
   sessions: { id: string; name: string; n_samples: number; n_neurons: number; n_train: number; n_test: number }[];
 }
 
+export interface DiagSummary {
+  mean_diagonal: number | null;
+  mean_off_diagonal: number | null;
+}
+
 export interface ExperimentMatrix {
   decoder: DecoderResult;
-  subspace: unknown | null;
+  subspace: SubspaceResult | null;
   summary: {
-    decoder: Record<"mean_r" | "mean_r2" | "mean_rmse", { mean_diagonal: number | null; mean_off_diagonal: number | null }>;
+    decoder: Record<"mean_r" | "mean_r2" | "mean_rmse", DiagSummary>;
+    subspace?: Record<"mean_angle" | "alignment_index", DiagSummary>;
     n_unavailable: number;
     session_loads: number;
+  };
+}
+
+export type SubspaceKey = "mean_angle" | "max_angle" | "projection_distance" | "alignment_index" | "chance_mean_angle" | "n_used";
+
+export interface SubspaceCellOk {
+  status: "ok";
+  k: number;
+  n_neurons_used: number;
+  n_shared: number;
+  alignment: "neuron_ids" | "index";
+  angles_deg: number[];
+  mean_angle: number;
+  max_angle: number;
+  projection_distance: number;
+  alignment_index: number;
+  chance_mean_angle: number;
+  chance_p05_angle: number;
+  degenerate: boolean;
+}
+
+export interface SubspaceResult {
+  matrices: Record<SubspaceKey, (number | null)[][]>;
+  cells: (SubspaceCellOk | { status: "unavailable"; reason: string })[][];
+  n_components: number;
+  zscore: boolean;
+}
+
+export interface SessionPca {
+  n_components_requested: number;
+  n_components: number;
+  zscore: boolean;
+  n_features_used: number;
+  n_features_dropped: number;
+  explained_variance_ratio: number[];
+  cumulative_explained_variance: number[];
+  variance_explained_by_k: number;
+  trajectory: { time: number[]; time_unit: "s" | "bin"; smooth_bins: number; pcs: number[][]; behaviour: number[][] };
+}
+
+export interface PairSessionMeta {
+  id: string;
+  name: string;
+  subject: string | null;
+  recording_date: string | null;
+  bin_size_ms: number | null;
+  n_samples: number;
+  n_neurons: number;
+  n_outputs: number;
+  n_trials: number | null;
+  duration_s: number | null;
+  pct_zero: number | null;
+  has_neuron_ids: boolean;
+}
+
+export interface PairComparison {
+  experiment: { id: string; name: string; config: ExperimentConfig };
+  train: PairSessionMeta;
+  test: PairSessionMeta;
+  indices: [number, number];
+  outputs: number[];
+  reference: { within_train_r?: number | null; within_test_r?: number | null; transfer_r?: number | null; within_train_angle?: number | null; within_test_angle?: number | null };
+  alignment: { method: "neuron_ids" | "index"; n_shared: number; warning: string | null } | null;
+  alignment_error?: string;
+  representation_error?: string;
+  decoder: {
+    metrics: MetricSet;
+    n_used: number;
+    n_train: number;
+    n_test: number;
+    traces: { time: number[]; time_unit: "s" | "bin"; actual: number[][]; predicted: number[][] };
+    scatter: { actual: number[][]; predicted: number[][] };
+  } | null;
+  representation: (Omit<SubspaceCellOk, "status" | "n_shared" | "alignment"> & {
+    explained_variance_a: number[];
+    explained_variance_b: number[];
+    variance_capture: { k: number[]; captured_by_a: number[]; captured_by_own: number[] };
+  }) | null;
+  activity: {
+    unit: string;
+    labels: string[];
+    mean_a: number[];
+    mean_b: number[];
+    diff: number[];
+    pearson_r: number | null;
+    mean_abs_diff: number;
+    median_relative_change: number | null;
+    population_mean_a: number;
+    population_mean_b: number;
+  } | null;
+  behaviour: {
+    outputs: {
+      mean_a: number; mean_b: number; var_a: number; var_b: number; std_a: number; std_b: number;
+      var_change_pct: number | null; ks_statistic: number; hist_edges: number[]; hist_a: number[]; hist_b: number[];
+    }[];
+    mean_euclidean_difference: number;
+    total_var_change_pct: number | null;
+    speed_mean_a: number | null;
+    speed_mean_b: number | null;
+    example_a: number[][];
+    example_b: number[][];
   };
 }
