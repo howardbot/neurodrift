@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CrossDayDesign, ExplanationsTested, GapChart, InputReadoutGrids, PairSlopes } from "@/components/showcase/MarmosetFigures";
+import { CountUp } from "@/components/motion";
 import { Callout, Figure, NextProject, ProjectHero, Section, SkillList, Steps, Term } from "@/components/showcase/Story";
 import { projectBySlug } from "@/content/research";
 
@@ -18,8 +19,8 @@ function Numbers() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((i) => (
-        <div key={i.label} className="card p-4">
-          <div className="num font-mono text-2xl font-semibold">{i.value}</div>
+        <div key={i.label} className="card card-hover p-4">
+          <div className="font-mono text-2xl font-semibold text-accent-700 dark:text-accent-200"><CountUp value={i.value} /></div>
           <div className="mt-1 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">{i.label}</div>
         </div>
       ))}
@@ -194,8 +195,8 @@ export default function CrossDayDecoding() {
       </details>
 
       <div className="flex flex-wrap gap-3 text-sm">
-        <a href={project.repo} className="rounded border border-zinc-300 px-4 py-2 font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800">Code and results on GitHub →</a>
-        <Link href="/tool" className="rounded border border-zinc-300 px-4 py-2 font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800">Explore the idea in NeuroDrift →</Link>
+        <a href={project.repo} className="btn btn-outline group">Code and results on GitHub <span className="arrow">→</span></a>
+        <Link href="/tool" className="btn btn-outline group">Explore the idea in NeuroDrift <span className="arrow">→</span></Link>
       </div>
 
       <NextProject current={project.slug} />

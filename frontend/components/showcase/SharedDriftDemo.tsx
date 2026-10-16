@@ -31,7 +31,8 @@ function Scatter({ a, b, label, r }: { a: number[]; b: number[]; label: string; 
   const size = 150;
   const lo = Math.min(...a, ...b);
   const hi = Math.max(...a, ...b);
-  const s = (v: number) => ((v - lo) / (hi - lo || 1)) * (size - 10) + 5;
+  // Rounded: trig in the noise generator can differ in the last bit between server and browser.
+  const s = (v: number) => Math.round((((v - lo) / (hi - lo || 1)) * (size - 10) + 5) * 100) / 100;
   return (
     <div className="text-center">
       <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto w-full max-w-[170px]" role="img" aria-label={`${label}: correlation ${r.toFixed(2)}`}>

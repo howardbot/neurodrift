@@ -35,8 +35,9 @@ export function SpikeSortingDemo() {
 
   const W = 300;
   const H = 220;
-  const sx = (t: number) => 34 + ((t - 0.1) / 0.8) * (W - 44);
-  const sy = (a: number) => H - 26 - ((a - 10) / 120) * (H - 40);
+  // Rounded: trig in the noise generator can differ in the last bit between server and browser.
+  const sx = (t: number) => Math.round((34 + ((t - 0.1) / 0.8) * (W - 44)) * 100) / 100;
+  const sy = (a: number) => Math.round((H - 26 - ((a - 10) / 120) * (H - 40)) * 100) / 100;
 
   const ts = Array.from({ length: 60 }, (_, i) => i * 0.025);
   const wf = (n: (typeof NEURONS)[number]) =>

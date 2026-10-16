@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { binCenters, formatBytes, formatDuration, formatNumber } from "@/lib/format";
+import { binCenters, countUpFrame, formatBytes, formatDuration, formatNumber } from "@/lib/format";
 import { parseErrorBody } from "@/lib/api";
 import { suggestSessionName } from "@/components/UploadSessionForm";
 
@@ -11,6 +11,15 @@ describe("format", () => {
     expect(formatNumber(0.12345)).toBe("0.123");
     expect(formatNumber(null)).toBe("—");
     expect(formatDuration(159.98)).toBe("2 min 40 s");
+  });
+
+  it("builds count-up frames that keep the target's separators", () => {
+    expect(countUpFrame("103,680", 0)).toBe("0");
+    expect(countUpFrame("103,680", 0.5)).toBe("51,840");
+    expect(countUpFrame("103,680", 1)).toBe("103,680");
+    expect(countUpFrame("146", 0.5)).toBe("73");
+    expect(countUpFrame("146", 2)).toBe("146");
+    expect(countUpFrame("10⁻¹⁵", 0.5)).toBe("10⁻¹⁵");
   });
 
   it("computes histogram bin centres", () => {

@@ -197,7 +197,7 @@ export function ExplanationsTested() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {TESTED.map((t) => (
-        <div key={t.idea} className="card p-4">
+        <div key={t.idea} className="card card-hover p-4">
           <div className="text-sm font-semibold leading-snug">{t.idea}?</div>
           <div className="mt-1.5 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">{t.test}</div>
           <span className={`mt-3 inline-block rounded px-2 py-0.5 text-[11px] font-medium ${VERDICT_STYLE[t.verdict].cls}`}>{VERDICT_STYLE[t.verdict].label}</span>
