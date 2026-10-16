@@ -67,7 +67,7 @@ export default function ProjectsPage() {
           )}
           <div className="grid gap-3 sm:grid-cols-2">
             {data?.map((p) => (
-              <Link key={p.id} href={`/projects/${p.id}`} className="card block p-4 transition-colors hover:border-accent-500">
+              <Link key={p.id} href={`/projects/${p.id}`} className="card card-hover block p-4">
                 <div className="flex items-start justify-between gap-2">
                   <h2 className="truncate text-sm font-semibold">{p.name}</h2>
                   {p.is_demo && <Badge tone="accent">demo</Badge>}

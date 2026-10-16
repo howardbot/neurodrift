@@ -40,3 +40,15 @@ export function outputLabel(index: number, nOutputs: number): string {
   if (nOutputs === 2) return index === 0 ? "Y₀ (x)" : "Y₁ (y)";
   return `Y${index}`;
 }
+
+/**
+ * An intermediate frame of a count-up animation towards `target` (e.g. "103,680"),
+ * keeping the target's thousands separators. Targets that are not plain integers are
+ * returned unchanged.
+ */
+export function countUpFrame(target: string, progress: number): string {
+  if (!/^\d{1,3}(,\d{3})*$|^\d+$/.test(target)) return target;
+  const end = Number(target.replace(/,/g, ""));
+  const value = Math.round(end * Math.min(1, Math.max(0, progress)));
+  return target.includes(",") ? value.toLocaleString("en-US") : String(value);
+}

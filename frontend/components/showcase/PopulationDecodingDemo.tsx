@@ -11,6 +11,14 @@ function angleDiff(a: number, b: number): number {
   return Math.abs(((a - b + 540) % 360) - 180);
 }
 
+/** Trig results can differ in the last bit between server and browser; round what reaches the DOM. */
+const round = (v: number, digits = 2) => Math.round(v * 10 ** digits) / 10 ** digits;
+
+/** The equivalent of `angle` (degrees) nearest to `previous`, so a rotation never takes the long way round. */
+function unwrap(angle: number, previous: number): number {
+  return angle + 360 * Math.round((previous - angle) / 360);
+}
+
 /**
  * Toy population-vector decoder. Each neuron fires most for its preferred movement
  * direction (cosine tuning) plus noise; the decoder adds up each neuron's preferred
@@ -24,6 +32,7 @@ export function PopulationDecodingDemo() {
   const [live, setLive] = useState(true);
   const svgRef = useRef<SVGSVGElement>(null);
   const dragging = useRef(false);
+  const shownDecoded = useRef<number | null>(null);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setLive(false);
@@ -55,7 +64,9 @@ export function PopulationDecodingDemo() {
   }, [direction, nNeurons, noise, trial]);
 
   const error = angleDiff(decoded, direction);
-  const toXY = (deg: number, r: number) => [r * Math.cos((deg * Math.PI) / 180), -r * Math.sin((deg * Math.PI) / 180)] as const;
+  // Idempotent, so re-rendering with the same value leaves it unchanged.
+  const decodedAngle = round(unwrap(decoded, shownDecoded.current ?? decoded), 1);
+  shownDecoded.current = decodedAngle;
 
   function pointerToDirection(clientX: number, clientY: number) {
     const svg = svgRef.current;
@@ -66,8 +77,7 @@ export function PopulationDecodingDemo() {
     setDirection(Math.round(((Math.atan2(y, x) * 180) / Math.PI + 360) % 360));
   }
 
-  const [tx, ty] = toXY(direction, R - 28);
-  const [dx, dy] = toXY(decoded, R - 28);
+  const arm = R - 28;
 
   return (
     <div className="grid items-center gap-6 md:grid-cols-[300px_1fr]">
@@ -87,18 +97,34 @@ export function PopulationDecodingDemo() {
       >
         <circle r={R} fill="none" className="stroke-zinc-200 dark:stroke-zinc-800" strokeDasharray="3 4" />
         {neurons.map((n, i) => {
-          const [x, y] = [R * Math.cos(n.pd), -R * Math.sin(n.pd)];
+          const [x, y] = [round(R * Math.cos(n.pd)), round(-R * Math.sin(n.pd))];
           const strength = Math.min(1, n.rate / (BASELINE + GAIN + 4));
           return (
             <g key={i}>
-              <circle cx={x} cy={y} r={5 + 9 * strength} fill="#2f5d9e" opacity={0.15 + 0.85 * strength} />
+              <circle
+                cx={x}
+                cy={y}
+                r={14}
+                className="fill-accent-600 dark:fill-accent-400"
+                style={{
+                  opacity: round(0.15 + 0.85 * strength, 3),
+                  transform: `scale(${round((5 + 9 * strength) / 14, 3)})`,
+                  transformBox: "fill-box",
+                  transformOrigin: "center",
+                  transition: "transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.4s",
+                }}
+              />
               <title>{`Neuron preferring ${Math.round((n.pd * 180) / Math.PI)}°: ${n.rate.toFixed(1)} spikes/s`}</title>
             </g>
           );
         })}
-        <line x1={0} y1={0} x2={tx} y2={ty} stroke="#15803d" strokeWidth={4} strokeLinecap="round" />
-        <circle cx={tx} cy={ty} r={7} fill="#15803d" className="cursor-grab" />
-        <line x1={0} y1={0} x2={dx} y2={dy} stroke="#c2410c" strokeWidth={3} strokeDasharray="6 4" strokeLinecap="round" />
+        <g style={{ transform: `rotate(${-direction}deg)` }}>
+          <line x1={0} y1={0} x2={arm} y2={0} stroke="#15803d" strokeWidth={4} strokeLinecap="round" />
+          <circle cx={arm} cy={0} r={7} fill="#15803d" className="cursor-grab" />
+        </g>
+        <g style={{ transform: `rotate(${-decodedAngle}deg)`, transition: "transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1)" }}>
+          <line x1={0} y1={0} x2={arm} y2={0} stroke="#c2410c" strokeWidth={3} strokeDasharray="6 4" strokeLinecap="round" />
+        </g>
         <circle r={4} className="fill-zinc-500" />
       </svg>
 

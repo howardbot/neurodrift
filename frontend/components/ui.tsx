@@ -5,7 +5,8 @@ import type { ApiError } from "@/lib/api";
 type Variant = "primary" | "secondary" | "danger" | "ghost";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-accent-600 text-white hover:bg-accent-700 disabled:bg-accent-500/60",
+  primary:
+    "bg-accent-600 text-white shadow-sm shadow-accent-600/25 hover:bg-accent-700 hover:shadow-md hover:shadow-accent-600/30 disabled:bg-accent-500/60 disabled:shadow-none",
   secondary:
     "border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800",
   danger:
@@ -14,7 +15,7 @@ const variants: Record<Variant, string> = {
 };
 
 const buttonBase =
-  "inline-flex items-center justify-center gap-1.5 rounded px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100";
 
 export function Button({
   variant = "secondary",
@@ -67,7 +68,7 @@ export function Card({
   return (
     <section id={id} className={`card ${className}`}>
       {(title || actions) && (
-        <header className="flex items-start justify-between gap-4 border-b border-zinc-200 px-4 py-2.5 dark:border-zinc-800">
+        <header className="flex items-start justify-between gap-4 rounded-t-lg border-b border-zinc-200 bg-zinc-50/60 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-900/60">
           <div>
             {title && <h2 className="text-sm font-semibold">{title}</h2>}
             {subtitle && <p className="mt-0.5 text-xs text-zinc-500">{subtitle}</p>}
@@ -111,7 +112,7 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-6 flex animate-fade-up flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
         {eyebrow && <div className="mb-1 text-xs text-zinc-500">{eyebrow}</div>}
         <h1 className="truncate text-xl font-semibold tracking-tight">{title}</h1>
@@ -151,7 +152,7 @@ export function Notice({ children }: { children: ReactNode }) {
 export function Spinner({ label = "Loading…" }: { label?: string }) {
   return (
     <div className="flex items-center gap-2 py-6 text-sm text-zinc-500">
-      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-300 border-t-accent-600" />
+      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-zinc-300 border-t-accent-600 dark:border-zinc-700 dark:border-t-accent-300" />
       {label}
     </div>
   );
