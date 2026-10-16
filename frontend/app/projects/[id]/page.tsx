@@ -12,6 +12,7 @@ import { Badge, Button, Card, EmptyState, ErrorBox, Notice, PageHeader, Spinner,
 import { api } from "@/lib/api";
 import { formatDate, formatDuration, formatNumber } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
+import { useScrollToHash } from "@/lib/useScrollToHash";
 import type { Session } from "@/types/api";
 
 function neuronAlignment(sessions: Session[]): { label: string; tone: "ok" | "warn"; detail: string } {
@@ -52,6 +53,7 @@ export default function ProjectPage() {
   const { data: project, error, loading, reload } = useApi(() => api.getProject(id), id);
   const experiments = useApi(() => api.listProjectExperiments(id), id);
   useSetCurrentProject(project);
+  useScrollToHash(!!project);
 
   async function removeProject() {
     if (!project || !window.confirm(`Delete project "${project.name}" and all ${project.n_sessions} session files?`)) return;
@@ -76,7 +78,7 @@ export default function ProjectPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow={<Link href="/projects" className="hover:underline">Projects</Link>}
-        title={<span className="flex items-center gap-2">{project.name}{project.is_demo && <Badge tone="accent">synthetic demo</Badge>}</span>}
+        title={<span className="flex flex-wrap items-center gap-x-2 gap-y-1">{project.name}{project.is_demo && <Badge tone="accent">synthetic demo</Badge>}</span>}
         description={project.description || undefined}
         actions={<Button variant="danger" onClick={removeProject}>Delete project</Button>}
       />
@@ -90,8 +92,8 @@ export default function ProjectPage() {
         <Stat label="Created" value={formatDate(project.created_at)} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="min-w-0 space-y-6">
           <Card id="sessions" title="Sessions" subtitle="Ordered by session_order; this order defines 'session distance' in later analyses.">
             {sessions.length === 0 ? (
               <EmptyState title="No sessions yet">Upload one .npz file per recording session.</EmptyState>

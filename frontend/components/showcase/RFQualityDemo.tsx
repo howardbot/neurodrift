@@ -40,7 +40,7 @@ export function RFQualityDemo() {
 
   const cell = 18;
   return (
-    <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-center">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-[auto_minmax(0,1fr)] md:items-center">
       <svg viewBox={`0 0 ${GRID * cell} ${GRID * cell}`} className="mx-auto w-full max-w-[240px]" role="img" aria-label="Toy receptive-field map">
         {map.map((v, k) => (
           <rect key={k} x={(k % GRID) * cell} y={Math.floor(k / GRID) * cell} width={cell - 1} height={cell - 1} fill={`rgba(47,93,158,${(0.08 + 0.92 * v).toFixed(3)})`} />

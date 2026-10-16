@@ -44,7 +44,7 @@ export function SpikeSortingDemo() {
     ts.map((t, i) => `${i ? "L" : "M"}${(10 + t * 170).toFixed(1)},${(70 - waveform(n.amp, n.t2p, t) * 0.55).toFixed(1)}`).join("");
 
   return (
-    <div className="grid gap-6 md:grid-cols-[1fr_1.2fr]">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
       <div className="space-y-4">
         <div>
           <div className="mb-1 text-xs font-medium text-zinc-500">Average spike shape of each neuron</div>

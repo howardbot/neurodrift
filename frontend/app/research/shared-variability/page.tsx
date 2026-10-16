@@ -100,7 +100,7 @@ export default function SharedVariability() {
       </Section>
 
       <Section eyebrow="Exploration" title="The wider toolkit">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {TOOLKIT.map((t) => (
             <div key={t.title} className="card card-hover p-4">
               <div className="text-sm font-semibold">{t.title}</div>

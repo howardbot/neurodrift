@@ -4,25 +4,8 @@ import { Reveal, ScrollProgress } from "@/components/motion";
 import { ProjectGlyph } from "@/components/showcase/Glyphs";
 import { RESEARCH, type ResearchProject } from "@/content/research";
 
-/** A word with a plain-language definition shown on hover or keyboard focus. */
-export function Term({ children, def }: { children: ReactNode; def: string }) {
-  return (
-    <span className="group relative inline-block">
-      <span
-        tabIndex={0}
-        className="cursor-help border-b border-dotted border-zinc-400 outline-none transition-colors hover:border-accent-500 hover:text-accent-700 focus:border-accent-500 dark:hover:text-accent-200"
-      >
-        {children}
-      </span>
-      <span
-        role="tooltip"
-        className="pointer-events-none invisible absolute bottom-full left-1/2 z-20 mb-2 w-64 -translate-x-1/2 translate-y-1 scale-95 rounded-lg border border-zinc-200 bg-white/95 p-2.5 text-xs font-normal leading-relaxed text-zinc-700 opacity-0 shadow-xl shadow-zinc-900/10 backdrop-blur transition-all duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:border-zinc-700 dark:bg-zinc-900/95 dark:text-zinc-300"
-      >
-        {def}
-      </span>
-    </span>
-  );
-}
+// Glossary terms are a client component; re-exported so pages keep importing from here.
+export { Term } from "@/components/Term";
 
 /** Soft, slowly drifting colour behind a page's opening. Decorative. */
 export function HeroGlow() {
@@ -143,7 +126,7 @@ export function Callout({ title, children, tone = "neutral" }: { title: string; 
 
 export function SkillList({ groups }: { groups: { label: string; items: string[] }[] }) {
   return (
-    <dl className="grid gap-4 sm:grid-cols-2">
+    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {groups.map((g, i) => (
         <Reveal key={g.label} delay={(i % 2) * 100} className="card card-hover p-4">
           <dt className="text-xs font-medium uppercase tracking-wider text-zinc-500">{g.label}</dt>

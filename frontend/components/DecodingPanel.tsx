@@ -48,7 +48,7 @@ export function PredictionPlots({
   return (
     <div className="space-y-4">
       {outputs.map((o, j) => (
-        <div key={o} className="grid gap-4 lg:grid-cols-[1fr_280px]">
+        <div key={o} className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
             <div className="text-xs font-medium text-zinc-500">{outputLabel(o, nOutputs)} — predicted vs actual, start of test block</div>
             <Plot data={traces[j] ?? []} layout={{ xaxis: { title: { text: xTitle } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={200} />
@@ -95,19 +95,21 @@ export function DecodingPanel({ sessionId, nOutputs }: { sessionId: string; nOut
             <Stat label="Decoder" value={data.config.decoder === "ridge" ? `ridge α=${data.config.alpha}` : "OLS"} />
           </div>
           {m.n_undefined > 0 && <p className="mt-2 text-xs text-amber-700">{m.n_undefined} metric value(s) are undefined (constant signal) and excluded from means.</p>}
-          <table className="table-base mt-4 max-w-xl">
-            <thead><tr><th>Output</th><th className="text-right">Pearson r</th><th className="text-right">R²</th><th className="text-right">RMSE</th></tr></thead>
-            <tbody>
-              {data.config.outputs.map((o, j) => (
-                <tr key={o}>
-                  <td>{outputLabel(o, nOutputs)}</td>
-                  <td className="num text-right font-mono">{formatNumber(m.r[j])}</td>
-                  <td className="num text-right font-mono">{formatNumber(m.r2[j])}</td>
-                  <td className="num text-right font-mono">{formatNumber(m.rmse[j])}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="mt-4 max-w-xl overflow-x-auto">
+            <table className="table-base">
+              <thead><tr><th>Output</th><th className="text-right">Pearson r</th><th className="text-right">R²</th><th className="text-right">RMSE</th></tr></thead>
+              <tbody>
+                {data.config.outputs.map((o, j) => (
+                  <tr key={o}>
+                    <td>{outputLabel(o, nOutputs)}</td>
+                    <td className="num text-right font-mono">{formatNumber(m.r[j])}</td>
+                    <td className="num text-right font-mono">{formatNumber(m.r2[j])}</td>
+                    <td className="num text-right font-mono">{formatNumber(m.rmse[j])}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div className="mt-4"><PredictionPlots result={data} outputs={data.config.outputs} nOutputs={nOutputs} /></div>
         </div>
       )}

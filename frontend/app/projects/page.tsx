@@ -54,7 +54,7 @@ export default function ProjectsPage() {
   return (
     <div>
       <PageHeader title="Projects" description="A project groups recording sessions from one subject or array that you want to compare." />
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div>
           {loading && !data && <Spinner />}
           {error && <ErrorBox error={error} title="Could not load projects" />}
@@ -65,12 +65,12 @@ export default function ProjectsPage() {
               <div className="mt-4 flex justify-center"><DemoButton /></div>
             </div>
           )}
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {data?.map((p) => (
               <Link key={p.id} href={`/projects/${p.id}`} className="card card-hover block p-4">
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="truncate text-sm font-semibold">{p.name}</h2>
-                  {p.is_demo && <Badge tone="accent">demo</Badge>}
+                  <h2 className="min-w-0 truncate text-sm font-semibold" title={p.name}>{p.name}</h2>
+                  {p.is_demo && <span className="shrink-0"><Badge tone="accent">demo</Badge></span>}
                 </div>
                 {p.description && <p className="mt-1 line-clamp-2 text-xs text-zinc-500">{p.description}</p>}
                 <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">

@@ -30,7 +30,10 @@ export function Term({ children, def }: { children: ReactNode; def: string }) {
     const r = t.getBoundingClientRect();
     const vw = document.documentElement.clientWidth;
     const { offsetWidth: w, offsetHeight: h } = b;
-    const above = r.top - GAP - h >= EDGE / 2;
+    // Keep clear of the sticky phone header; prefer above, flip below when there is no room.
+    const header = document.querySelector("[data-sticky-header]")?.getBoundingClientRect();
+    const minTop = (header && header.height > 0 ? header.bottom : 0) + EDGE / 2;
+    const above = r.top - GAP - h >= minTop || r.top - minTop > window.innerHeight - r.bottom;
     const left = Math.min(Math.max(r.left + r.width / 2 - w / 2, EDGE), Math.max(EDGE, vw - EDGE - w));
     b.style.inset = "auto";
     b.style.margin = "0";
@@ -96,7 +99,7 @@ export function Term({ children, def }: { children: ReactNode; def: string }) {
         data-term-trigger=""
         popoverTarget={tipId}
         aria-describedby={tipId}
-        className="cursor-help border-b border-dotted border-zinc-400 transition-colors hover:border-accent-500 hover:text-accent-700 dark:hover:text-accent-200"
+        className="cursor-help border-b border-dotted border-zinc-400 transition-colors [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:hover:border-accent-500 [@media(hover:hover)]:hover:text-accent-700 dark:[@media(hover:hover)]:hover:text-accent-200"
         onClick={(e) => {
           // Take over from the declarative toggle: a tap pins the bubble open, a second tap closes it.
           if (!supportsPopover()) return;

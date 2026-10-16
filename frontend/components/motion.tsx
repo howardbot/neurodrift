@@ -20,6 +20,9 @@ function useEnterViewport<T extends Element>(onEnter: () => void): [RefObject<T 
 
   useLayoutEffect(() => {
     const el = ref.current;
+    // Reset first: when the effect re-runs (StrictMode, or after a hash jump scrolled the
+    // element into view), a hidden state left by the previous run would never clear.
+    setPending(false);
     if (!el || prefersReducedMotion() || typeof IntersectionObserver === "undefined") return;
     if (el.getBoundingClientRect().top < window.innerHeight * 0.95) return;
     setPending(true);

@@ -15,6 +15,16 @@
   }
 }
 
+/* In-page anchors land below the sticky phone header (h-12) rather than under it. */
+html {
+  scroll-padding-top: 4rem;
+}
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 1.5rem;
+  }
+}
+
 body {
   @apply bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
 }
@@ -57,7 +67,7 @@ body {
     @apply bg-gradient-to-r from-accent-600 via-sky-500 to-violet-500 bg-[length:200%_auto] bg-clip-text text-transparent dark:from-accent-300 dark:via-sky-300 dark:to-violet-300;
   }
   .input {
-    @apply w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm outline-none
+    @apply w-full max-w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm outline-none
       focus:border-accent-500 focus:ring-1 focus:ring-accent-500
       dark:border-zinc-700 dark:bg-zinc-900;
   }
@@ -83,6 +93,34 @@ body {
 }
 [data-reveal="shown"] {
   transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+
+/* Glossary bubble (components/Term.tsx): shown only while its popover is open. Browsers
+   without the Popover API drop the :popover-open rule, keep it hidden and fall back to
+   the trigger's title attribute. */
+.term-tip {
+  display: none;
+}
+.term-tip:popover-open {
+  display: block;
+  animation: term-in 0.16s var(--ease-out);
+  transform-origin: bottom center;
+}
+.term-tip[data-side="bottom"]:popover-open {
+  animation-name: term-in-below;
+  transform-origin: top center;
+}
+@keyframes term-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0) scale(0.97);
+  }
+}
+@keyframes term-in-below {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0) scale(0.97);
+  }
 }
 
 /* A path drawn on as it appears. Needs pathLength="1" on the SVG element. */

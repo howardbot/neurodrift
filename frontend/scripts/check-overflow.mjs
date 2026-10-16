@@ -109,32 +109,42 @@ async function checkTooltips(page) {
       const hit = open ? document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(12, r.height / 2)) : null;
       return { open, left: r.left, right: r.right, top: r.top, bottom: r.bottom, vw: document.documentElement.clientWidth, vh: window.innerHeight, covered: open && !t.contains(hit) };
     });
+  // Poll rather than sleep: pages with a WebGL demo can keep the main thread busy for a
+  // second or more under software rendering (headless CI, no GPU).
+  const until = async (i, open) => {
+    for (let t = 0; t < 5000; t += 50) {
+      const s = await state(i);
+      if (s.open === open) return s;
+      await page.waitForTimeout(50);
+    }
+    return null;
+  };
   for (let i = 0; i < count; i++) {
     const trigger = page.locator("[data-term-trigger]").nth(i);
     const word = (await trigger.textContent())?.trim();
     await trigger.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(150);
     await trigger.tap();
-    await page.waitForTimeout(220);
-    let s = await state(i);
-    if (!s.open) {
+    const s = await until(i, true);
+    if (!s) {
       bad.push(`"${word}": tooltip did not open on tap`);
       continue;
     }
+    await page.waitForTimeout(200); // let the open animation settle before measuring
+    Object.assign(s, await state(i));
     if (s.left < -0.5 || s.right > s.vw + 0.5) bad.push(`"${word}": tooltip spans x ${Math.round(s.left)}–${Math.round(s.right)} of ${s.vw}px`);
     if (s.top < -0.5 || s.bottom > s.vh + 0.5) bad.push(`"${word}": tooltip spans y ${Math.round(s.top)}–${Math.round(s.bottom)} of ${s.vh}px`);
     if (s.covered) bad.push(`"${word}": tooltip is covered by another element`);
     await trigger.tap();
-    await page.waitForTimeout(120);
-    if ((await state(i)).open) bad.push(`"${word}": second tap did not close it`);
+    if (!(await until(i, false))) bad.push(`"${word}": second tap did not close it`);
     await trigger.tap();
+    await until(i, true);
     await page.keyboard.press("Escape");
-    await page.waitForTimeout(120);
-    if ((await state(i)).open) bad.push(`"${word}": Escape did not close it`);
+    if (!(await until(i, false))) bad.push(`"${word}": Escape did not close it`);
     await trigger.tap();
-    await page.waitForTimeout(120);
+    await until(i, true);
     await page.touchscreen.tap(4, s.vh - 4);
-    await page.waitForTimeout(120);
-    if ((await state(i)).open) bad.push(`"${word}": tapping elsewhere did not close it`);
+    if (!(await until(i, false))) bad.push(`"${word}": tapping elsewhere did not close it`);
   }
   return { count, bad };
 }

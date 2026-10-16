@@ -22,16 +22,18 @@ export default function Documentation() {
 
       <Section title="Session file format">
         <p>One NumPy <code>.npz</code> archive per recording session. Rows of <code>X</code> and <code>Y</code> are aligned time bins.</p>
-        <table className="table-base">
-          <thead><tr><th>Key</th><th>Shape</th><th>Required</th><th>Meaning</th></tr></thead>
-          <tbody>
-            <tr><td className="font-mono">X</td><td className="font-mono">(n_samples, n_neurons)</td><td>yes</td><td>Neural features, e.g. binned spike counts</td></tr>
-            <tr><td className="font-mono">Y</td><td className="font-mono">(n_samples, n_outputs)</td><td>yes</td><td>Behavioural targets, e.g. cursor velocity (1-D is treated as one output)</td></tr>
-            <tr><td className="font-mono">timestamps</td><td className="font-mono">(n_samples,)</td><td>no</td><td>Bin times in seconds</td></tr>
-            <tr><td className="font-mono">trial_ids</td><td className="font-mono">(n_samples,)</td><td>no</td><td>Integer trial label per bin</td></tr>
-            <tr><td className="font-mono">neuron_ids</td><td className="font-mono">(n_neurons,)</td><td>no</td><td>Unique integer or string unit IDs, used to match neurons across sessions</td></tr>
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="table-base [&_td:last-child]:min-w-[14rem] [&_td:last-child]:whitespace-normal">
+            <thead><tr><th>Key</th><th>Shape</th><th>Required</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td className="font-mono">X</td><td className="font-mono">(n_samples, n_neurons)</td><td>yes</td><td>Neural features, e.g. binned spike counts</td></tr>
+              <tr><td className="font-mono">Y</td><td className="font-mono">(n_samples, n_outputs)</td><td>yes</td><td>Behavioural targets, e.g. cursor velocity (1-D is treated as one output)</td></tr>
+              <tr><td className="font-mono">timestamps</td><td className="font-mono">(n_samples,)</td><td>no</td><td>Bin times in seconds</td></tr>
+              <tr><td className="font-mono">trial_ids</td><td className="font-mono">(n_samples,)</td><td>no</td><td>Integer trial label per bin</td></tr>
+              <tr><td className="font-mono">neuron_ids</td><td className="font-mono">(n_neurons,)</td><td>no</td><td>Unique integer or string unit IDs, used to match neurons across sessions</td></tr>
+            </tbody>
+          </table>
+        </div>
         <Code>{`import numpy as np
 np.savez("R1_D01.npz", X=X, Y=Y, timestamps=t, trial_ids=trial_ids, neuron_ids=unit_ids)`}</Code>
         <p>
