@@ -137,5 +137,7 @@ dataset or parameters).
 | `GET /api/experiments/{id}/status` | `{status, progress, error_message}` |
 | `GET /api/experiments/{id}/matrix` | decoder + subspace matrices |
 | `GET /api/experiments/{id}/compare/{train}/{test}` | pair comparison payload |
-| `GET /api/experiments/{id}/export/{artifact}` | CSV/JSON/ZIP exports |
+| `POST /api/experiments/{id}/rerun` | failed → 202 experiment reset to pending and re-queued (409 unless failed, 422 if a session was deleted) |
+| `GET /api/experiments/{id}/export/{artifact}` | `decoder_matrix.csv`, `subspace_angles.csv`, `session_summary.csv`, `experiment_config.json`, `all.zip` (409 unless completed) |
+| `GET /api/experiments/{id}/report.html` | self-contained HTML report, inline CSS/SVG (409 unless completed; `?download=true` → attachment) |
 | `POST /api/demo` | create the synthetic demo project → 201 |

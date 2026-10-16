@@ -7,8 +7,9 @@ import { useSetCurrentProject } from "@/components/CurrentProject";
 import { DriftScatter } from "@/components/DriftScatter";
 import { StatusBadge } from "@/components/ExperimentsTable";
 import { MatrixHeatmap, type MatrixSpec } from "@/components/MatrixHeatmap";
-import { Button, Card, ErrorBox, Notice, PageHeader, Spinner, Stat } from "@/components/ui";
-import { api } from "@/lib/api";
+import { StabilityExplorer } from "@/components/StabilityExplorer";
+import { Button, ButtonAnchor, Card, ErrorBox, Notice, PageHeader, Spinner, Stat } from "@/components/ui";
+import { ApiError, api, exportUrl, reportUrl } from "@/lib/api";
 import { formatNumber } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 import type { DecoderResult, Experiment, MatrixKey, SubspaceKey, SubspaceResult } from "@/types/api";
@@ -28,6 +29,38 @@ const SUBSPACE_SPECS: Partial<Record<SubspaceKey, MatrixSpec>> = {
   projection_distance: { label: "Projection distance", better: "low", fmt: ".2f" },
   alignment_index: { label: "Alignment index", better: "high", fmt: ".2f" },
 };
+
+const EXPORTS: { label: string; hint: string; href: (id: string) => string; needsSubspace?: boolean }[] = [
+  { label: "Decoder matrix", hint: "Mean Pearson r · rows train, columns test · CSV", href: (id) => exportUrl(id, "decoder_matrix.csv") },
+  { label: "Subspace angles", hint: "Mean principal angle (°) · rows train, columns test · CSV", href: (id) => exportUrl(id, "subspace_angles.csv"), needsSubspace: true },
+  { label: "Session summary", hint: "Metadata, within-session and transfer means · CSV", href: (id) => exportUrl(id, "session_summary.csv") },
+  { label: "Configuration", hint: "Config, seed, session snapshot, software versions · JSON", href: (id) => exportUrl(id, "experiment_config.json") },
+  { label: "Report", hint: "Self-contained page with inline CSS and SVG · HTML", href: (id) => reportUrl(id, true) },
+  { label: "Everything", hint: "All of the above in one archive · ZIP", href: (id) => exportUrl(id, "all.zip") },
+];
+
+function ExportLinks({ e, hasSubspace }: { e: Experiment; hasSubspace: boolean }) {
+  return (
+    <ul className="space-y-2.5 text-sm">
+      {EXPORTS.map((x) => {
+        const available = hasSubspace || !x.needsSubspace;
+        return (
+          <li key={x.label} className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-medium">{x.label}</div>
+              <div className="text-xs text-zinc-500">{available ? x.hint : "Not computed for this experiment"}</div>
+            </div>
+            {available ? (
+              <ButtonAnchor href={x.href(e.id)} download className="shrink-0 py-1 text-xs">Download</ButtonAnchor>
+            ) : (
+              <Button disabled className="shrink-0 py-1 text-xs">Download</Button>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 function useExperiment(id: string) {
   const state = useApi(() => api.getExperiment(id), id);
@@ -116,6 +149,9 @@ export default function ExperimentPage() {
   const matrix = useApi(() => api.getExperimentMatrix(id), e?.status === "completed" ? id : null);
   const [decoderMetric, setDecoderMetric] = useState<keyof typeof DECODER_SPECS>("mean_r");
   const [subspaceMetric, setSubspaceMetric] = useState<SubspaceKey>("mean_angle");
+  const [stabilityTrain, setStabilityTrain] = useState(0);
+  const [rerunning, setRerunning] = useState(false);
+  const [rerunError, setRerunError] = useState<ApiError>();
 
   const decoder = matrix.data?.decoder;
   const subspace = matrix.data?.subspace ?? null;
@@ -148,6 +184,20 @@ export default function ExperimentPage() {
     if (train && test) router.push(`/projects/${e.project_id}/compare/${train.id}/${test.id}?experiment=${e.id}`);
   };
 
+  async function rerun() {
+    if (!e) return;
+    setRerunning(true);
+    setRerunError(undefined);
+    try {
+      await api.rerunExperiment(e.id);
+    } catch (err) {
+      setRerunError(err instanceof ApiError ? err : new ApiError(0, String(err)));
+    } finally {
+      setRerunning(false);
+      exp.reload();
+    }
+  }
+
   async function remove() {
     if (!e || !window.confirm(`Delete experiment "${e.name}"?`)) return;
     await api.deleteExperiment(e.id);
@@ -168,7 +218,21 @@ export default function ExperimentPage() {
         }
         title={<span className="flex items-center gap-2">{e.name} <StatusBadge status={e.status} /></span>}
         description={`${e.sessions.length} sessions · ${e.sessions.length ** 2} train/test combinations · created ${new Date(e.created_at).toLocaleString("en-CA", { hour12: false })}`}
-        actions={e.status !== "running" && <Button variant="danger" onClick={remove}>Delete</Button>}
+        actions={
+          <>
+            {e.status === "completed" && (
+              <ButtonAnchor href={reportUrl(e.id)} target="_blank" rel="noopener" variant="primary" title="Open a self-contained HTML report in a new tab">
+                Generate report
+              </ButtonAnchor>
+            )}
+            {e.status === "failed" && (
+              <Button variant="primary" onClick={rerun} disabled={rerunning} title="Run again with the same configuration and seed">
+                {rerunning ? "Re-running…" : "Re-run"}
+              </Button>
+            )}
+            {e.status !== "running" && <Button variant="danger" onClick={remove}>Delete</Button>}
+          </>
+        }
       />
 
       {(e.status === "pending" || e.status === "running") && (
@@ -182,6 +246,7 @@ export default function ExperimentPage() {
         </Card>
       )}
       {e.status === "failed" && <ErrorBox error={e.error_message ?? "Unknown error"} title="Experiment failed" />}
+      {rerunError && <ErrorBox error={rerunError} title="Could not re-run experiment" />}
       {matrix.error && <ErrorBox error={matrix.error} title="Could not load results" />}
       {e.status === "completed" && matrix.loading && !decoder && <Spinner label="Loading results…" />}
 
@@ -257,13 +322,45 @@ export default function ExperimentPage() {
             </Card>
           )}
 
+          <Card
+            title="Decoder stability explorer"
+            subtitle={
+              subspace
+                ? "Decoder r for one training session against session distance, with the mean principal angle of the same pairs underneath."
+                : "Decoder r for one training session against session distance. Subspace angles were not computed for this experiment."
+            }
+            actions={
+              <select
+                className="input w-auto py-1 text-xs"
+                value={Math.min(stabilityTrain, names.length - 1)}
+                onChange={(ev) => setStabilityTrain(Number(ev.target.value))}
+                aria-label="Training session"
+              >
+                {names.map((name, i) => <option key={name} value={i}>train on {name}</option>)}
+              </select>
+            }
+          >
+            <StabilityExplorer decoder={decoder} subspace={subspace} train={Math.min(stabilityTrain, names.length - 1)} />
+            <p className="mt-2 text-xs text-zinc-500">
+              Distance counts positions in this experiment&apos;s session order, not days. Distance 0 is the held-out within-session
+              estimate. The dashed line averages every training session at each distance. Descriptive only: there are no uncertainty
+              estimates, and lower transfer does not by itself indicate neural drift — behaviour, recording quality and the recorded
+              neurons also differ between sessions.
+            </p>
+          </Card>
+
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
             <Card title="Session summaries" subtitle="Transfer means exclude the diagonal. Lower transfer does not by itself indicate neural drift: behaviour and recording quality also differ.">
               <SessionSummary decoder={decoder} subspace={subspace} />
             </Card>
-            <Card title="Configuration">
-              <ConfigSummary e={e} />
-            </Card>
+            <div className="space-y-6">
+              <Card title="Configuration">
+                <ConfigSummary e={e} />
+              </Card>
+              <Card title="Exports" subtitle="Built from the stored results. Matrices: rows = training session, columns = test session; missing cells are empty.">
+                <ExportLinks e={e} hasSubspace={subspace !== null} />
+              </Card>
+            </div>
           </div>
         </>
       )}

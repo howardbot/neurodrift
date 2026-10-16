@@ -146,6 +146,8 @@ export interface Experiment {
   finished_at: string | null;
 }
 
+export type ExportArtifact = "decoder_matrix.csv" | "subspace_angles.csv" | "session_summary.csv" | "experiment_config.json" | "all.zip";
+
 export interface ExperimentCreate extends Partial<ExperimentConfig> {
   name?: string;
   session_ids?: string[];

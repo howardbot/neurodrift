@@ -4,6 +4,7 @@ import type {
   Experiment,
   ExperimentCreate,
   ExperimentMatrix,
+  ExportArtifact,
   PairComparison,
   Project,
   ProjectDetail,
@@ -87,6 +88,7 @@ export const api = {
   getExperiment: (id: string) => request<Experiment>(`/experiments/${id}`),
   getExperimentMatrix: (id: string) => request<ExperimentMatrix>(`/experiments/${id}/matrix`),
   deleteExperiment: (id: string) => request<void>(`/experiments/${id}`, { method: "DELETE" }),
+  rerunExperiment: (id: string) => request<Experiment>(`/experiments/${id}/rerun`, { method: "POST" }),
 
   getSessionPca: (id: string, nComponents: number, zscore: boolean) =>
     request<SessionPca>(`/sessions/${id}/pca?n_components=${nComponents}&zscore=${zscore}`),
@@ -95,6 +97,16 @@ export const api = {
 
   createDemo: () => request<Project>("/demo", { method: "POST" }),
 };
+
+/** Download URL of one export (served as an attachment by the backend). */
+export function exportUrl(experimentId: string, artifact: ExportArtifact): string {
+  return `/api/experiments/${experimentId}/export/${artifact}`;
+}
+
+/** URL of the self-contained HTML report; `download` asks for an attachment instead of inline. */
+export function reportUrl(experimentId: string, download = false): string {
+  return `/api/experiments/${experimentId}/report.html${download ? "?download=true" : ""}`;
+}
 
 /** Upload a session with progress reporting (fetch has no upload progress events). */
 export function uploadSession(

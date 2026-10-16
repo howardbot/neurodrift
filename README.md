@@ -10,13 +10,13 @@ questions and methods.
 NeuroDrift is a lightweight web application for studying the cross-session stability of
 neural population representations and linear neural decoders. Upload one `.npz` file per
 recording session (binned neural activity `X` and behaviour `Y`), inspect quality control,
-and — as the milestones below land — train decoders on one session, test them on every other
-session, and compare that generalisation with changes in neural subspaces, activity levels
-and behaviour.
+train decoders on one session and test them on every other session, and compare that
+generalisation with changes in neural subspaces, activity levels and behaviour. Results can be
+downloaded as CSV/JSON/ZIP or as a self-contained HTML report.
 
-> Status: **Milestones 1–7 of 8 are implemented** (foundation, data ingestion + QC, synthetic
-> demo, ridge/OLS decoding, cross-session decoder matrix via RQ, PCA subspace drift, pair
-> comparison). Exports, report generation and deployment polish are next. See [Roadmap](#roadmap).
+> Status: **all 8 milestones are implemented** (foundation, data ingestion + QC, synthetic demo,
+> ridge/OLS decoding, cross-session decoder matrix via RQ, PCA subspace drift, pair comparison,
+> exports + HTML report + decoder stability explorer). See [Roadmap](#roadmap).
 
 <!-- Screenshots: add docs/img/project.png and docs/img/session.png once captured. -->
 
@@ -226,9 +226,48 @@ Implemented:
   size is known and data are counts), and behaviour distributions (mean, SD, variance change,
   two-sample KS statistic reported without p-values because bins are autocorrelated).
 
+* **Decoder stability explorer** — on the experiment page, pick a training session and plot its
+  decoder r against session distance |i − j| (positions in the experiment's session order, not
+  days), split into test sessions before and after it, with the mean over all training sessions
+  as a dashed reference. The mean principal angle of the same pairs is shown in a second panel
+  underneath (with the chance level), when the experiment has subspace results.
+
 Limitations: no uncertainty estimates yet (no bootstrap CIs), no lagged/Wiener decoders, no
 alignment methods (CCA/Procrustes), and correlation between representation drift and decoder
 loss across pairs is descriptive only.
+
+## Exports and reports
+
+Every completed experiment can be downloaded from its page (or via the API). All files are
+built from the stored results — nothing is recomputed — and the endpoints return `409` while the
+experiment is pending, running or failed.
+
+| `GET /api/experiments/{id}/…` | Content |
+| --- | --- |
+| `export/decoder_matrix.csv` | mean Pearson r, rows = training session, columns = test session, labelled with session names; cells that could not be computed are empty |
+| `export/subspace_angles.csv` | mean principal angle (°) in the same layout (`404` for experiments run before subspace analysis existed) |
+| `export/session_summary.csv` | one row per session: position, name, id, order, subject, recording date, bin size, bins, neurons, train/test block sizes, within-session r, out-/in-transfer r, within-session angle, mean angle to/from the other sessions |
+| `export/experiment_config.json` | configuration, random seed, ordered session snapshot, software versions, stored summary, unavailable pairs with reasons, and the matrix/split conventions |
+| `export/all.zip` | all of the above plus `report.html` |
+| `report.html` | self-contained HTML report (`?download=true` for an attachment) |
+
+```bash
+curl -OJ http://localhost/api/experiments/<id>/export/all.zip
+```
+
+The **HTML report** is a single file with inline CSS and inline SVG heatmaps — no scripts,
+fonts or other external requests (it is also served with a restrictive Content-Security-Policy),
+so it can be archived, e-mailed or printed as-is. It contains the project name, the experiment
+configuration, the session summary, the decoder and subspace matrices (with the values in
+expandable tables), within- vs cross-session means and means by session distance, and
+interpretation notes that keep decoder transfer, representation change and behaviour change as
+separate measurements and make no causal claims. There is no PDF export; print the HTML page if
+a PDF is needed.
+
+**Re-run.** A failed experiment (e.g. the job queue was unavailable) can be re-run from its page
+or with `POST /api/experiments/{id}/rerun`: it is reset to `pending` with its stored
+configuration and seed and queued again. Re-running is refused (`422`) if one of its sessions
+has since been deleted.
 
 ## Roadmap
 
@@ -241,11 +280,11 @@ loss across pairs is descriptive only.
 | 5 Cross-session matrix | RQ jobs, train × test heatmap | ✅ |
 | 6 Representation drift | PCA, principal angles, drift-vs-decoding scatter | ✅ |
 | 7 Pair comparison | click-through pair view | ✅ |
-| 8 Polish | exports, report, docs, deployment hardening | ⏳ |
+| 8 Polish | CSV/JSON/ZIP exports, HTML report, decoder stability explorer, re-run, docs | ✅ |
 
 ## Tests
 
 ```bash
-cd backend && pytest          # validation, QC, decoding sanity checks, experiment lifecycle
-cd frontend && npm test       # formatting and API error handling
+cd backend && pytest          # validation, QC, decoding sanity checks, experiment lifecycle, exports, report, re-run
+cd frontend && npm test       # formatting, API error handling, stability-explorer helpers
 ```

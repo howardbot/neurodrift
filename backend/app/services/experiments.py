@@ -94,9 +94,14 @@ def enqueue(experiment: Experiment) -> None:
         run_experiment(str(experiment.id))
         return
     from redis.exceptions import RedisError
+    from rq.job import Job
 
     try:
-        job = _queue().enqueue(
+        queue = _queue()
+        # A re-run reuses the experiment id as job id: drop the previous, finished job first.
+        if Job.exists(str(experiment.id), connection=queue.connection):
+            Job.fetch(str(experiment.id), connection=queue.connection).delete()
+        job = queue.enqueue(
             "app.services.experiments.run_experiment",
             str(experiment.id),
             job_id=str(experiment.id),
@@ -107,6 +112,23 @@ def enqueue(experiment: Experiment) -> None:
     except RedisError as exc:
         raise QueueUnavailableError(f"Job queue unavailable: {exc}") from exc
     experiment.job_id = job.id
+
+
+def reset_for_rerun(db: Session, experiment: Experiment) -> None:
+    """Return a failed experiment to ``pending`` with its stored configuration and seed.
+
+    Clears the error, progress, timestamps and any stored result so the job starts from
+    scratch. The caller enqueues it afterwards.
+    """
+    if experiment.result is not None:
+        db.delete(experiment.result)
+    experiment.status = ExperimentStatus.pending
+    experiment.progress = 0.0
+    experiment.error_message = None
+    experiment.started_at = None
+    experiment.finished_at = None
+    experiment.job_id = None
+    db.commit()
 
 
 def recover_orphaned_experiments() -> int:

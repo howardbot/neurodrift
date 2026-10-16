@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 import type { ApiError } from "@/lib/api";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost";
@@ -38,6 +38,15 @@ export function ButtonLink({
       {children}
     </Link>
   );
+}
+
+/** Plain anchor styled as a button, for API downloads and new-tab links (no client routing). */
+export function ButtonAnchor({
+  variant = "secondary",
+  className = "",
+  ...props
+}: AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: Variant }) {
+  return <a className={`${buttonBase} ${variants[variant]} ${className}`} {...props} />;
 }
 
 export function Card({
