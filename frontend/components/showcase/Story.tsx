@@ -7,12 +7,16 @@ import { RESEARCH, type ResearchProject } from "@/content/research";
 // Glossary terms are a client component; re-exported so pages keep importing from here.
 export { Term } from "@/components/Term";
 
-/** Soft, slowly drifting colour behind a page's opening. Decorative. */
+/**
+ * Soft, slowly drifting colour behind a page's opening. Decorative. Layers may extend past
+ * the left edge (not scrollable) but stay inside the right edge even at the peak of their
+ * drift (transforms count as scrollable overflow), so they never widen the page.
+ */
 export function HeroGlow() {
   return (
     <div aria-hidden="true" data-pause-offscreen="" className="pointer-events-none absolute inset-x-0 -top-16 -z-10 h-[440px]">
       <div className="glow absolute -top-16 -left-[calc(10%+4rem)] h-[28rem] w-[calc(60%+8rem)] animate-drift [--glow-alpha:0.2] [--glow:90_141_205] dark:[--glow-alpha:0.15] dark:[--glow:59_111_182]" />
-      <div className="glow absolute -right-16 -top-6 h-[26rem] w-[calc(45%+8rem)] animate-drift-slow [--glow-alpha:0.15] [--glow:167_139_250] dark:[--glow-alpha:0.1] dark:[--glow:139_92_246]" />
+      <div className="glow absolute -top-6 right-1 h-[26rem] w-[calc(45%+3rem)] animate-drift-slow [--glow-alpha:0.15] [--glow:167_139_250] dark:[--glow-alpha:0.1] dark:[--glow:139_92_246]" />
       <div className="glow absolute left-[calc(30%-4rem)] top-24 h-[22rem] w-[calc(40%+8rem)] animate-drift [--glow-alpha:0.2] [--glow:125_211_252] [animation-delay:-9s] dark:[--glow-alpha:0.1] dark:[--glow:14_165_233]" />
     </div>
   );

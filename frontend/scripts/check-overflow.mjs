@@ -267,6 +267,20 @@ for (const width of WIDTHS) {
       }
       await page.waitForTimeout(1000);
       const m = await page.evaluate(measure);
+      // Looping decorative animations (drifting glows) move boxes, and transforms count as
+      // scrollable overflow: check the page width at several points of every animation.
+      m.scrollWidth = Math.max(m.scrollWidth, await page.evaluate(() => {
+        const anims = document.getAnimations().filter((a) => a.playState === "running");
+        let widest = 0;
+        for (const phase of [0, 0.25, 0.5, 0.75]) {
+          for (const a of anims) {
+            const d = Number(a.effect?.getComputedTiming().duration) || 0;
+            if (d) a.currentTime = phase * d;
+          }
+          widest = Math.max(widest, document.documentElement.scrollWidth);
+        }
+        return widest;
+      }));
       const problems = [];
       if (m.hiddenReveals) problems.push(`${m.hiddenReveals} scroll-revealed block(s) still hidden after scrolling through`);
       if (m.scrollWidth > m.vw) problems.push(`page scrolls sideways: scrollWidth ${m.scrollWidth} > ${m.vw}`);
