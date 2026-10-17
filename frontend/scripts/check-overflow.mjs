@@ -151,22 +151,27 @@ function measure() {
 // chart's drag layer can swallow it, leaving content that is reachable only on desktop).
 async function checkSwipes(page, cdp) {
   const bad = [];
-  const n = await page.evaluate(() => {
-    const list = [...document.querySelectorAll("*")].filter((el) => {
+  // Scrollers are looked up afresh on every step: charts re-create parts of their DOM on
+  // resize, so a handle taken earlier can go stale.
+  const scrollers = () => {
+    const vw = document.documentElement.clientWidth;
+    return [...document.querySelectorAll("*")].filter((el) => {
       const ox = getComputedStyle(el).overflowX;
-      return (ox === "auto" || ox === "scroll") && el.scrollWidth > el.clientWidth + 1 && el.clientHeight > 20 && !el.closest("[data-sticky-header]");
+      const r = el.getBoundingClientRect();
+      return (ox === "auto" || ox === "scroll") && el.scrollWidth > el.clientWidth + 1 && el.clientHeight > 20 && r.width > 0 && r.left < vw && !el.closest("[data-sticky-header]");
     });
-    list.forEach((el, i) => el.setAttribute("data-swipe-check", String(i)));
-    return list.length;
-  });
+  };
+  const n = await page.evaluate(`(${scrollers})().length`);
   for (let i = 0; i < n; i++) {
-    const box = await page.locator(`[data-swipe-check="${i}"]`).evaluate((el) => {
+    const box = await page.evaluate(`(() => {
+      const el = (${scrollers})()[${i}];
+      if (!el) return null;
       el.scrollIntoView({ block: "center", behavior: "instant" });
       el.scrollLeft = 0;
       const r = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      return { x: r.left + r.width * 0.75, y: Math.min(Math.max(r.top + r.height / 2, 60), vh - 20), label: `${el.tagName.toLowerCase()}.${String(el.className).split(/\s+/).slice(0, 3).join(".")}` };
-    });
+      return { x: r.left + r.width * 0.75, y: Math.min(Math.max(r.top + r.height / 2, 60), window.innerHeight - 20), label: el.tagName.toLowerCase() + "." + String(el.className).split(/\\s+/).slice(0, 3).join(".") };
+    })()`);
+    if (!box) continue;
     await page.waitForTimeout(150);
     const steps = 10;
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: box.x, y: box.y }] });
@@ -175,8 +180,8 @@ async function checkSwipes(page, cdp) {
     }
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     await page.waitForTimeout(400);
-    const moved = await page.locator(`[data-swipe-check="${i}"]`).evaluate((el) => el.scrollLeft);
-    if (moved < 20) bad.push(`horizontal swipe does not scroll ${box.label} (scrollLeft ${Math.round(moved)})`);
+    const moved = await page.evaluate(`(() => { const el = (${scrollers})()[${i}]; return el ? el.scrollLeft : null; })()`);
+    if (moved !== null && moved < 20) bad.push(`horizontal swipe does not scroll ${box.label} (scrollLeft ${Math.round(moved)})`);
   }
   return bad;
 }
@@ -243,27 +248,32 @@ for (const width of WIDTHS) {
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   for (const route of list) {
-    await page.goto(BASE + route, { waitUntil: "networkidle" });
-    await page.addStyleTag({ content: ".overflow-x-clip { overflow-x: visible !important; }" });
-    // Scroll through slowly so every scroll-revealed block is shown and lazy content is laid
-    // out; anything still hidden would escape the measurement, so it fails the route.
-    const height = await page.evaluate(() => document.documentElement.scrollHeight);
-    for (let y = 0; y < height + 800; y += 300) {
-      await page.evaluate((top) => window.scrollTo({ top, behavior: "instant" }), y);
-      await page.waitForTimeout(100);
+    try {
+      await page.goto(BASE + route, { waitUntil: "networkidle" });
+      await page.addStyleTag({ content: ".overflow-x-clip { overflow-x: visible !important; }" });
+      // Scroll through slowly so every scroll-revealed block is shown and lazy content is laid
+      // out; anything still hidden would escape the measurement, so it fails the route.
+      const height = await page.evaluate(() => document.documentElement.scrollHeight);
+      for (let y = 0; y < height + 800; y += 300) {
+        await page.evaluate((top) => window.scrollTo({ top, behavior: "instant" }), y);
+        await page.waitForTimeout(100);
+      }
+      await page.waitForTimeout(1000);
+      const m = await page.evaluate(measure);
+      const problems = [];
+      if (m.hiddenReveals) problems.push(`${m.hiddenReveals} scroll-revealed block(s) still hidden after scrolling through`);
+      if (m.scrollWidth > m.vw) problems.push(`page scrolls sideways: scrollWidth ${m.scrollWidth} > ${m.vw}`);
+      for (const o of m.offenders) problems.push(`${o.kind} overflow: ${o.left}..${o.right}px (width ${o.width}): ${o.label} "${o.text}"`);
+      problems.push(...(await checkSwipes(page, cdp)));
+      const tips = await checkTooltips(page);
+      problems.push(...tips.bad);
+      failures += problems.length ? 1 : 0;
+      console.log(`${problems.length ? "FAIL" : "ok  "} ${width}px ${route}${tips.count ? ` (${tips.count} tooltips)` : ""}`);
+      for (const p of problems) console.log(`       - ${p}`);
+    } catch (e) {
+      failures += 1;
+      console.log(`FAIL ${width}px ${route}\n       - check crashed: ${String(e.message).split("\n")[0]}`);
     }
-    await page.waitForTimeout(1000);
-    const m = await page.evaluate(measure);
-    const problems = [];
-    if (m.hiddenReveals) problems.push(`${m.hiddenReveals} scroll-revealed block(s) still hidden after scrolling through`);
-    if (m.scrollWidth > m.vw) problems.push(`page scrolls sideways: scrollWidth ${m.scrollWidth} > ${m.vw}`);
-    for (const o of m.offenders) problems.push(`${o.kind} overflow: ${o.left}..${o.right}px (width ${o.width}): ${o.label} "${o.text}"`);
-    problems.push(...(await checkSwipes(page, cdp)));
-    const tips = await checkTooltips(page);
-    problems.push(...tips.bad);
-    failures += problems.length ? 1 : 0;
-    console.log(`${problems.length ? "FAIL" : "ok  "} ${width}px ${route}${tips.count ? ` (${tips.count} tooltips)` : ""}`);
-    for (const p of problems) console.log(`       - ${p}`);
   }
   await context.close();
 }

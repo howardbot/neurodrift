@@ -66,8 +66,9 @@ export function Term({ children, def }: { children: ReactNode; def: string }) {
 
   const hideSoon = () => {
     window.clearTimeout(hideTimer.current);
-    // A bubble opened by keyboard focus stays while the word keeps focus (WCAG 1.4.13).
-    hideTimer.current = window.setTimeout(() => document.activeElement !== trigger.current && hide(), 140);
+    // Long enough to cross the gap from the word onto the bubble. A bubble opened by
+    // keyboard focus stays while the word keeps focus (WCAG 1.4.13).
+    hideTimer.current = window.setTimeout(() => document.activeElement !== trigger.current && hide(), 300);
   };
 
   useEffect(() => {
