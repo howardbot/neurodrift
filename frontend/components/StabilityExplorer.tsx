@@ -104,7 +104,7 @@ export function StabilityExplorer({
   // The lines are drawn on from left to right (along session distance) the first time.
   return (
     <PlotReveal mode="wipe">
-      {(onRender) => <Plot data={data} layout={layout} height={withAngles ? 500 : 320} onRender={onRender} />}
+      {(onRender) => <Plot label={`Decoder r${withAngles ? " (top) and mean principal angle with its chance level (bottom)" : ""} against session distance, training on ${names[train] ?? "the selected session"}`} data={data} layout={layout} height={withAngles ? 500 : 320} onRender={onRender} />}
     </PlotReveal>
   );
 }

@@ -44,7 +44,7 @@ describe("parseErrorBody", () => {
   });
 });
 
-import { ranks, spearman } from "@/lib/stats";
+import { matrixRange, ranks, spearman } from "@/lib/stats";
 
 describe("stats", () => {
   it("ranks with ties and computes Spearman", () => {
@@ -52,5 +52,11 @@ describe("stats", () => {
     expect(spearman([1, 2, 3, 4], [10, 20, 30, 40])).toBeCloseTo(1);
     expect(spearman([1, 2, 3, 4], [4, 3, 2, 1])).toBeCloseTo(-1);
     expect(spearman([1, 2], [1, 2])).toBeNull();
+  });
+
+  it("summarises a matrix, skipping missing cells", () => {
+    expect(matrixRange([[78, null], [Number.NaN, 76]])).toEqual({ mean: 77, min: 76, max: 78 });
+    expect(matrixRange([[null]])).toBeNull();
+    expect(matrixRange(undefined)).toBeNull();
   });
 });

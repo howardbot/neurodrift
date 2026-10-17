@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DemoButton } from "@/components/DemoButton";
 import { PageHeader } from "@/components/ui";
 
@@ -17,6 +18,13 @@ export default function DemoPage() {
           (turnover), baseline rates wander, and the behaviour statistics change slightly. Spike counts are Poisson.
         </p>
         <p>The generator is seeded, so every demo project is identical.</p>
+        <p>
+          NeuroDrift was inspired by the research story{" "}
+          <Link href="/research/cross-day-decoding" className="text-accent-600 underline-offset-2 hover:underline dark:text-accent-300">
+            Reading movement from the brain, day after day
+          </Link>
+          ; the demo data are synthetic, not from those recordings.
+        </p>
         <DemoButton label="Create demo project" />
       </div>
     </div>

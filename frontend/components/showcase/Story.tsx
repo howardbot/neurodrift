@@ -3,10 +3,18 @@ import type { ReactNode } from "react";
 import { Reveal, ScrollProgress } from "@/components/motion";
 import { ScrollSteps } from "@/components/ScrollSteps";
 import { ProjectGlyph } from "@/components/showcase/Glyphs";
-import { RESEARCH, type ResearchProject } from "@/content/research";
+import { TermPopover } from "@/components/Term";
+import { GLOSSARY, RESEARCH, type GlossaryId, type ResearchProject } from "@/content/research";
 
-// Glossary terms are a client component; re-exported so pages keep importing from here.
-export { Term } from "@/components/Term";
+/**
+ * A word with its plain-language definition from the glossary (GLOSSARY in
+ * content/research.ts). Looked up here on the server, so a page ships only the definitions
+ * it uses. `note` adds context specific to the page.
+ */
+export function Term({ id, note, children }: { id: GlossaryId; note?: string; children: ReactNode }) {
+  const def = GLOSSARY[id].definition + (note ? ` ${note}` : "");
+  return <TermPopover def={def}>{children}</TermPopover>;
+}
 
 /**
  * Soft, slowly drifting colour behind a page's opening. Decorative. Layers may extend past

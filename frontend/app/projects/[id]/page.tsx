@@ -44,7 +44,7 @@ function SessionsQcPlot({ sessions }: { sessions: Session[] }) {
       },
     };
   }, [sessions]);
-  return <Plot data={data} layout={layout} height={240} />;
+  return <Plot label="Mean activity per bin (bars) and neuron count (line) per session" data={data} layout={layout} height={240} />;
 }
 
 export default function ProjectPage() {

@@ -16,7 +16,7 @@ export default function ThreeDVision() {
         <p>
           Hold up a finger and close each eye in turn: the finger jumps against the background. Because your eyes are a few centimetres
           apart, each sees the world from a slightly different place. The brain measures those small offsets —{" "}
-          <Term def="The difference in where a point lands on the left and right retinas. Points nearer or farther than where you are looking produce disparities of opposite sign.">binocular disparity</Term>{" "}
+          <Term id="binocular-disparity">binocular disparity</Term>{" "}
           — and turns them into depth. 3D films use the same trick by showing each eye a different image.
         </p>
         <p>
@@ -42,7 +42,7 @@ export default function ThreeDVision() {
           items={[
             { title: "Loads and normalises 3D models", body: "Reads standard mesh files (a jet, an engine, a hinge, a lattice) and rescales each to a common size so objects can be compared fairly." },
             { title: "Renders a separate image for each eye", body: "Positions two virtual cameras with an eye separation and viewing distance scaled to the object, in several stereo and flat display modes." },
-            { title: "Controls shading", body: <>Switches between flat shading (one <Term def="A vector pointing straight out of a surface. Lighting calculations use it to decide how bright each part of the surface should be.">surface normal</Term> per triangle, crisp edges) and smooth shading (normals averaged at each vertex) to control which depth cues are present.</> },
+            { title: "Controls shading", body: <>Switches between flat shading (one <Term id="surface-normal">surface normal</Term> per triangle, crisp edges) and smooth shading (normals averaged at each vertex) to control which depth cues are present.</> },
             { title: "Helps the eyes stay aligned", body: "Adds fixation and fusion markers so the viewer keeps both eyes pointed at the right place." },
             { title: "Captures and presents stimulus sets", body: "Batch-renders every rotation and display mode, then presents them in random order with timing synchronised to the neural recording system." },
           ]}
@@ -63,7 +63,7 @@ export default function ThreeDVision() {
       <Section eyebrow="Part 2" title="A model of how neurons could read 3D pose">
         <p>
           I also worked on a computational model built from{" "}
-          <Term def="Model neurons that each prefer a particular pattern of disparity across a strip of the visual field, such as the gradient produced by a surface tilted by a given amount.">disparity-gradient detectors</Term>.
+          <Term id="disparity-gradient-detectors">disparity-gradient detectors</Term>.
           Their responses are combined with information about where the eyes are pointing and then normalised against one another —
           a common operation in the brain — to produce model neurons that signal a surface&apos;s tilt and distance.
         </p>

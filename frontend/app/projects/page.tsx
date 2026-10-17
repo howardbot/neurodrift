@@ -9,6 +9,7 @@ import { Badge, Button, ErrorBox, PageHeader, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
+import type { Project } from "@/types/api";
 
 function CreateProjectForm() {
   const router = useRouter();
@@ -49,6 +50,41 @@ function CreateProjectForm() {
   );
 }
 
+/** Shown while the synthetic demo is the only project: where to start, in three steps. */
+function FirstVisitGuide({ project }: { project: Project }) {
+  const base = `/projects/${project.id}`;
+  const experiment = project.latest_experiment?.status === "completed" ? project.latest_experiment : null;
+  const link = "font-medium text-accent-600 underline-offset-2 hover:underline dark:text-accent-300";
+  return (
+    <div className="card mb-4 border-l-4 border-l-accent-500/60 p-4 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+      <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">New here? Start with the demo</h2>
+      <ol className="mt-2 list-decimal space-y-1.5 pl-5 marker:text-zinc-400">
+        <li>
+          Open the <Link href={base} className={link}>demo project</Link>: {project.n_sessions} synthetic recording sessions whose
+          tuning drifts across sessions.
+        </li>
+        <li>
+          {experiment ? (
+            <>
+              Open its latest experiment <Link href={`/experiments/${experiment.id}`} className={link}>{experiment.name}</Link>, or run a new one
+              from the project&apos;s <Link href={`${base}#analysis`} className={link}>analysis</Link> section.
+            </>
+          ) : (
+            <>
+              Run a cross-session analysis from the project&apos;s <Link href={`${base}#analysis`} className={link}>analysis</Link> section.
+            </>
+          )}
+        </li>
+        <li>Read the results: each experiment page has a &ldquo;How to read these results&rdquo; panel above the matrices.</li>
+      </ol>
+      <p className="mt-2 text-xs">
+        For your own recordings, create a project and upload one <code className="font-mono">.npz</code> file per session (format in the{" "}
+        <Link href="/documentation#session-file-format" className={link}>documentation</Link>).
+      </p>
+    </div>
+  );
+}
+
 export default function ProjectsPage() {
   const { data, error, loading } = useApi(api.listProjects, "projects");
   // Every project link leads to plots: fetch the chart library once the list is in view.
@@ -70,6 +106,7 @@ export default function ProjectsPage() {
               <div className="mt-4 flex justify-center"><DemoButton /></div>
             </div>
           )}
+          {data?.length === 1 && data[0]!.is_demo && <FirstVisitGuide project={data[0]!} />}
           <div ref={list} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {data?.map((p) => (
               <Link key={p.id} href={`/projects/${p.id}`} className="card card-hover block p-4">

@@ -23,12 +23,12 @@ export default function SharedVariability() {
       <Section eyebrow="The setting" title="Two areas looking at the same surface">
         <p>
           When you judge which way a table top or a hillside is tilted, several brain areas work together. Two of them are{" "}
-          <Term def="A visual area in the back of the brain that helps process three-dimensional structure, such as depth and surface orientation.">V3A</Term>{" "}
+          <Term id="v3a">V3A</Term>{" "}
           and the{" "}
-          <Term def="Caudal intraparietal area: a region in parietal cortex, further along the visual pathway, involved in perceiving the 3D orientation of surfaces and linking vision to action.">CIP</Term>.
+          <Term id="cip">CIP</Term>.
           In these experiments a monkey looked at a plane made of dots, shown at different tilts, slants and distances, and reported its
           orientation by moving its eyes to a target. Neurons in both areas were recorded at the same time with{" "}
-          <Term def="An electrode bundle of four closely spaced wires; each neuron's spike looks slightly different on each wire, which helps tell neurons apart.">tetrodes</Term>,
+          <Term id="tetrodes">tetrodes</Term>,
           trial after trial.
         </p>
       </Section>
@@ -37,7 +37,7 @@ export default function SharedVariability() {
         <p>
           Show the same surface twice and a neuron will not respond identically. Part of that trial-to-trial variation is private noise,
           but part may be shared across many neurons — so-called{" "}
-          <Term def="Trial-to-trial fluctuations that are correlated across neurons: when one fires a bit more than usual, the other tends to as well, beyond what the stimulus explains. Often called noise correlations.">shared variability</Term>.
+          <Term id="shared-variability">shared variability</Term>.
           If V3A and CIP fluctuate together, that could hint at how the two areas exchange information. If one area&apos;s activity helps
           predict the other&apos;s, even better.
         </p>
@@ -60,7 +60,7 @@ export default function SharedVariability() {
           The core analysis summarises each area by its average firing rate on every trial, then removes three things that could link the
           areas without any communication: the response to each of the 96 stimulus combinations, slow trends over the session, and activity
           just before the stimulus appeared. Only the leftovers — the{" "}
-          <Term def="What remains of a measurement after subtracting everything a model predicts. If two areas' residuals still move together, something beyond the modelled factors links them.">residuals</Term>{" "}
+          <Term id="residuals">residuals</Term>{" "}
           — are compared, in three independent ways.
         </p>
       </Section>

@@ -61,9 +61,9 @@ export default function CrossDayDecoding() {
 
       <Section eyebrow="The question" title="Brain-reading has a shelf life">
         <p>
-          A <Term def="A mathematical model that maps recorded neural activity to a quantity of interest — here, the position of the wrist during a reach.">decoder</Term>{" "}
+          A <Term id="decoder" note="Here, that quantity is the position of the wrist during a reach.">decoder</Term>{" "}
           learns which patterns of brain activity go with which hand positions. It is the core of a{" "}
-          <Term def="A system that records brain activity and translates it into commands for a computer cursor, robotic arm or other device.">brain–computer interface</Term>.
+          <Term id="brain-computer-interface">brain–computer interface</Term>.
           The problem is that recordings change: from one day to the next, electrodes pick up slightly different neurons, and the
           brain itself adapts as an animal learns. A decoder trained on Monday often works worse on Tuesday and has to be recalibrated.
         </p>
@@ -92,9 +92,9 @@ export default function CrossDayDecoding() {
         <Steps
           items={[
             { title: "Record", body: "Electrodes record neural activity while video tracking measures the wrist and shoulder during each reach." },
-            { title: "Simplify", body: <>Activity is counted in 30-millisecond windows and compressed with <Term def="Principal component analysis: finds the few combined activity patterns that capture most of the variation across many channels.">PCA</Term> into a dozen main patterns.</> },
-            { title: "Line up the days", body: <>Because each day&apos;s recording is slightly different, the main patterns of two days are aligned with <Term def="Canonical correlation analysis: rotates two sets of signals so that their shared structure lines up as closely as possible.">CCA</Term> before decoding.</> },
-            { title: "Decode", body: <>A <Term def="A decoder that combines what the neural activity says right now with a prediction of where the hand should be, given where it just was. It is widely used in brain–computer interfaces.">Kalman filter</Term> predicts the wrist position moment by moment.</> },
+            { title: "Simplify", body: <>Activity is counted in 30-millisecond windows and compressed with <Term id="pca">PCA</Term> into a dozen main patterns.</> },
+            { title: "Line up the days", body: <>Because each day&apos;s recording is slightly different, the main patterns of two days are aligned with <Term id="cca">CCA</Term> before decoding.</> },
+            { title: "Decode", body: <>A <Term id="kalman-filter">Kalman filter</Term> predicts the wrist position moment by moment.</> },
             { title: "Score both directions", body: "Accuracy is the correlation between predicted and real position (1 = perfect, 0 = no relationship). The key number is the gap: reverse accuracy minus forward accuracy." },
           ]}
         />
@@ -224,6 +224,7 @@ export default function CrossDayDecoding() {
       <div className="flex flex-wrap gap-3 text-sm">
         <a href={project.repo} className="btn btn-outline group">Code and results on GitHub <span className="arrow">→</span></a>
         <Link href="/tool" className="btn btn-outline group">Explore the idea in NeuroDrift <span className="arrow">→</span></Link>
+        <Link href="/demo" className="btn btn-outline group">Try it on the demo data <span className="arrow">→</span></Link>
       </div>
 
       <NextProject current={project.slug} />

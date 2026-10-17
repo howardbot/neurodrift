@@ -35,3 +35,18 @@ export function pearson(x: number[], y: number[]): number | null {
 export function spearman(x: number[], y: number[]): number | null {
   return pearson(ranks(x), ranks(y));
 }
+
+/**
+ * Mean, smallest and largest finite value of a matrix, skipping missing cells; null when
+ * there are none. Used for the chance angle, which differs from pair to pair because it
+ * depends on how many neurons each pair shares.
+ */
+export function matrixRange(matrix: (number | null)[][] | undefined): { mean: number; min: number; max: number } | null {
+  const values = (matrix ?? []).flat().filter((v): v is number => v !== null && Number.isFinite(v));
+  if (!values.length) return null;
+  return {
+    mean: values.reduce((a, b) => a + b, 0) / values.length,
+    min: Math.min(...values),
+    max: Math.max(...values),
+  };
+}

@@ -16,14 +16,14 @@ export default function SpikeSorting() {
           An electrode in the brain does not record one neuron. Like a microphone in a crowded room, it picks up several nearby neurons
           at once, plus background noise. Each neuron&apos;s spike has a slightly different size and shape at the electrode, depending on
           the cell type and how far away it is.{" "}
-          <Term def="The process of detecting spikes in a recording and assigning each one to the neuron that most likely produced it, based on its shape across the recording channels.">Spike sorting</Term>{" "}
+          <Term id="spike-sorting">Spike sorting</Term>{" "}
           uses those differences to work out which spike came from which neuron.
         </p>
         <p>
           The recordings in this project used{" "}
-          <Term def="An electrode bundle of four closely spaced recording wires. A spike looks slightly different on each wire, which helps tell neighbouring neurons apart.">tetrodes</Term>.
+          <Term id="tetrodes">tetrodes</Term>.
           Traditionally a person sorts them by eye in software such as Plexon Offline Sorter, drawing boundaries around clusters. Newer
-          algorithms such as <Term def="An open-source spike-sorting algorithm that learns a template waveform for each neuron and matches it across channels and time. It is fast and reproducible but still needs checking.">Kilosort 4</Term>{" "}
+          algorithms such as <Term id="kilosort-4">Kilosort 4</Term>{" "}
           do it automatically. Automation is faster and repeatable, but are the neurons it finds the same, and as good?
         </p>
       </Section>
@@ -43,7 +43,7 @@ export default function SpikeSorting() {
         <Steps
           items={[
             { title: "Phase 1 · Line up the automated output", body: "Built a neuron-level master table from the Kilosort results: trial quality, firing statistics, recording channel and position, joined with each unit's receptive-field data." },
-            { title: "Phase 2 · Check receptive fields", body: <>Mapped each neuron&apos;s <Term def="The patch of the visual field where a stimulus makes a neuron fire. A well-isolated visual neuron usually has a compact, clearly defined receptive field.">receptive field</Term> from responses to briefly flashed patterns and labelled it clear or weak with explicit, interpretable rules: a large enough responsive area, a peak that stands out from the average without being a single noisy spike, and enough stimulus exposure.</> },
+            { title: "Phase 2 · Check receptive fields", body: <>Mapped each neuron&apos;s <Term id="receptive-field">receptive field</Term> from responses to briefly flashed patterns and labelled it clear or weak with explicit, interpretable rules: a large enough responsive area, a peak that stands out from the average without being a single noisy spike, and enough stimulus exposure.</> },
             { title: "Phase 3 · Line up the manual output", body: "Built the same table from the traditional sort, robustly matching per-tetrode, per-unit files so no neuron is silently overwritten." },
             { title: "Phase 4 · Compare head to head", body: "Neuron counts per tetrode, how often each method yields a clear receptive field, the distributions of receptive-field properties, waveform features, and task tuning where available." },
             { title: "Phase 5 · Fit the receptive fields", body: "Fitted a 2D Gaussian to every map to compare receptive-field centre, size and fit quality between the two methods." },

@@ -67,6 +67,7 @@ export function DriftScatter({
   return (
     <div>
       <Plot
+        label="Decoder performance against representation drift, one point per train → test pair"
         data={data}
         layout={{
           xaxis: { title: { text: "mean principal angle (°) — larger = more different" } },

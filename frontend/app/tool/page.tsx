@@ -58,6 +58,13 @@ export default function ToolLanding() {
           <p className="mt-3 max-w-xl animate-fade-up text-lg text-zinc-600 [animation-delay:160ms] dark:text-zinc-400">
             Understand how neural representations and decoders change across recording sessions.
           </p>
+          <p className="mt-2 animate-fade-up text-sm text-zinc-500 [animation-delay:200ms]">
+            Inspired by the research story{" "}
+            <Link href="/research/cross-day-decoding" className="text-accent-600 underline-offset-2 hover:underline dark:text-accent-300">
+              Reading movement from the brain, day after day
+            </Link>
+            .
+          </p>
           <div className="mt-6 flex animate-fade-up flex-wrap items-start gap-3 [animation-delay:240ms]">
             <DemoButton />
             <ButtonLink href="/projects">Create Project</ButtonLink>

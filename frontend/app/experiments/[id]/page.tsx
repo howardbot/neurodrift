@@ -9,8 +9,10 @@ import { StatusBadge } from "@/components/ExperimentsTable";
 import { MatrixHeatmap, type MatrixSpec } from "@/components/MatrixHeatmap";
 import { StabilityExplorer } from "@/components/StabilityExplorer";
 import { Button, ButtonAnchor, Card, ErrorBox, Notice, PageHeader, Spinner, Stat } from "@/components/ui";
+import { ReadingGuide } from "@/components/ReadingGuide";
 import { ApiError, api, exportUrl, reportUrl } from "@/lib/api";
 import { formatNumber } from "@/lib/format";
+import { matrixRange } from "@/lib/stats";
 import { useApi } from "@/lib/useApi";
 import type { DecoderResult, Experiment, MatrixKey, SubspaceKey, SubspaceResult } from "@/types/api";
 
@@ -155,6 +157,7 @@ export default function ExperimentPage() {
 
   const decoder = matrix.data?.decoder;
   const subspace = matrix.data?.subspace ?? null;
+  const chance = matrixRange(subspace?.matrices.chance_mean_angle);
   const names = useMemo(() => decoder?.sessions.map((s) => s.name) ?? [], [decoder]);
 
   const decoderCustom = useMemo(
@@ -260,6 +263,12 @@ export default function ExperimentPage() {
             <Stat label="Unavailable pairs" value={matrix.data!.summary.n_unavailable} hint="Pairs whose neurons could not be aligned" />
           </div>
 
+          <ReadingGuide
+            trainFraction={e.config.train_fraction}
+            subspaceK={subspace?.n_components ?? null}
+            chance={chance}
+          />
+
           <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
             <Card
               title="Decoder generalisation"
@@ -306,7 +315,8 @@ export default function ExperimentPage() {
                     onSelect={openPair}
                   />
                   <p className="mt-2 text-xs text-zinc-500" title="Random k-dimensional subspaces of the same neuron space are not orthogonal on average.">
-                    Chance level (random subspaces, same k and neuron count) ≈ {formatNumber(subspace.matrices.chance_mean_angle[0]?.[0] ?? null, 1)}°. The diagonal
+                    Chance level (random subspaces, same k and neuron count) ≈ {formatNumber(chance?.mean, 1)}°
+                    {chance && chance.max - chance.min >= 0.05 && <> (range {formatNumber(chance.min, 1)}–{formatNumber(chance.max, 1)}° across pairs)</>}. The diagonal
                     is the within-session reference: same session, different time blocks.
                   </p>
                 </>
