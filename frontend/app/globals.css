@@ -135,7 +135,7 @@ body {
 }
 
 /* Looping CSS animations inside [data-pause-offscreen] stop while it is off screen
-   (PauseOffscreenAnimations in components/motion.tsx sets data-offscreen). */
+   (components/PauseOffscreenAnimations.tsx sets data-offscreen). */
 [data-offscreen],
 [data-offscreen] * {
   animation-play-state: paused !important;

@@ -23,3 +23,22 @@ export function warmPlotly(): () => void {
   const id = setTimeout(run, 1500);
   return () => clearTimeout(id);
 }
+
+/**
+ * Warms the Plotly chunk once `el` (a list of links to analysis pages) scrolls into view,
+ * so pages without any such link, or visits that never reach it, download nothing.
+ */
+export function warmPlotlyWhenVisible(el: Element | null): () => void {
+  if (!el || typeof IntersectionObserver === "undefined") return () => {};
+  let cancel = () => {};
+  const io = new IntersectionObserver(([entry]) => {
+    if (!entry?.isIntersecting) return;
+    io.disconnect();
+    cancel = warmPlotly();
+  });
+  io.observe(el);
+  return () => {
+    io.disconnect();
+    cancel();
+  };
+}

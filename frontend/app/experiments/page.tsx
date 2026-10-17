@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ExperimentsTable } from "@/components/ExperimentsTable";
-import { warmPlotly } from "@/lib/plotly";
+import { warmPlotlyWhenVisible } from "@/lib/plotly";
 import { Card, EmptyState, ErrorBox, PageHeader, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 
 export default function ExperimentsPage() {
   const { data, error, loading } = useApi(api.listExperiments, "experiments");
-  // Every experiment link leads to plots: fetch the chart library while the page is idle.
-  useEffect(() => warmPlotly(), []);
+  // Every experiment link leads to plots: fetch the chart library once the list is in view.
+  const list = useRef<HTMLDivElement>(null);
+  const hasExperiments = !!data?.length;
+  useEffect(() => (hasExperiments ? warmPlotlyWhenVisible(list.current) : undefined), [hasExperiments]);
   return (
     <div>
       <PageHeader title="Experiments" description="Saved cross-session analyses across all projects. Completed results reopen without recomputation." />
@@ -20,9 +22,11 @@ export default function ExperimentsPage() {
         <EmptyState title="No experiments yet">Open a project and choose “Run Cross-Session Analysis”.</EmptyState>
       )}
       {data && data.length > 0 && (
-        <Card>
-          <ExperimentsTable experiments={data} showProject />
-        </Card>
+        <div ref={list}>
+          <Card>
+            <ExperimentsTable experiments={data} showProject />
+          </Card>
+        </div>
       )}
     </div>
   );

@@ -14,6 +14,7 @@ Quality 92 keeps the plotted text indistinguishable from a lossless encode at 3x
 import hashlib
 import io
 import json
+import re
 from pathlib import Path
 
 from PIL import Image
@@ -23,15 +24,15 @@ FIGURES = ROOT / "public" / "research" / "marmoset"
 MANIFEST = ROOT / "content" / "figures.json"
 WIDTHS = (1000, 2000)
 QUALITY = 92
+VARIANT = re.compile(r".+-\d+w\.[0-9a-f]{10}\.webp")
 
 
 def main() -> None:
     manifest: dict[str, dict] = {}
+    written: set[str] = set()
     for png in sorted(FIGURES.glob("*.png")):
         stem = png.stem
         image = Image.open(png).convert("RGB")
-        for old in FIGURES.glob(f"{stem}-*w.*.webp"):
-            old.unlink()
         variants = []
         for width in WIDTHS:
             height = round(image.height * width / image.width)
@@ -40,9 +41,14 @@ def main() -> None:
             data = buf.getvalue()
             name = f"{stem}-{width}w.{hashlib.sha256(data).hexdigest()[:10]}.webp"
             (FIGURES / name).write_bytes(data)
+            written.add(name)
             variants.append({"file": name, "width": width, "height": height, "bytes": len(data)})
         manifest[stem] = {"original": png.name, "originalWidth": image.width, "originalHeight": image.height, "variants": variants}
         print(f"{stem}: " + ", ".join(f"{v['width']}w {v['bytes'] / 1024:.0f} KB" for v in variants))
+    # Remove copies from earlier runs and of PNGs that no longer exist.
+    for old in FIGURES.iterdir():
+        if VARIANT.fullmatch(old.name) and old.name not in written:
+            old.unlink()
     MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n")
 
 

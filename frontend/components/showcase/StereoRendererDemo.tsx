@@ -42,7 +42,7 @@ export function StereoRendererDemo() {
   const [eyeFraction, setEyeFraction] = useState(1 / 30);
   const [marker, setMarker] = useState(true);
   const [spin, setSpin] = useState(true);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<"load" | "webgl" | null>(null);
   // three.js and WebGL start only once the demo nears the viewport, so the page's text
   // and figures come first; until then the mount shows a same-size placeholder.
   const [near, setNear] = useState(false);
@@ -50,6 +50,9 @@ export function StereoRendererDemo() {
   const settings = useRef<Settings>({ mode, smooth, eyeFraction, marker, spin });
   settings.current = { mode, smooth, eyeFraction, marker, spin };
   const shapeRef = useRef<(s: Shape) => void>(() => {});
+  // The shape picked so far, so a choice made while three.js is still loading is not lost.
+  const shapeNow = useRef(shape);
+  shapeNow.current = shape;
   const requestRender = useRef<() => void>(() => {});
 
   useEffect(() => {
@@ -81,10 +84,20 @@ export function StereoRendererDemo() {
     let cleanup = () => {};
 
     (async () => {
+      let modules;
       try {
-        const THREE = await import("three");
-        const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
-        const { TeapotGeometry } = await import("three/examples/jsm/geometries/TeapotGeometry.js");
+        modules = await Promise.all([
+          import("three"),
+          import("three/examples/jsm/controls/OrbitControls.js"),
+          import("three/examples/jsm/geometries/TeapotGeometry.js"),
+        ]);
+      } catch {
+        // Typically a chunk that no longer exists after a deploy; a reload fetches the new one.
+        if (!disposed) setFailed("load");
+        return;
+      }
+      const [THREE, { OrbitControls }, { TeapotGeometry }] = modules;
+      try {
         if (disposed) return;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -92,7 +105,6 @@ export function StereoRendererDemo() {
         mount.appendChild(renderer.domElement);
         renderer.domElement.style.display = "block";
         renderer.domElement.style.width = "100%";
-        renderer.domElement.style.touchAction = "pan-y";
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x1c1c1f);
@@ -108,6 +120,8 @@ export function StereoRendererDemo() {
         const stereo = new THREE.StereoCamera();
 
         const controls = new OrbitControls(camera, renderer.domElement);
+        // After the controls, which set touch-action: none: vertical swipes keep scrolling the page.
+        renderer.domElement.style.touchAction = "pan-y";
         controls.enableZoom = false;
         controls.enablePan = false;
         controls.enableDamping = true;
@@ -135,7 +149,7 @@ export function StereoRendererDemo() {
           mesh.geometry.dispose();
           mesh.geometry = g as typeof mesh.geometry;
         }
-        buildGeometry("teapot");
+        buildGeometry(shapeNow.current);
         shapeRef.current = buildGeometry;
 
         // Red–cyan composite of the two eye images.
@@ -267,7 +281,7 @@ export function StereoRendererDemo() {
           renderer.domElement.remove();
         };
       } catch {
-        if (!disposed) setFailed(true);
+        if (!disposed) setFailed("webgl");
       }
     })();
 
@@ -281,7 +295,8 @@ export function StereoRendererDemo() {
     shapeRef.current(shape);
   }, [shape]);
 
-  if (failed) return <div className="py-6 text-sm text-zinc-500">This demo needs WebGL, which is not available in this browser.</div>;
+  if (failed === "load") return <div className="py-6 text-sm text-zinc-500">The 3D demo could not be loaded. Reloading the page usually fixes this.</div>;
+  if (failed === "webgl") return <div className="py-6 text-sm text-zinc-500">This demo needs WebGL, which is not available in this browser.</div>;
 
   return (
     <div className="space-y-4">
@@ -289,7 +304,7 @@ export function StereoRendererDemo() {
           page does not shift when WebGL starts. */}
       <div
         ref={mountRef}
-        className={`relative overflow-hidden rounded bg-[#1c1c1f] ${ready ? "" : "aspect-[100/55] max-h-[420px] min-h-[260px]"}`}
+        className={`relative overflow-hidden rounded bg-[#1c1c1f] ${ready ? "" : "aspect-[100/55] max-h-[420px] min-h-[260px] w-full"}`}
         aria-label="Interactive 3D model renderer; drag to rotate"
         role="img"
       >
