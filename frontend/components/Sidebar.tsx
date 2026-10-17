@@ -28,9 +28,15 @@ interface NavSection {
 // One list for the desktop sidebar and the phone menu, so the two cannot drift apart.
 const NAV_SECTIONS: NavSection[] = [
   {
+    heading: "Personal",
+    items: [
+      { href: "/", label: "Home", active: (p) => p === "/" },
+      { href: "/about", label: "About", active: (p) => p === "/about" },
+    ],
+  },
+  {
     heading: "Research",
     items: [
-      { href: "/", label: "Overview", active: (p) => p === "/" },
       ...RESEARCH.map((r) => ({ href: `/research/${r.slug}`, label: SHORT_TITLES[r.slug] ?? r.title, active: (p: string) => p === `/research/${r.slug}` })),
       { href: "/glossary", label: "Glossary", active: (p) => p === "/glossary" },
     ],
@@ -38,7 +44,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     heading: "NeuroDrift tool",
     items: [
-      { href: "/tool", label: "About", active: (p) => p === "/tool" },
+      { href: "/tool", label: "Overview", active: (p) => p === "/tool" },
       { href: "/projects", label: "Projects", active: (p) => p === "/projects" },
       { href: "/experiments", label: "Experiments", active: (p) => p.startsWith("/experiments") },
       { href: "/demo", label: "Demo", active: (p) => p === "/demo" },
@@ -59,7 +65,7 @@ function projectItems(project: ProjectRef): NavItem[] {
 /** Project navigation is shown inside the tool, not on the research pages (or the glossary). */
 function useProjectNav(pathname: string): ProjectRef | null {
   const project = useCurrentProject();
-  const isResearch = pathname === "/" || pathname.startsWith("/research") || pathname === "/glossary";
+  const isResearch = pathname === "/" || pathname === "/about" || pathname.startsWith("/research") || pathname === "/glossary";
   return project && !isResearch ? project : null;
 }
 
@@ -99,7 +105,7 @@ export function Sidebar() {
         <Logo />
         <span className="leading-tight">
           <span className="block text-[15px] font-semibold tracking-tight">Qin Liu</span>
-          <span className="block text-[11px] text-zinc-500">Neuroscience research</span>
+          <span className="block text-[11px] text-zinc-500">Computational neuroscience</span>
         </span>
       </Link>
       <nav aria-label="Site" className="overflow-y-auto">
