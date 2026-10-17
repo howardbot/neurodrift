@@ -11,7 +11,12 @@ export function useScrollToHash(ready: boolean): void {
   useEffect(() => {
     if (!ready) return;
     const go = () => {
-      const id = decodeURIComponent(window.location.hash.slice(1));
+      let id = window.location.hash.slice(1);
+      try {
+        id = decodeURIComponent(id);
+      } catch {
+        // Malformed percent-encoding (e.g. "#%"): look up the raw fragment instead.
+      }
       if (id) document.getElementById(id)?.scrollIntoView({ block: "start" });
     };
     go();

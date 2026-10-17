@@ -73,7 +73,7 @@ function Metadata({ session, onSaved }: { session: Session; onSaved: () => void 
           {rows.map(([k, v]) => (
             <div key={k} className="contents">
               <dt className="text-zinc-500">{k}</dt>
-              <dd className="min-w-0 truncate">{v}</dd>
+              <dd className="min-w-0 [overflow-wrap:anywhere]">{v}</dd>
             </div>
           ))}
         </dl>

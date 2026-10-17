@@ -33,6 +33,12 @@ export function Term({ children, def }: { children: ReactNode; def: string }) {
     // Keep clear of the sticky phone header; prefer above, flip below when there is no room.
     const header = document.querySelector("[data-sticky-header]")?.getBoundingClientRect();
     const minTop = (header && header.height > 0 ? header.bottom : 0) + EDGE / 2;
+    // The word has scrolled under the header or off screen: a bubble in the top layer would
+    // otherwise float over the header with nothing to point at.
+    if (r.bottom <= minTop - EDGE / 2 || r.top >= window.innerHeight) {
+      hide(true);
+      return;
+    }
     const above = r.top - GAP - h >= minTop || r.top - minTop > window.innerHeight - r.bottom;
     const left = Math.min(Math.max(r.left + r.width / 2 - w / 2, EDGE), Math.max(EDGE, vw - EDGE - w));
     b.style.inset = "auto";
@@ -60,7 +66,8 @@ export function Term({ children, def }: { children: ReactNode; def: string }) {
 
   const hideSoon = () => {
     window.clearTimeout(hideTimer.current);
-    hideTimer.current = window.setTimeout(() => hide(), 140);
+    // A bubble opened by keyboard focus stays while the word keeps focus (WCAG 1.4.13).
+    hideTimer.current = window.setTimeout(() => document.activeElement !== trigger.current && hide(), 140);
   };
 
   useEffect(() => {
@@ -101,10 +108,11 @@ export function Term({ children, def }: { children: ReactNode; def: string }) {
         aria-describedby={tipId}
         className="cursor-help border-b border-dotted border-zinc-400 transition-colors [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:hover:border-accent-500 [@media(hover:hover)]:hover:text-accent-700 dark:[@media(hover:hover)]:hover:text-accent-200"
         onClick={(e) => {
-          // Take over from the declarative toggle: a tap pins the bubble open, a second tap closes it.
+          // Take over from the declarative toggle: a tap pins the bubble open, a second tap
+          // closes it. Enter/Space (detail 0) toggle, since focus has already opened it.
           if (!supportsPopover()) return;
           e.preventDefault();
-          if (pinned.current) hide(true);
+          if (pinned.current || (e.detail === 0 && tip.current?.matches(":popover-open"))) hide(true);
           else {
             pinned.current = true;
             show();
@@ -113,7 +121,9 @@ export function Term({ children, def }: { children: ReactNode; def: string }) {
         onPointerEnter={(e) => e.pointerType === "mouse" && show()}
         onPointerLeave={(e) => e.pointerType === "mouse" && hideSoon()}
         onFocus={show}
-        onBlur={() => hide()}
+        // Focus moving to another element closes even a pinned bubble; a tap on plain text
+        // (no related target) leaves it to light dismiss, and a click inside the bubble keeps it.
+        onBlur={(e) => !tip.current?.matches(":hover") && hide(e.relatedTarget !== null)}
       >
         {children}
       </button>

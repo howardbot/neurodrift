@@ -62,8 +62,11 @@ export function MatrixHeatmap({
     return {
       data: [trace],
       layout: {
-        xaxis: { title: { text: "test session" }, tickangle: n > 8 ? -45 : 0, type: "category" as const, showgrid: false },
-        yaxis: { title: { text: "train session" }, autorange: "reversed" as const, type: "category" as const, showgrid: false },
+        // No zoom or pan on a small category matrix: on touch screens Plotly's drag layer would
+        // otherwise swallow the swipe that scrolls a wide matrix sideways (clicks still fire).
+        dragmode: false as const,
+        xaxis: { title: { text: "test session" }, tickangle: n > 8 ? -45 : 0, type: "category" as const, showgrid: false, fixedrange: true },
+        yaxis: { title: { text: "train session" }, autorange: "reversed" as const, type: "category" as const, showgrid: false, fixedrange: true },
         margin: { l: 90, r: 20, t: 10, b: 80 },
       },
     };

@@ -8,11 +8,15 @@
 //   node scripts/check-overflow.mjs [--base http://localhost:3000] [--widths 375,320]
 //
 // For every route and width it fails when
-//   1. document.scrollWidth is wider than the viewport, or
-//   2. a visible element sticks out past the right edge without an ancestor that scrolls
-//      or clips it (overflow-x auto/scroll/hidden) inside the viewport, or
-//   3. a glossary term does not open on tap, its bubble leaves the viewport or is covered,
-//      or a second tap, Escape or a tap elsewhere does not close it.
+//   1. document.scrollWidth is wider than the viewport;
+//   2. visible content (an element or a run of text) sticks out past either edge without a
+//      scrolling ancestor (overflow-x auto/scroll) holding it inside the viewport. Clipping
+//      by overflow hidden/clip only counts for decorative (aria-hidden) content and for
+//      text truncated with an ellipsis; anything else is content cut off;
+//   3. a horizontally scrollable container does not scroll under a touch swipe;
+//   4. a scroll-revealed block is still hidden after scrolling through the page;
+//   5. a glossary term does not open on tap, its bubble leaves the viewport or overlaps
+//      the sticky header, or a second tap, Escape or a tap elsewhere does not close it.
 // The layout's own `overflow-x-clip` safety net is switched off while measuring, so
 // overflow it would merely hide still counts.
 
@@ -68,35 +72,113 @@ async function routes() {
   return list;
 }
 
-// Runs in the page. Returns elements that stick out past the right edge.
+// Runs in the page. Returns content that sticks out past either edge of the viewport.
 function measure() {
   const vw = document.documentElement.clientWidth;
   const offenders = [];
   const flagged = new Set();
-  const clips = (el) => ["auto", "scroll", "hidden", "clip"].includes(getComputedStyle(el).overflowX);
+  const overflowX = (el) => getComputedStyle(el).overflowX;
+  const scrolls = (el) => ["auto", "scroll"].includes(overflowX(el));
+  const decorative = (el) => !!el.closest("[aria-hidden=true], canvas");
+  const label = (el) => `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""}.${String(el.className?.baseVal ?? el.className ?? "").trim().split(/\s+/).slice(0, 4).join(".")}`;
+
+  // Clip [left, right] by every scrolling ancestor, and by clipping (overflow hidden/clip)
+  // ancestors only for decorative content: clipped text or controls are content cut off.
+  // `from` is the first box that can clip: the parent of an element, or the element that
+  // holds a text run.
+  function visibleSpan(el, from, left, right) {
+    let invisible = false;
+    for (let a = from; a && a !== document.body; a = a.parentElement) {
+      const cs = getComputedStyle(a);
+      if (cs.opacity === "0" || cs.visibility === "hidden") invisible = true;
+      const ox = cs.overflowX;
+      const clips = ox === "hidden" || ox === "clip";
+      if (ox === "auto" || ox === "scroll" || (clips && (decorative(el) || cs.textOverflow === "ellipsis"))) {
+        const r = a.getBoundingClientRect();
+        left = Math.max(left, r.left);
+        right = Math.min(right, r.right);
+      }
+    }
+    return { left, right, invisible };
+  }
+
+  function report(el, kind, r, text) {
+    flagged.add(el);
+    for (let a = el.parentElement; a; a = a.parentElement) if (flagged.has(a)) return;
+    offenders.push({ label: label(el), kind, left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width), text: (text ?? el.textContent ?? "").trim().slice(0, 50) });
+  }
+
   for (const el of document.body.querySelectorAll("*")) {
     if (el.closest("svg") && el.tagName.toLowerCase() !== "svg") continue;
     const style = getComputedStyle(el);
-    if (style.visibility === "hidden" || style.display === "none" || style.position === "fixed") continue;
+    if (style.visibility === "hidden" || style.display === "none" || style.position === "fixed" || style.opacity === "0") continue;
     const r = el.getBoundingClientRect();
-    if (r.width === 0 || r.height === 0 || r.right <= vw + 0.5) continue;
-    // Effective right edge after clipping by scrolling/clipping ancestors.
-    let right = r.right;
-    let invisible = false;
-    for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
-      if (getComputedStyle(a).opacity === "0") invisible = true;
-      if (clips(a)) right = Math.min(right, a.getBoundingClientRect().right);
-    }
-    if (invisible || style.opacity === "0" || right <= vw + 0.5) continue;
-    flagged.add(el);
-    // Report the outermost offender only: its children are implied.
-    let nested = false;
-    for (let a = el.parentElement; a; a = a.parentElement) if (flagged.has(a)) nested = true;
-    if (nested) continue;
-    const label = `${el.tagName.toLowerCase()}${el.id ? "#" + el.id : ""}.${String(el.className.baseVal ?? el.className).trim().split(/\s+/).slice(0, 4).join(".")}`;
-    offenders.push({ label, right: Math.round(r.right), width: Math.round(r.width), text: (el.textContent ?? "").trim().slice(0, 50) });
+    if (r.width === 0 || r.height === 0 || (r.right <= vw + 0.5 && r.left >= -0.5)) continue;
+    // Decorative layers may bleed past an edge (check 1 still catches them widening the page);
+    // boxes entirely left of the screen are deliberately off-screen (measuring nodes, sr-only).
+    if (decorative(el) || r.right <= 0) continue;
+    const span = visibleSpan(el, el.parentElement, r.left, r.right);
+    if (span.invisible) continue;
+    if (span.right > vw + 0.5 || span.left < -0.5) report(el, span.right > vw + 0.5 ? "right edge" : "left edge", r);
   }
-  return { vw, scrollWidth: document.documentElement.scrollWidth, offenders: offenders.slice(0, 12) };
+
+  // Text runs can overflow without their element's box doing so.
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const range = document.createRange();
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const el = n.parentElement;
+    if (!el || !n.textContent.trim() || el.closest("svg, script, style, [aria-hidden=true]")) continue;
+    range.selectNodeContents(n);
+    for (const r of range.getClientRects()) {
+      if (r.width === 0 || r.right <= 0 || (r.right <= vw + 0.5 && r.left >= -0.5)) continue;
+      const span = visibleSpan(el, el, r.left, r.right);
+      if (span.invisible) continue;
+      if (span.right > vw + 0.5 || span.left < -0.5) {
+        report(el, "text", r, n.textContent);
+        break;
+      }
+    }
+  }
+  return {
+    vw,
+    scrollWidth: document.documentElement.scrollWidth,
+    hiddenReveals: document.querySelectorAll('[data-reveal="hidden"]').length,
+    offenders: offenders.slice(0, 12),
+  };
+}
+
+// Every horizontally scrollable container must actually scroll under a finger swipe (a
+// chart's drag layer can swallow it, leaving content that is reachable only on desktop).
+async function checkSwipes(page, cdp) {
+  const bad = [];
+  const n = await page.evaluate(() => {
+    const list = [...document.querySelectorAll("*")].filter((el) => {
+      const ox = getComputedStyle(el).overflowX;
+      return (ox === "auto" || ox === "scroll") && el.scrollWidth > el.clientWidth + 1 && el.clientHeight > 20 && !el.closest("[data-sticky-header]");
+    });
+    list.forEach((el, i) => el.setAttribute("data-swipe-check", String(i)));
+    return list.length;
+  });
+  for (let i = 0; i < n; i++) {
+    const box = await page.locator(`[data-swipe-check="${i}"]`).evaluate((el) => {
+      el.scrollIntoView({ block: "center", behavior: "instant" });
+      el.scrollLeft = 0;
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      return { x: r.left + r.width * 0.75, y: Math.min(Math.max(r.top + r.height / 2, 60), vh - 20), label: `${el.tagName.toLowerCase()}.${String(el.className).split(/\s+/).slice(0, 3).join(".")}` };
+    });
+    await page.waitForTimeout(150);
+    const steps = 10;
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: box.x, y: box.y }] });
+    for (let k = 1; k <= steps; k++) {
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: box.x - (k * 160) / steps, y: box.y }] });
+    }
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(400);
+    const moved = await page.locator(`[data-swipe-check="${i}"]`).evaluate((el) => el.scrollLeft);
+    if (moved < 20) bad.push(`horizontal swipe does not scroll ${box.label} (scrollLeft ${Math.round(moved)})`);
+  }
+  return bad;
 }
 
 async function checkTooltips(page) {
@@ -106,8 +188,10 @@ async function checkTooltips(page) {
     page.locator("[role=tooltip]").nth(i).evaluate((t) => {
       const r = t.getBoundingClientRect();
       const open = t.matches(":popover-open") || (r.width > 0 && getComputedStyle(t).visibility !== "hidden");
-      const hit = open ? document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(12, r.height / 2)) : null;
-      return { open, left: r.left, right: r.right, top: r.top, bottom: r.bottom, vw: document.documentElement.clientWidth, vh: window.innerHeight, covered: open && !t.contains(hit) };
+      // A top-layer popover always wins elementFromPoint, so test overlap with the header geometrically.
+      const h = document.querySelector("[data-sticky-header]")?.getBoundingClientRect();
+      const overHeader = !!h && h.height > 0 && r.top < h.bottom - 0.5 && r.bottom > h.top;
+      return { open, left: r.left, right: r.right, top: r.top, bottom: r.bottom, vw: document.documentElement.clientWidth, vh: window.innerHeight, covered: open && overHeader };
     });
   // Poll rather than sleep: pages with a WebGL demo can keep the main thread busy for a
   // second or more under software rendering (headless CI, no GPU).
@@ -134,7 +218,7 @@ async function checkTooltips(page) {
     Object.assign(s, await state(i));
     if (s.left < -0.5 || s.right > s.vw + 0.5) bad.push(`"${word}": tooltip spans x ${Math.round(s.left)}–${Math.round(s.right)} of ${s.vw}px`);
     if (s.top < -0.5 || s.bottom > s.vh + 0.5) bad.push(`"${word}": tooltip spans y ${Math.round(s.top)}–${Math.round(s.bottom)} of ${s.vh}px`);
-    if (s.covered) bad.push(`"${word}": tooltip is covered by another element`);
+    if (s.covered) bad.push(`"${word}": tooltip overlaps the sticky header`);
     await trigger.tap();
     if (!(await until(i, false))) bad.push(`"${word}": second tap did not close it`);
     await trigger.tap();
@@ -157,18 +241,25 @@ let failures = 0;
 for (const width of WIDTHS) {
   const context = await browser.newContext({ viewport: { width, height: 812 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   const page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
   for (const route of list) {
     await page.goto(BASE + route, { waitUntil: "networkidle" });
     await page.addStyleTag({ content: ".overflow-x-clip { overflow-x: visible !important; }" });
-    // Scroll through so scroll-revealed content and lazy figures are laid out.
+    // Scroll through slowly so every scroll-revealed block is shown and lazy content is laid
+    // out; anything still hidden would escape the measurement, so it fails the route.
     const height = await page.evaluate(() => document.documentElement.scrollHeight);
-    for (let y = 0; y < height; y += 600) await page.evaluate((top) => window.scrollTo({ top, behavior: "instant" }), y);
-    await page.waitForTimeout(900);
+    for (let y = 0; y < height + 800; y += 300) {
+      await page.evaluate((top) => window.scrollTo({ top, behavior: "instant" }), y);
+      await page.waitForTimeout(100);
+    }
+    await page.waitForTimeout(1000);
     const m = await page.evaluate(measure);
-    const tips = await checkTooltips(page);
     const problems = [];
+    if (m.hiddenReveals) problems.push(`${m.hiddenReveals} scroll-revealed block(s) still hidden after scrolling through`);
     if (m.scrollWidth > m.vw) problems.push(`page scrolls sideways: scrollWidth ${m.scrollWidth} > ${m.vw}`);
-    for (const o of m.offenders) problems.push(`sticks out to ${o.right}px (width ${o.width}): ${o.label} "${o.text}"`);
+    for (const o of m.offenders) problems.push(`${o.kind} overflow: ${o.left}..${o.right}px (width ${o.width}): ${o.label} "${o.text}"`);
+    problems.push(...(await checkSwipes(page, cdp)));
+    const tips = await checkTooltips(page);
     problems.push(...tips.bad);
     failures += problems.length ? 1 : 0;
     console.log(`${problems.length ? "FAIL" : "ok  "} ${width}px ${route}${tips.count ? ` (${tips.count} tooltips)` : ""}`);
