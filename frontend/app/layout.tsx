@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CurrentProjectProvider } from "@/components/CurrentProject";
+import { PauseOffscreenAnimations } from "@/components/PauseOffscreenAnimations";
 import { MobileHeader, Sidebar } from "@/components/Sidebar";
 import "./globals.css";
 
@@ -13,6 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
+        <PauseOffscreenAnimations />
         <CurrentProjectProvider>
           <div className="flex min-h-screen">
             <Sidebar />

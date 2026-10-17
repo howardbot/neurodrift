@@ -1,0 +1,40 @@
+{
+  "directional_replication_main": {
+    "original": "directional_replication_main.png",
+    "originalWidth": 2340,
+    "originalHeight": 1440,
+    "variants": [
+      {
+        "file": "directional_replication_main-1000w.ccfa48c243.webp",
+        "width": 1000,
+        "height": 615,
+        "bytes": 49984
+      },
+      {
+        "file": "directional_replication_main-2000w.c7f0af9100.webp",
+        "width": 2000,
+        "height": 1231,
+        "bytes": 114866
+      }
+    ]
+  },
+  "paired_directional": {
+    "original": "paired_directional.png",
+    "originalWidth": 2841,
+    "originalHeight": 1690,
+    "variants": [
+      {
+        "file": "paired_directional-1000w.bf6cbabd06.webp",
+        "width": 1000,
+        "height": 595,
+        "bytes": 55868
+      },
+      {
+        "file": "paired_directional-2000w.1b77a96c15.webp",
+        "width": 2000,
+        "height": 1190,
+        "bytes": 128672
+      }
+    ]
+  }
+}

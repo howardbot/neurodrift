@@ -19,6 +19,16 @@ const SHAPES: { id: Shape; label: string }[] = [
   { id: "sphere", label: "Low-poly sphere" },
 ];
 
+// three.js, the orbit controls and the teapot. The modules are fetched and evaluated while
+// the browser is idle after the page has loaded, so that work neither delays the page nor
+// lands in the middle of a scroll; WebGL itself starts only when the demo nears the viewport.
+const loadThree = () =>
+  Promise.all([
+    import("three"),
+    import("three/examples/jsm/controls/OrbitControls.js"),
+    import("three/examples/jsm/geometries/TeapotGeometry.js"),
+  ]);
+
 interface Settings {
   mode: ViewMode;
   smooth: boolean;
@@ -42,27 +52,69 @@ export function StereoRendererDemo() {
   const [eyeFraction, setEyeFraction] = useState(1 / 30);
   const [marker, setMarker] = useState(true);
   const [spin, setSpin] = useState(true);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<"load" | "webgl" | null>(null);
+  // WebGL starts only once the demo nears the viewport, so the page's text
+  // and figures come first; until then the mount shows a same-size placeholder.
+  const [near, setNear] = useState(false);
+  const [ready, setReady] = useState(false);
+  // "Loading…" is only true once JavaScript runs; the server-rendered placeholder says the
+  // demo needs JavaScript instead.
+  const [hydrated, setHydrated] = useState(false);
   const settings = useRef<Settings>({ mode, smooth, eyeFraction, marker, spin });
   settings.current = { mode, smooth, eyeFraction, marker, spin };
   const shapeRef = useRef<(s: Shape) => void>(() => {});
+  // The shape picked so far, so a choice made while three.js is still loading is not lost.
+  const shapeNow = useRef(shape);
+  shapeNow.current = shape;
+  const requestRender = useRef<() => void>(() => {});
 
   useEffect(() => {
+    setHydrated(true);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setSpin(false);
+    const warm = () => void loadThree().catch(() => {});
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(warm, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = setTimeout(warm, 1500);
+    return () => clearTimeout(id);
   }, []);
 
   useEffect(() => {
     const mount = mountRef.current;
-    if (!mount) return;
+    if (!mount || near) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setNear(true);
+      return;
+    }
+    const io = new IntersectionObserver(([entry]) => entry?.isIntersecting && setNear(true), { rootMargin: "300px 0px" });
+    io.observe(mount);
+    return () => io.disconnect();
+  }, [near]);
+
+  // Settings changes need a frame even when nothing is spinning.
+  useEffect(() => {
+    requestRender.current();
+  }, [mode, smooth, eyeFraction, marker, spin, shape]);
+
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount || !near) return;
     let disposed = false;
     let frame = 0;
     let cleanup = () => {};
 
     (async () => {
+      let modules;
       try {
-        const THREE = await import("three");
-        const { OrbitControls } = await import("three/examples/jsm/controls/OrbitControls.js");
-        const { TeapotGeometry } = await import("three/examples/jsm/geometries/TeapotGeometry.js");
+        modules = await loadThree();
+      } catch {
+        // Typically a chunk that no longer exists after a deploy; a reload fetches the new one.
+        if (!disposed) setFailed("load");
+        return;
+      }
+      const [THREE, { OrbitControls }, { TeapotGeometry }] = modules;
+      try {
         if (disposed) return;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -70,7 +122,6 @@ export function StereoRendererDemo() {
         mount.appendChild(renderer.domElement);
         renderer.domElement.style.display = "block";
         renderer.domElement.style.width = "100%";
-        renderer.domElement.style.touchAction = "pan-y";
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x1c1c1f);
@@ -86,6 +137,8 @@ export function StereoRendererDemo() {
         const stereo = new THREE.StereoCamera();
 
         const controls = new OrbitControls(camera, renderer.domElement);
+        // After the controls, which set touch-action: none: vertical swipes keep scrolling the page.
+        renderer.domElement.style.touchAction = "pan-y";
         controls.enableZoom = false;
         controls.enablePan = false;
         controls.enableDamping = true;
@@ -113,7 +166,7 @@ export function StereoRendererDemo() {
           mesh.geometry.dispose();
           mesh.geometry = g as typeof mesh.geometry;
         }
-        buildGeometry("teapot");
+        buildGeometry(shapeNow.current);
         shapeRef.current = buildGeometry;
 
         // Red–cyan composite of the two eye images.
@@ -146,27 +199,44 @@ export function StereoRendererDemo() {
           targetR.setSize(width * pr, height * pr);
         };
         resize();
-        const ro = new ResizeObserver(resize);
+        // Render on demand: a frame is drawn only while something moves (auto-rotation, a
+        // drag and its damping) or after a change, and never while the demo is off screen.
+        let visible = true;
+        const schedule = () => {
+          if (!frame && visible && !disposed) frame = requestAnimationFrame(loop);
+        };
+        requestRender.current = schedule;
+
+        const ro = new ResizeObserver(() => {
+          resize();
+          schedule();
+        });
         ro.observe(mount);
 
-        let visible = true;
         const io = new IntersectionObserver(([entry]) => {
           visible = entry?.isIntersecting ?? true;
+          if (visible) schedule();
         });
         io.observe(mount);
+        controls.addEventListener("change", schedule);
 
         let lastSmooth: boolean | null = null;
-        const render = () => {
-          frame = requestAnimationFrame(render);
+        const loop = () => {
+          frame = 0;
           if (!visible) return;
+          controls.autoRotate = settings.current.spin;
+          // update() applies auto-rotation and damping; true while the camera still moves.
+          const moving = controls.update();
+          render();
+          if (settings.current.spin || moving) schedule();
+        };
+        const render = () => {
           const s = settings.current;
           if (s.smooth !== lastSmooth) {
             material.flatShading = !s.smooth;
             material.needsUpdate = true;
             lastSmooth = s.smooth;
           }
-          controls.autoRotate = s.spin;
-          controls.update();
           fusion.visible = s.marker;
           // Fusion marker on the front of the canonical sphere, facing the viewer.
           fusion.position.copy(camera.position).normalize().multiplyScalar(1.08);
@@ -209,12 +279,15 @@ export function StereoRendererDemo() {
           renderer.setRenderTarget(null);
           renderer.render(quadScene, quadCamera);
         };
-        render();
+        schedule();
+        setReady(true);
 
         cleanup = () => {
           cancelAnimationFrame(frame);
+          requestRender.current = () => {};
           ro.disconnect();
           io.disconnect();
+          controls.removeEventListener("change", schedule);
           controls.dispose();
           mesh.geometry.dispose();
           material.dispose();
@@ -225,7 +298,7 @@ export function StereoRendererDemo() {
           renderer.domElement.remove();
         };
       } catch {
-        if (!disposed) setFailed(true);
+        if (!disposed) setFailed("webgl");
       }
     })();
 
@@ -233,17 +306,31 @@ export function StereoRendererDemo() {
       disposed = true;
       cleanup();
     };
-  }, []);
+  }, [near]);
 
   useEffect(() => {
     shapeRef.current(shape);
   }, [shape]);
 
-  if (failed) return <div className="py-6 text-sm text-zinc-500">This demo needs WebGL, which is not available in this browser.</div>;
+  if (failed === "load") return <div className="py-6 text-sm text-zinc-500">The 3D demo could not be loaded. Reloading the page usually fixes this.</div>;
+  if (failed === "webgl") return <div className="py-6 text-sm text-zinc-500">This demo needs WebGL, which is not available in this browser.</div>;
 
   return (
     <div className="space-y-4">
-      <div ref={mountRef} className="overflow-hidden rounded bg-[#1c1c1f]" aria-label="Interactive 3D model renderer; drag to rotate" role="img" />
+      {/* Sized like the canvas (min(420, max(260, 55% of the width))) before it exists, so the
+          page does not shift when WebGL starts. */}
+      <div
+        ref={mountRef}
+        className={`relative overflow-hidden rounded bg-[#1c1c1f] ${ready ? "" : "aspect-[100/55] max-h-[420px] min-h-[260px] w-full"}`}
+        aria-label="Interactive 3D model renderer; drag to rotate"
+        role="img"
+      >
+        {!ready && (
+          <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-xs text-zinc-500">
+            {hydrated ? "Loading the 3D demo…" : <noscript>The interactive 3D demo needs JavaScript.</noscript>}
+          </div>
+        )}
+      </div>
       <div className="flex flex-wrap gap-1.5">
         {MODES.map((m) => (
           <button

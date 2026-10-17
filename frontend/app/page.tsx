@@ -72,7 +72,7 @@ export default function Home() {
       <section className="relative mb-20 pt-2">
         <HeroGlow />
         <div className="max-w-3xl">
-          <div className="mb-5 inline-flex animate-fade-up items-center gap-2 rounded-full border border-accent-500/20 bg-white/70 px-3 py-1 text-xs font-medium text-accent-700 shadow-sm backdrop-blur dark:bg-zinc-900/60 dark:text-accent-200">
+          <div className="mb-5 inline-flex animate-fade-up items-center gap-2 rounded-full border border-accent-500/20 bg-white/80 px-3 py-1 text-xs font-medium text-accent-700 shadow-sm dark:bg-zinc-900/60 dark:text-accent-200">
             <LiveDot tone="accent" />
             Qin Liu · Neuroscience research
           </div>
@@ -177,8 +177,10 @@ export default function Home() {
       {/* NeuroDrift */}
       <Reveal as="section" className="mb-20">
         <div className="card relative isolate overflow-hidden p-6 md:p-8">
-          <div aria-hidden="true" className="absolute -right-20 -top-24 -z-10 h-72 w-72 animate-drift rounded-full bg-accent-400/20 blur-3xl dark:bg-accent-500/15" />
-          <div aria-hidden="true" className="absolute -bottom-24 left-1/3 -z-10 h-56 w-56 animate-drift-slow rounded-full bg-violet-400/15 blur-3xl dark:bg-violet-500/10" />
+          <div aria-hidden="true" data-pause-offscreen="" className="pointer-events-none absolute inset-0 -z-10">
+            <div className="glow absolute -right-36 -top-40 h-[26rem] w-[26rem] animate-drift [--glow-alpha:0.2] [--glow:90_141_205] dark:[--glow-alpha:0.15] dark:[--glow:59_111_182]" />
+            <div className="glow absolute -bottom-40 left-[calc(33.333%-4rem)] h-[22rem] w-[22rem] animate-drift-slow [--glow-alpha:0.15] [--glow:167_139_250] dark:[--glow-alpha:0.1] dark:[--glow:139_92_246]" />
+          </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
             <div>
               <div className="text-xs font-medium uppercase tracking-wider text-accent-600 dark:text-accent-300">Software I built</div>

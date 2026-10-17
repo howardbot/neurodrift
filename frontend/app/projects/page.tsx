@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { DemoButton } from "@/components/DemoButton";
+import { warmPlotlyWhenVisible } from "@/lib/plotly";
 import { Badge, Button, ErrorBox, PageHeader, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { formatDate } from "@/lib/format";
@@ -50,6 +51,10 @@ function CreateProjectForm() {
 
 export default function ProjectsPage() {
   const { data, error, loading } = useApi(api.listProjects, "projects");
+  // Every project link leads to plots: fetch the chart library once the list is in view.
+  const list = useRef<HTMLDivElement>(null);
+  const hasProjects = !!data?.length;
+  useEffect(() => (hasProjects ? warmPlotlyWhenVisible(list.current) : undefined), [hasProjects]);
 
   return (
     <div>
@@ -65,7 +70,7 @@ export default function ProjectsPage() {
               <div className="mt-4 flex justify-center"><DemoButton /></div>
             </div>
           )}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div ref={list} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {data?.map((p) => (
               <Link key={p.id} href={`/projects/${p.id}`} className="card card-hover block p-4">
                 <div className="flex items-start justify-between gap-2">

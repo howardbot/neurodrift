@@ -26,8 +26,8 @@ export function PredictionPlots({
     () =>
       outputs.map((o, j): Data[] => [
         // Actual is drawn last so the smooth behaviour stays visible over noisy single-bin predictions.
-        { type: "scattergl", mode: "lines", x: result.traces.time, y: result.traces.predicted[j], name: "predicted", line: { color: PREDICTED, width: 1 }, opacity: 0.75 },
-        { type: "scattergl", mode: "lines", x: result.traces.time, y: result.traces.actual[j], name: "actual", line: { color: ACTUAL, width: 1.6 } },
+        { type: "scatter", mode: "lines", x: result.traces.time, y: result.traces.predicted[j], name: "predicted", line: { color: PREDICTED, width: 1 }, opacity: 0.75 },
+        { type: "scatter", mode: "lines", x: result.traces.time, y: result.traces.actual[j], name: "actual", line: { color: ACTUAL, width: 1.6 } },
       ]),
     [result, outputs],
   );
@@ -38,7 +38,7 @@ export function PredictionPlots({
         const lo = Math.min(...a);
         const hi = Math.max(...a);
         return [
-          { type: "scattergl", mode: "markers", x: a, y: result.scatter.predicted[j], marker: { size: 3, color: PREDICTED, opacity: 0.35 }, name: "test bins", hovertemplate: "actual %{x:.2f}<br>predicted %{y:.2f}<extra></extra>" },
+          { type: "scatter", mode: "markers", x: a, y: result.scatter.predicted[j], marker: { size: 3, color: PREDICTED, opacity: 0.35 }, name: "test bins", hovertemplate: "actual %{x:.2f}<br>predicted %{y:.2f}<extra></extra>" },
           { type: "scatter", mode: "lines", x: [lo, hi], y: [lo, hi], line: { color: ACTUAL, dash: "dash", width: 1 }, name: "y = x", hoverinfo: "skip" },
         ];
       }),

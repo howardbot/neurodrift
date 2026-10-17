@@ -7,13 +7,17 @@ import { RESEARCH, type ResearchProject } from "@/content/research";
 // Glossary terms are a client component; re-exported so pages keep importing from here.
 export { Term } from "@/components/Term";
 
-/** Soft, slowly drifting colour behind a page's opening. Decorative. */
+/**
+ * Soft, slowly drifting colour behind a page's opening. Decorative. Layers may extend past
+ * the left edge (not scrollable) but stay inside the right edge even at the peak of their
+ * drift (transforms count as scrollable overflow), so they never widen the page.
+ */
 export function HeroGlow() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-16 -z-10 h-[440px]">
-      <div className="absolute -left-[10%] top-0 h-80 w-[60%] animate-drift rounded-full bg-accent-400/20 blur-3xl dark:bg-accent-500/15" />
-      <div className="absolute right-0 top-10 h-72 w-[45%] animate-drift-slow rounded-full bg-violet-400/15 blur-3xl dark:bg-violet-500/10" />
-      <div className="absolute left-[30%] top-40 h-56 w-[40%] animate-drift rounded-full bg-sky-300/20 blur-3xl [animation-delay:-9s] dark:bg-sky-500/10" />
+    <div aria-hidden="true" data-pause-offscreen="" className="pointer-events-none absolute inset-x-0 -top-16 -z-10 h-[440px]">
+      <div className="glow absolute -top-16 -left-[calc(10%+4rem)] h-[28rem] w-[calc(60%+8rem)] animate-drift [--glow-alpha:0.2] [--glow:90_141_205] dark:[--glow-alpha:0.15] dark:[--glow:59_111_182]" />
+      <div className="glow absolute -top-6 right-1 h-[26rem] w-[calc(45%+3rem)] animate-drift-slow [--glow-alpha:0.15] [--glow:167_139_250] dark:[--glow-alpha:0.1] dark:[--glow:139_92_246]" />
+      <div className="glow absolute left-[calc(30%-4rem)] top-24 h-[22rem] w-[calc(40%+8rem)] animate-drift [--glow-alpha:0.2] [--glow:125_211_252] [animation-delay:-9s] dark:[--glow-alpha:0.1] dark:[--glow:14_165_233]" />
     </div>
   );
 }
@@ -42,7 +46,7 @@ export function ProjectHero({ project }: { project: ResearchProject }) {
         {project.tags.map((t) => (
           <span
             key={t}
-            className="rounded-full border border-zinc-200 bg-white/70 px-2.5 py-0.5 text-xs text-zinc-600 backdrop-blur transition-colors hover:border-accent-500/60 hover:text-accent-700 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-400 dark:hover:text-accent-200"
+            className="rounded-full border border-zinc-200 bg-white/80 px-2.5 py-0.5 text-xs text-zinc-600 transition-colors hover:border-accent-500/60 hover:text-accent-700 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-400 dark:hover:text-accent-200"
           >
             {t}
           </span>

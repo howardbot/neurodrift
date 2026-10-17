@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "next": "15.5.28",
-    "plotly.js-dist-min": "^3.0.0",
+    "plotly.js-cartesian-dist-min": "^3.7.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.179.1"

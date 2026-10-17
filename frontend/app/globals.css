@@ -57,7 +57,7 @@ body {
     @apply bg-accent-600 text-white shadow-sm shadow-accent-600/25 hover:bg-accent-700 hover:shadow-md hover:shadow-accent-600/30;
   }
   .btn-outline {
-    @apply border border-zinc-300 bg-white/60 backdrop-blur hover:border-zinc-400 hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/60 dark:hover:border-zinc-600 dark:hover:bg-zinc-800;
+    @apply border border-zinc-300 bg-white/80 hover:border-zinc-400 hover:bg-white dark:border-zinc-700 dark:bg-zinc-900/80 dark:hover:border-zinc-600 dark:hover:bg-zinc-800;
   }
   /* Arrow that nudges forward when its group is hovered. */
   .arrow {
@@ -121,6 +121,24 @@ body {
     opacity: 0;
     transform: translate3d(0, -4px, 0) scale(0.97);
   }
+}
+
+/* Soft colour glows drawn with a gradient instead of filter: blur(), so drifting one is a
+   cheap composited transform. Set --glow to an "r g b" triplet and --glow-alpha. */
+.glow {
+  background-image: radial-gradient(
+    closest-side,
+    rgb(var(--glow) / var(--glow-alpha)),
+    rgb(var(--glow) / calc(var(--glow-alpha) * 0.55)) 50%,
+    rgb(var(--glow) / 0)
+  );
+}
+
+/* Looping CSS animations inside [data-pause-offscreen] stop while it is off screen
+   (components/PauseOffscreenAnimations.tsx sets data-offscreen). */
+[data-offscreen],
+[data-offscreen] * {
+  animation-play-state: paused !important;
 }
 
 /* A path drawn on as it appears. Needs pathLength="1" on the SVG element. */

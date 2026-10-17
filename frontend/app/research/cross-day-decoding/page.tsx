@@ -2,12 +2,38 @@ import Link from "next/link";
 import { CrossDayDesign, ExplanationsTested, GapChart, InputReadoutGrids, PairSlopes } from "@/components/showcase/MarmosetFigures";
 import { CountUp } from "@/components/motion";
 import { Callout, Figure, NextProject, ProjectHero, Section, SkillList, Steps, Term } from "@/components/showcase/Story";
+import figures from "@/content/figures.json";
 import { projectBySlug } from "@/content/research";
 
 const project = projectBySlug("cross-day-decoding");
 export const metadata = { title: project.title };
 
 const REPO = "https://github.com/howardbot/Marmoset_Decoding_Public";
+
+const FIGURE_DIR = "/research/marmoset";
+
+/**
+ * One of the original result figures, served as pre-converted WebP (scripts/convert-figures.py)
+ * with srcset, so phones and 1x screens fetch the ~1000 px copy and 2x screens the ~2000 px one.
+ */
+function OriginalFigure({ name, alt }: { name: keyof typeof figures; alt: string }) {
+  const f = figures[name];
+  const small = f.variants[0]!;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`${FIGURE_DIR}/${small.file}`}
+      srcSet={f.variants.map((v) => `${FIGURE_DIR}/${v.file} ${v.width}w`).join(", ")}
+      sizes="(min-width: 1312px) 992px, (min-width: 768px) calc(100vw - 20rem), calc(100vw - 4rem)"
+      width={small.width}
+      height={small.height}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      className="h-auto w-full rounded bg-white"
+    />
+  );
+}
 
 function Numbers() {
   const items = [
@@ -183,12 +209,13 @@ export default function CrossDayDecoding() {
       <details className="card mb-10 p-4">
         <summary className="cursor-pointer text-sm font-semibold">For specialists: the original figures</summary>
         <div className="mt-4 space-y-6">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/research/marmoset/paired_directional.png" alt="Paired cross-epoch decoding directions for every R1/R2 session pair" className="w-full rounded bg-white" loading="lazy" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/research/marmoset/directional_replication_main.png" alt="Input × readout replication under a common trial budget" className="w-full rounded bg-white" loading="lazy" />
+          <OriginalFigure name="paired_directional" alt="Paired cross-epoch decoding directions for every R1/R2 session pair" />
+          <OriginalFigure name="directional_replication_main" alt="Input × readout replication under a common trial budget" />
           <p className="text-xs text-zinc-500">
-            From the public repository, unmodified. Definitions, protocols and every caveat are in the{" "}
+            From the public repository, resized for the web; full-resolution PNGs:{" "}
+            <a className="underline" href={`${FIGURE_DIR}/${figures.paired_directional.original}`}>first figure</a>,{" "}
+            <a className="underline" href={`${FIGURE_DIR}/${figures.directional_replication_main.original}`}>second figure</a>.
+            Definitions, protocols and every caveat are in the{" "}
             <a className="underline" href={`${REPO}/blob/main/Reports/current/mechanism_handoff.md`}>scientific handoff</a>.
           </p>
         </div>
