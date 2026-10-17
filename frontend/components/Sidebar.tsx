@@ -32,6 +32,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/", label: "Overview", active: (p) => p === "/" },
       ...RESEARCH.map((r) => ({ href: `/research/${r.slug}`, label: SHORT_TITLES[r.slug] ?? r.title, active: (p: string) => p === `/research/${r.slug}` })),
+      { href: "/glossary", label: "Glossary", active: (p) => p === "/glossary" },
     ],
   },
   {
@@ -55,10 +56,10 @@ function projectItems(project: ProjectRef): NavItem[] {
   ];
 }
 
-/** Project navigation is shown inside the tool, not on the research pages. */
+/** Project navigation is shown inside the tool, not on the research pages (or the glossary). */
 function useProjectNav(pathname: string): ProjectRef | null {
   const project = useCurrentProject();
-  const isResearch = pathname === "/" || pathname.startsWith("/research");
+  const isResearch = pathname === "/" || pathname.startsWith("/research") || pathname === "/glossary";
   return project && !isResearch ? project : null;
 }
 

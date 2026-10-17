@@ -71,8 +71,16 @@ body {
   .arrow {
     @apply inline-block transition-transform duration-200 group-hover:translate-x-1;
   }
+  /* Every stop keeps large-text contrast (3:1) on the page background: in light mode
+     accent-600 6.3, sky-600 3.9, violet-600 5.5; in dark mode 8.7 or more. */
   .text-gradient {
-    @apply bg-gradient-to-r from-accent-600 via-sky-500 to-violet-500 bg-clip-text text-transparent dark:from-accent-300 dark:via-sky-300 dark:to-violet-300;
+    @apply bg-gradient-to-r from-accent-600 via-sky-600 to-violet-600 bg-clip-text text-transparent dark:from-accent-300 dark:via-sky-300 dark:to-violet-300;
+  }
+  /* Forced colours drop backgrounds, which would leave clipped-gradient text invisible. */
+  @media (forced-colors: active) {
+    .text-gradient {
+      @apply bg-none text-[CanvasText];
+    }
   }
   .input {
     @apply w-full max-w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm outline-none

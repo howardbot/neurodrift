@@ -90,6 +90,7 @@ export function MatrixHeatmap({
         <PlotReveal mode="rows" rows={n}>
           {(onRender) => (
             <Plot
+              label={`${spec.label}: rows are training sessions, columns test sessions`}
               data={data}
               layout={layout}
               height={Math.max(340, 60 + n * 40)}

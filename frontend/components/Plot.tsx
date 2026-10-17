@@ -64,6 +64,7 @@ export function Plot({
   height = 300,
   onClick,
   onRender,
+  label,
   className = "",
 }: {
   data: Data[];
@@ -73,6 +74,8 @@ export function Plot({
   onClick?: (event: PlotMouseEvent) => void;
   /** Called after every draw, before the browser paints it, with the plot's root element. */
   onRender?: (gd: HTMLElement) => void;
+  /** What the chart shows, for screen readers (usually the caption or card title above it). */
+  label?: string;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -127,5 +130,6 @@ export function Plot({
   }, []);
 
   if (failed) return <div className="py-6 text-sm text-red-600">Plot library failed to load.</div>;
-  return <div ref={ref} className={`w-full ${className}`} style={{ minHeight: height }} />;
+  // role="figure" (not "img") keeps the chart's own buttons reachable.
+  return <div ref={ref} role={label ? "figure" : undefined} aria-label={label} className={`w-full ${className}`} style={{ minHeight: height }} />;
 }

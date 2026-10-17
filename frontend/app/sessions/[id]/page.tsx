@@ -105,9 +105,9 @@ function ActivityPlots({ qc }: { qc: SessionQc }) {
   const common = { showlegend: false, margin: { l: 50, r: 10, t: 10, b: 44 } };
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <div><div className="text-xs font-medium text-zinc-500">Mean activity per neuron</div><Plot data={means} layout={{ ...common, xaxis: { title: { text: "mean per bin" } }, yaxis: { title: { text: "neurons" } } }} height={220} /></div>
-      <div><div className="text-xs font-medium text-zinc-500">Variance per neuron</div><Plot data={vars} layout={{ ...common, xaxis: { title: { text: "variance" } }, yaxis: { title: { text: "neurons" } } }} height={220} /></div>
-      <div><div className="text-xs font-medium text-zinc-500">Mean vs variance (red: zero variance)</div><Plot data={scatter} layout={{ ...common, xaxis: { title: { text: "mean" } }, yaxis: { title: { text: "variance" } } }} height={220} /></div>
+      <div><div className="text-xs font-medium text-zinc-500">Mean activity per neuron</div><Plot label="Mean activity per neuron" data={means} layout={{ ...common, xaxis: { title: { text: "mean per bin" } }, yaxis: { title: { text: "neurons" } } }} height={220} /></div>
+      <div><div className="text-xs font-medium text-zinc-500">Variance per neuron</div><Plot label="Variance per neuron" data={vars} layout={{ ...common, xaxis: { title: { text: "variance" } }, yaxis: { title: { text: "neurons" } } }} height={220} /></div>
+      <div><div className="text-xs font-medium text-zinc-500">Mean vs variance (red: zero variance)</div><Plot label="Mean vs variance (red: zero variance)" data={scatter} layout={{ ...common, xaxis: { title: { text: "mean" } }, yaxis: { title: { text: "variance" } } }} height={220} /></div>
     </div>
   );
 }
@@ -134,11 +134,11 @@ function TracePlots({ qc, nOutputs }: { qc: SessionQc; nOutputs: number }) {
     <div className="space-y-4">
       <div>
         <div className="text-xs font-medium text-zinc-500">Behavioural targets — first {formatNumber(t.window_bins)} bins</div>
-        <Plot data={targets} layout={{ xaxis: { title: { text: xTitle } }, yaxis: { title: { text: "Y" } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={220} />
+        <Plot label={`Behavioural targets, first ${formatNumber(t.window_bins)} bins`} data={targets} layout={{ xaxis: { title: { text: xTitle } }, yaxis: { title: { text: "Y" } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={220} />
       </div>
       <div>
         <div className="text-xs font-medium text-zinc-500">Six most variable neurons (vertically offset) — same window</div>
-        <Plot data={neurons} layout={{ xaxis: { title: { text: xTitle } }, yaxis: { showticklabels: false, title: { text: "activity (offset)" } }, showlegend: false, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={300} />
+        <Plot label="Six most variable neurons, vertically offset, same window" data={neurons} layout={{ xaxis: { title: { text: xTitle } }, yaxis: { showticklabels: false, title: { text: "activity (offset)" } }, showlegend: false, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={300} />
       </div>
     </div>
   );
@@ -149,7 +149,7 @@ function BehaviourPlots({ qc, nOutputs }: { qc: SessionQc; nOutputs: number }) {
     () => qc.targets.histograms.map((h, j) => ({ type: "bar", x: binCenters(h.edges), y: h.counts, name: outputLabel(j, nOutputs), opacity: 0.65 })),
     [qc, nOutputs],
   );
-  return <Plot data={data} layout={{ barmode: "overlay", bargap: 0, xaxis: { title: { text: "value" } }, yaxis: { title: { text: "bins" } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={240} />;
+  return <Plot label="Distribution of each behavioural output" data={data} layout={{ barmode: "overlay", bargap: 0, xaxis: { title: { text: "value" } }, yaxis: { title: { text: "bins" } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={240} />;
 }
 
 export default function SessionPage() {

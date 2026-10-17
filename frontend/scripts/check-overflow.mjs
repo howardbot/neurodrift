@@ -54,7 +54,7 @@ async function getJson(url) {
 }
 
 async function routes() {
-  const list = ["/", "/research/cross-day-decoding", "/research/shared-variability", "/research/3d-vision", "/research/spike-sorting", "/tool", "/projects", "/experiments", "/demo", "/documentation"];
+  const list = ["/", "/research/cross-day-decoding", "/research/shared-variability", "/research/3d-vision", "/research/spike-sorting", "/tool", "/projects", "/experiments", "/demo", "/documentation", "/glossary"];
   try {
     const [project] = await getJson("/api/projects");
     if (project) {

@@ -121,7 +121,7 @@ export default function Home() {
         <PrimerStep n={1} title="Neurons talk in spikes">
           <p>
             Your brain has about 86 billion neurons. They communicate with brief electrical pulses called{" "}
-            <Term def="Also called action potentials: a neuron's voltage jumps up and back down in about a millisecond, and the pulse travels to other neurons.">spikes</Term>.
+            <Term id="spikes">spikes</Term>.
             A fine electrode placed next to a neuron picks these up; played through a speaker they sound like clicks.
           </p>
           <div className="card px-4 py-3">
@@ -132,14 +132,14 @@ export default function Home() {
         <PrimerStep n={2} title="Each neuron has favourites">
           <p>
             Many neurons fire faster for some things than others — a particular direction of arm movement, the tilt of a surface,
-            a colour. This preference is called <Term def="How a neuron's firing rate changes with some property of the world or the body. A neuron 'tuned' to rightward reaches fires most when the arm moves right.">tuning</Term>.
+            a colour. This preference is called <Term id="tuning">tuning</Term>.
             But even for the same thing, a neuron never fires exactly the same way twice: its output is noisy.
           </p>
         </PrimerStep>
         <PrimerStep n={3} title="A crowd is more reliable than one voice">
           <p>
             Because each neuron prefers something different, the pattern across many neurons carries the information. A{" "}
-            <Term def="A mathematical model that maps recorded neural activity to a quantity of interest, such as arm position or what the animal is looking at.">decoder</Term>{" "}
+            <Term id="decoder">decoder</Term>{" "}
             combines them into one estimate. Brain–computer interfaces use exactly this idea to let people with paralysis move a
             cursor or robotic arm. Try it: each dot below is a simulated neuron around a dial of movement directions.
           </p>

@@ -41,6 +41,7 @@ function PcaPlots({ pca }: { pca: SessionPca }) {
       <div>
         <div className="text-xs font-medium text-zinc-500">Explained variance (blue: first {k} components)</div>
         <Plot
+          label={`Explained variance; the first ${k} components in blue`}
           data={spectrum}
           layout={{
             xaxis: { title: { text: "component" } },
@@ -54,11 +55,11 @@ function PcaPlots({ pca }: { pca: SessionPca }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
           <div className="text-xs font-medium text-zinc-500">PC time courses — first {formatNumber(tr.time.length)} bins ({tr.smooth_bins}-bin boxcar, display only)</div>
-          <Plot data={timecourses} layout={{ xaxis: { title: { text: xTitle } }, yaxis: { title: { text: "projection" } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={260} />
+          <Plot label="PC time courses" data={timecourses} layout={{ xaxis: { title: { text: xTitle } }, yaxis: { title: { text: "projection" } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={260} />
         </div>
         <div>
           <div className="text-xs font-medium text-zinc-500">Trajectory in PC1–PC2, coloured by behaviour Y₀</div>
-          <Plot data={plane} layout={{ xaxis: { title: { text: "PC1" } }, yaxis: { title: { text: "PC2" } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={260} />
+          <Plot label="Trajectory in PC1–PC2, coloured by behaviour Y₀" data={plane} layout={{ xaxis: { title: { text: "PC1" } }, yaxis: { title: { text: "PC2" } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={260} />
         </div>
       </div>
     </div>

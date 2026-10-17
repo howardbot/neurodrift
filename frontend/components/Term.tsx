@@ -8,7 +8,8 @@ const GAP = 8; // px between the word and the bubble
 const supportsPopover = () => typeof HTMLElement !== "undefined" && "popover" in HTMLElement.prototype;
 
 /**
- * A word with a plain-language definition.
+ * A word with a plain-language definition (use `Term` from components/showcase/Story.tsx,
+ * which looks the definition up in the glossary).
  *
  * The word is a native button that toggles a popover, so tapping it, tapping elsewhere and
  * Escape all work without JavaScript (the bubble is then centred on screen). With
@@ -16,7 +17,7 @@ const supportsPopover = () => typeof HTMLElement !== "undefined" && "popover" in
  * below it when there is no room), and is kept inside the viewport. Popovers render in the
  * top layer, so cards with `overflow: hidden` or transformed ancestors never clip them.
  */
-export function Term({ children, def }: { children: ReactNode; def: string }) {
+export function TermPopover({ children, def }: { children: ReactNode; def: string }) {
   const tipId = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const tip = useRef<HTMLSpanElement>(null);

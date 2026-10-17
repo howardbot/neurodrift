@@ -99,11 +99,11 @@ function RepresentationPlots({ c }: { c: PairComparison }) {
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div>
         <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Principal angles between top-{rep.k} subspaces ({rep.n_neurons_used} neurons)</div>
-        <Plot data={angles} layout={{ xaxis: { title: { text: "angle index" }, dtick: 1 }, yaxis: { title: { text: "degrees" }, range: [0, 90] }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={260} />
+        <Plot label={`Principal angles between top-${rep.k} subspaces (${rep.n_neurons_used} neurons)`} data={angles} layout={{ xaxis: { title: { text: "angle index" }, dtick: 1 }, yaxis: { title: { text: "degrees" }, range: [0, 90] }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={260} />
       </div>
       <div>
         <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Variance of {c.test.name} (test block) captured by each set of PCs</div>
-        <Plot data={capture} layout={{ xaxis: { title: { text: "number of PCs" }, dtick: 1 }, yaxis: { title: { text: "% variance" }, rangemode: "tozero" }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={260} />
+        <Plot label={`Variance of ${c.test.name} (test block) captured by each set of PCs`} data={capture} layout={{ xaxis: { title: { text: "number of PCs" }, dtick: 1 }, yaxis: { title: { text: "% variance" }, rangemode: "tozero" }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={260} />
       </div>
       {rep.degenerate && (
         <div className="lg:col-span-2"><Notice>2k exceeds the number of neurons, so some angles are 0° by construction.</Notice></div>
@@ -130,11 +130,11 @@ function ActivityPlots({ c }: { c: PairComparison }) {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div>
           <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Mean activity per shared neuron ({act.unit})</div>
-          <Plot data={scatter} layout={{ xaxis: { title: { text: c.train.name } }, yaxis: { title: { text: c.test.name } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={260} />
+          <Plot label={`Mean activity per shared neuron (${act.unit})`} data={scatter} layout={{ xaxis: { title: { text: c.train.name } }, yaxis: { title: { text: c.test.name } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={260} />
         </div>
         <div>
           <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Neuron-level change ({c.test.name} − {c.train.name}, {act.unit})</div>
-          <Plot data={hist} layout={{ xaxis: { title: { text: `Δ mean activity (${act.unit})` } }, yaxis: { title: { text: "neurons" } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={260} />
+          <Plot label={`Neuron-level change (${c.test.name} − ${c.train.name}, ${act.unit})`} data={hist} layout={{ xaxis: { title: { text: `Δ mean activity (${act.unit})` } }, yaxis: { title: { text: "neurons" } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={260} />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-x-6 sm:grid-cols-4">
@@ -171,13 +171,13 @@ function BehaviourPlots({ c }: { c: PairComparison }) {
         {hists.map((h, k) => (
           <div key={k}>
             <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">{outputLabel(c.outputs[k] ?? k, nAll)} distribution</div>
-            <Plot data={h} layout={{ barmode: "overlay", bargap: 0, xaxis: { title: { text: "value" } }, yaxis: { title: { text: "bins" } }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={240} />
+            <Plot label={`${outputLabel(c.outputs[k] ?? k, nAll)} distribution`} data={h} layout={{ barmode: "overlay", bargap: 0, xaxis: { title: { text: "value" } }, yaxis: { title: { text: "bins" } }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={240} />
           </div>
         ))}
         {paths && (
           <div>
             <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Example: first 400 bins in output space (Y₀ vs Y₁)</div>
-            <Plot data={paths} layout={{ xaxis: { title: { text: "Y₀" } }, yaxis: { title: { text: "Y₁" }, scaleanchor: "x" }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={240} />
+            <Plot label="Example: first 400 bins in output space (Y₀ vs Y₁)" data={paths} layout={{ xaxis: { title: { text: "Y₀" } }, yaxis: { title: { text: "Y₁" }, scaleanchor: "x" }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={240} />
           </div>
         )}
       </div>

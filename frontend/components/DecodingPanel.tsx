@@ -51,11 +51,11 @@ export function PredictionPlots({
         <div key={o} className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
             <div className="text-xs font-medium text-zinc-500">{outputLabel(o, nOutputs)} — predicted vs actual, start of test block</div>
-            <Plot data={traces[j] ?? []} layout={{ xaxis: { title: { text: xTitle } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={200} />
+            <Plot label={`${outputLabel(o, nOutputs)}: predicted vs actual, start of test block`} data={traces[j] ?? []} layout={{ xaxis: { title: { text: xTitle } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={200} />
           </div>
           <div>
             <div className="text-xs font-medium text-zinc-500">{outputLabel(o, nOutputs)} — all test bins (subsample)</div>
-            <Plot data={scatters[j] ?? []} layout={{ showlegend: false, xaxis: { title: { text: "actual" } }, yaxis: { title: { text: "predicted" } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={200} />
+            <Plot label={`${outputLabel(o, nOutputs)}: predicted vs actual, all test bins (subsample)`} data={scatters[j] ?? []} layout={{ showlegend: false, xaxis: { title: { text: "actual" } }, yaxis: { title: { text: "predicted" } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={200} />
           </div>
         </div>
       ))}
