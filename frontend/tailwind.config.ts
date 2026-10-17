@@ -38,16 +38,20 @@ export default {
           "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1)" },
           "50%": { transform: "translate3d(4%, -6%, 0) scale(1.08)" },
         },
-        "gradient-x": {
-          "0%, 100%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
+        // Transform/opacity only, so every loop stays on the compositor.
+        "drift-y": {
+          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
+          "50%": { transform: "translate3d(0, -1.5px, 0)" },
         },
-        "dash-flow": { to: { strokeDashoffset: "-18" } },
+        "ray-pulse": {
+          "0%, 100%": { opacity: "0.35" },
+          "50%": { opacity: "1" },
+        },
         sweep: { from: { transform: "translateX(-12%)" }, to: { transform: "translateX(100%)" } },
         "wave-x": { from: { transform: "translateX(0)" }, to: { transform: "translateX(-50%)" } },
         "cell-pulse": {
-          "0%, 100%": { transform: "scale(1)", filter: "brightness(1)" },
-          "50%": { transform: "scale(0.82)", filter: "brightness(1.25)" },
+          "0%, 100%": { transform: "scale(1)", opacity: "1" },
+          "50%": { transform: "scale(0.82)", opacity: "0.7" },
         },
         "menu-in": {
           from: { opacity: "0", transform: "translate3d(0, -4px, 0)" },
@@ -61,11 +65,11 @@ export default {
         // `backwards`, not `both`: a filled end state leaves a transform on the element,
         // which would make it the containing block of every position:fixed descendant.
         "fade-up": `fade-up 0.8s ${ease} backwards`,
-        "page-in": `page-in 0.45s ${ease} backwards`,
+        "page-in": `page-in 0.2s ${ease} backwards`,
         drift: "drift 18s ease-in-out infinite",
         "drift-slow": "drift 26s ease-in-out infinite reverse",
-        "gradient-x": "gradient-x 8s ease-in-out infinite",
-        "dash-flow": "dash-flow 1.6s linear infinite",
+        "drift-y": "drift-y 4.8s ease-in-out infinite",
+        "ray-pulse": "ray-pulse 2.4s ease-in-out infinite",
         sweep: "sweep 3.2s linear infinite",
         "wave-x": "wave-x 6s linear infinite",
         "cell-pulse": "cell-pulse 3.6s ease-in-out infinite",

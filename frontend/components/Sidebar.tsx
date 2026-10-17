@@ -77,7 +77,7 @@ function NavLink({ href, children, active, ariaCurrent }: { href: string; childr
     <Link
       href={href}
       aria-current={ariaCurrent}
-      className={`group relative block rounded-md px-2.5 py-1.5 text-sm transition-colors duration-200 before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-accent-600 before:transition-transform before:duration-300 dark:before:bg-accent-300 ${
+      className={`group relative block rounded-md px-2.5 py-1.5 text-sm before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-accent-600 before:transition-transform before:duration-300 dark:before:bg-accent-300 ${
         active
           ? "bg-accent-50 font-medium text-accent-800 before:scale-y-100 dark:bg-accent-500/10 dark:text-accent-100"
           : "text-zinc-600 before:scale-y-0 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-100"
@@ -94,7 +94,7 @@ export function Sidebar() {
 
   return (
     <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-zinc-200 bg-white px-3 py-4 dark:border-zinc-800 dark:bg-zinc-900 md:flex">
-      <Link href="/" className="group mb-2 flex items-center gap-2 rounded-md px-2.5 py-1 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/60">
+      <Link href="/" className="group mb-2 flex items-center gap-2 rounded-md px-2.5 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800/60">
         <Logo />
         <span className="leading-tight">
           <span className="block text-[15px] font-semibold tracking-tight">Qin Liu</span>
@@ -139,7 +139,7 @@ function MenuLink({ item, pathname, onNavigate }: { item: NavItem; pathname: str
       href={item.href}
       aria-current={current(item, pathname)}
       onClick={onNavigate}
-      className={`flex min-h-11 items-center rounded-md px-3 text-[15px] transition-colors ${
+      className={`flex min-h-11 items-center rounded-md px-3 text-[15px] ${
         active
           ? "bg-accent-50 font-medium text-accent-800 dark:bg-accent-500/15 dark:text-accent-100"
           : "text-zinc-700 active:bg-zinc-100 dark:text-zinc-300 dark:active:bg-zinc-800"

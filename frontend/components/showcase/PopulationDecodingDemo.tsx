@@ -38,11 +38,34 @@ export function PopulationDecodingDemo() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setLive(false);
   }, []);
 
+  // New trials only while the demo is on screen and the tab is visible.
+  const [onScreen, setOnScreen] = useState(true);
   useEffect(() => {
-    if (!live) return;
-    const t = window.setInterval(() => setTrial((x) => x + 1), 800);
-    return () => window.clearInterval(t);
-  }, [live]);
+    const el = svgRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([entry]) => setOnScreen(!!entry?.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!live || !onScreen) return;
+    let t = 0;
+    const start = () => {
+      if (!t && !document.hidden) t = window.setInterval(() => setTrial((x) => x + 1), 800);
+    };
+    const stop = () => {
+      window.clearInterval(t);
+      t = 0;
+    };
+    const onVisibility = () => (document.hidden ? stop() : start());
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [live, onScreen]);
 
   const { neurons, decoded } = useMemo(() => {
     const rand = rng(1000 + trial * 7919 + nNeurons);

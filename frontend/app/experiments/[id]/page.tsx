@@ -238,7 +238,7 @@ export default function ExperimentPage() {
       {(e.status === "pending" || e.status === "running") && (
         <Card title={e.status === "pending" ? "Queued" : "Running"}>
           <div className="h-2 overflow-hidden rounded bg-zinc-200 dark:bg-zinc-800">
-            <div className="h-full bg-accent-600 transition-all" style={{ width: `${Math.round(e.progress * 100)}%` }} />
+            <div className="h-full origin-left bg-accent-600 transition-transform" style={{ transform: `scaleX(${e.progress})` }} />
           </div>
           <p className="mt-2 text-xs text-zinc-500">
             {Math.round(e.progress * 100)} % — decoder matrix, then subspace matrix, on a single worker. This page updates automatically.

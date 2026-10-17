@@ -3,6 +3,7 @@
 import { useMemo, useRef } from "react";
 import type { Data } from "plotly.js";
 import { Plot } from "@/components/Plot";
+import { PlotReveal } from "@/components/PlotReveal";
 
 // Sequential light → dark blue; darker = "better" (higher r, smaller angle, ...).
 const BLUES: [number, string][] = [
@@ -85,18 +86,24 @@ export function MatrixHeatmap({
       onScroll={() => (panned.current = true)}
     >
       <div style={{ minWidth: Math.max(420, 120 + n * 44) }} className={onSelect ? "cursor-pointer" : ""}>
-        <Plot
-          data={data}
-          layout={layout}
-          height={Math.max(340, 60 + n * 40)}
-          onClick={(e) => {
-            const p = e.points[0];
-            if (!p || !onSelect || panned.current) return;
-            const i = names.indexOf(String(p.y));
-            const j = names.indexOf(String(p.x));
-            if (i >= 0 && j >= 0) onSelect([i, j]);
-          }}
-        />
+        {/* Rows (training sessions) appear one after another the first time it is seen. */}
+        <PlotReveal mode="rows" rows={n}>
+          {(onRender) => (
+            <Plot
+              data={data}
+              layout={layout}
+              height={Math.max(340, 60 + n * 40)}
+              onRender={onRender}
+              onClick={(e) => {
+                const p = e.points[0];
+                if (!p || !onSelect || panned.current) return;
+                const i = names.indexOf(String(p.y));
+                const j = names.indexOf(String(p.x));
+                if (i >= 0 && j >= 0) onSelect([i, j]);
+              }}
+            />
+          )}
+        </PlotReveal>
       </div>
     </div>
   );

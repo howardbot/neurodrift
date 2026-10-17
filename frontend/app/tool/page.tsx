@@ -53,7 +53,7 @@ export default function ToolLanding() {
         <div>
           <div className="mb-1.5 animate-fade-up text-xs font-medium uppercase tracking-wider text-accent-600 dark:text-accent-300">The tool</div>
           <h1 className="animate-fade-up text-4xl font-semibold tracking-tight [animation-delay:80ms]">
-            Neuro<span className="text-gradient animate-gradient-x">Drift</span>
+            Neuro<span className="text-gradient">Drift</span>
           </h1>
           <p className="mt-3 max-w-xl animate-fade-up text-lg text-zinc-600 [animation-delay:160ms] dark:text-zinc-400">
             Understand how neural representations and decoders change across recording sessions.

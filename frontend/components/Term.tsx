@@ -107,7 +107,7 @@ export function Term({ children, def }: { children: ReactNode; def: string }) {
         data-term-trigger=""
         popoverTarget={tipId}
         aria-describedby={tipId}
-        className="cursor-help border-b border-dotted border-zinc-400 transition-colors [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:hover:border-accent-500 [@media(hover:hover)]:hover:text-accent-700 dark:[@media(hover:hover)]:hover:text-accent-200"
+        className="cursor-help border-b border-dotted border-zinc-400 [-webkit-tap-highlight-color:transparent] [@media(hover:hover)]:hover:border-accent-500 [@media(hover:hover)]:hover:text-accent-700 dark:[@media(hover:hover)]:hover:text-accent-200"
         onClick={(e) => {
           // Take over from the declarative toggle: a tap pins the bubble open, a second tap
           // closes it. Enter/Space (detail 0) toggle, since focus has already opened it.

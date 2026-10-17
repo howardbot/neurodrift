@@ -63,6 +63,7 @@ export function Plot({
   config,
   height = 300,
   onClick,
+  onRender,
   className = "",
 }: {
   data: Data[];
@@ -70,12 +71,16 @@ export function Plot({
   config?: Partial<Config>;
   height?: number;
   onClick?: (event: PlotMouseEvent) => void;
+  /** Called after every draw, before the browser paints it, with the plot's root element. */
+  onRender?: (gd: HTMLElement) => void;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const plotly = useRef<PlotlyModule | null>(null);
   const clickRef = useRef(onClick);
   clickRef.current = onClick;
+  const renderRef = useRef(onRender);
+  renderRef.current = onRender;
   const dark = usePrefersDark();
   const [failed, setFailed] = useState(false);
   // Layouts and configs are usually inline object literals; compare them by value so a
@@ -104,6 +109,7 @@ export function Plot({
               (e) => clickRef.current?.(e),
             );
           }
+          if (!cancelled) renderRef.current?.(gd as unknown as HTMLElement);
         });
       })
       .catch(() => !cancelled && setFailed(true));

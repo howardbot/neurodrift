@@ -11,7 +11,7 @@ import { RESEARCH } from "@/content/research";
 function LiveDot({ tone = "emerald" }: { tone?: "emerald" | "accent" }) {
   const colour = tone === "emerald" ? "bg-emerald-500" : "bg-accent-500";
   return (
-    <span className="relative flex h-2 w-2">
+    <span className="relative flex h-2 w-2" data-pause-offscreen="">
       <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-60 motion-reduce:hidden ${colour}`} />
       <span className={`relative inline-flex h-2 w-2 rounded-full ${colour}`} />
     </span>
@@ -23,10 +23,11 @@ function SpikeTrain() {
   const spikes = [18, 41, 47, 90, 132, 139, 145, 190, 236, 262, 300, 309, 352, 398, 441, 447, 488, 530];
   const d = spikes.reduce((acc, x) => `${acc} L${x - 2},40 L${x},6 L${x + 2},52 L${x + 5},40`, "M0,40") + " L560,40";
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden" data-pause-offscreen="">
       <svg viewBox="0 0 560 60" className="w-full" role="img" aria-label="A neuron's electrical activity showing brief spikes">
-        <path d={d} pathLength={1} fill="none" className="draw-path stroke-accent-600 dark:stroke-accent-300" strokeWidth={1.6} strokeLinejoin="round" />
+        <path d={d} fill="none" className="stroke-accent-600 dark:stroke-accent-300" strokeWidth={1.6} strokeLinejoin="round" />
       </svg>
+      <span aria-hidden="true" className="trace-cover pointer-events-none absolute inset-0 bg-white dark:bg-zinc-900" />
       {/* Oscilloscope-style scan line. */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 animate-sweep motion-reduce:hidden">
         <div className="h-full w-20 -translate-x-full border-r border-accent-500/50 bg-gradient-to-r from-transparent to-accent-500/15" />
@@ -78,7 +79,7 @@ export default function Home() {
           </div>
           <h1 className="animate-fade-up text-[2rem] font-semibold leading-[1.15] tracking-tight [animation-delay:80ms] md:text-[2.9rem] md:leading-[1.1]">
             How does the brain turn what we see into what we do —{" "}
-            <span className="text-gradient animate-gradient-x">and can we read those signals reliably?</span>
+            <span className="text-gradient">and can we read those signals reliably?</span>
           </h1>
           <p className="mt-6 animate-fade-up text-lg leading-relaxed text-zinc-600 [animation-delay:160ms] dark:text-zinc-400">
             I analyse recordings from individual neurons in monkeys and marmosets. My projects ask how brain areas share
@@ -192,7 +193,7 @@ export default function Home() {
               </p>
               <div className="mt-4 flex flex-wrap gap-1.5 text-xs text-zinc-500">
                 {["Next.js", "FastAPI", "PostgreSQL", "Redis job queue", "scikit-learn", "Docker"].map((t) => (
-                  <span key={t} className="rounded-full border border-zinc-200 bg-white/60 px-2 py-0.5 transition-colors hover:border-accent-500/60 hover:text-accent-700 dark:border-zinc-700 dark:bg-zinc-900/60 dark:hover:text-accent-200">
+                  <span key={t} className="rounded-full border border-zinc-200 bg-white/60 px-2 py-0.5 hover:border-accent-500/60 hover:text-accent-700 dark:border-zinc-700 dark:bg-zinc-900/60 dark:hover:text-accent-200">
                     {t}
                   </span>
                 ))}

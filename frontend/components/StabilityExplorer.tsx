@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { Data, Layout } from "plotly.js";
 import { Plot } from "@/components/Plot";
+import { PlotReveal } from "@/components/PlotReveal";
 import { meanByDistance, stabilityProfile, type StabilityPoint } from "@/lib/stability";
 import type { DecoderResult, SubspaceResult } from "@/types/api";
 
@@ -100,5 +101,10 @@ export function StabilityExplorer({
       }
     : { xaxis, yaxis: { title: { text: "decoder r" } }, margin: { l: 60, r: 16, t: 10, b: 50 } };
 
-  return <Plot data={data} layout={layout} height={withAngles ? 500 : 320} />;
+  // The lines are drawn on from left to right (along session distance) the first time.
+  return (
+    <PlotReveal mode="wipe">
+      {(onRender) => <Plot data={data} layout={layout} height={withAngles ? 500 : 320} onRender={onRender} />}
+    </PlotReveal>
+  );
 }
