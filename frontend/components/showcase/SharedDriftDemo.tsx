@@ -89,7 +89,7 @@ export function SharedDriftDemo() {
           <path d={path(sim.a, lo, hi, H)} fill="none" stroke="#2f5d9e" strokeWidth={1.2} opacity={0.85} />
           <path d={path(sim.b, lo, hi, H)} fill="none" stroke="#c2410c" strokeWidth={1.2} opacity={0.75} />
         </svg>
-        <div className="flex justify-between text-[11px] text-zinc-400"><span>first trial</span><span>trial {N_TRIALS}</span></div>
+        <div className="flex justify-between text-[11px] text-zinc-500 dark:text-zinc-400"><span>first trial</span><span>trial {N_TRIALS}</span></div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)]">

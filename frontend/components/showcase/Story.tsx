@@ -38,11 +38,11 @@ export function ProjectHero({ project }: { project: ResearchProject }) {
       <HeroGlow />
       <div className="mb-4 flex animate-fade-up flex-wrap items-center gap-2 text-xs text-zinc-500">
         <Link href="/" className="hover:text-accent-600">Research</Link>
-        <span className="text-zinc-300 dark:text-zinc-700">/</span>
+        <span aria-hidden="true" className="text-zinc-300 dark:text-zinc-700">/</span>
         <span>{project.status}</span>
         {project.context && (
           <>
-            <span className="text-zinc-300 dark:text-zinc-700">·</span>
+            <span aria-hidden="true" className="text-zinc-300 dark:text-zinc-700">·</span>
             <span>{project.context}</span>
           </>
         )}

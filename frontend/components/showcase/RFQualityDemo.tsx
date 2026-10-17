@@ -60,7 +60,7 @@ export function RFQualityDemo() {
           </div>
           <div>
             <div className="text-[11px] uppercase tracking-wider text-zinc-500">Verdict</div>
-            <div className={`text-xl font-semibold ${verdict ? "text-emerald-600" : "text-amber-600"}`}>{verdict ? "clear" : "weak"}</div>
+            <div className={`text-xl font-semibold ${verdict ? "text-emerald-700 dark:text-emerald-400" : "text-amber-700 dark:text-amber-400"}`}>{verdict ? "clear" : "weak"}</div>
           </div>
         </div>
         <label className="block">

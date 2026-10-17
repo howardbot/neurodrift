@@ -260,8 +260,9 @@ for (const width of WIDTHS) {
       await page.addStyleTag({ content: ".overflow-x-clip { overflow-x: visible !important; }" });
       // Scroll through slowly so every scroll-revealed block is shown and lazy content is laid
       // out; anything still hidden would escape the measurement, so it fails the route.
-      const height = await page.evaluate(() => document.documentElement.scrollHeight);
-      for (let y = 0; y < height + 800; y += 300) {
+      // The page can grow while blocks reveal and lazy content lays out, so re-measure its
+      // height on every step instead of once up front (stopping short left blocks hidden).
+      for (let y = 0; y < (await page.evaluate(() => document.documentElement.scrollHeight)) + 800; y += 300) {
         await page.evaluate((top) => window.scrollTo({ top, behavior: "instant" }), y);
         await page.waitForTimeout(100);
       }

@@ -1,4 +1,5 @@
 import { PAIRED_FORGET, PAIRED_INTERFERENCE } from "@/content/marmosetPairs";
+import { readableInk } from "@/lib/color";
 
 /** Experimental design: recording block 1 → in-between experience → recording block 2. */
 export function CrossDayDesign() {
@@ -136,13 +137,14 @@ const ENERGY = [
   { title: "Animal TS · no task (control)", cells: { R1_R1: 0.52, R1_R2: 1.803, R2_R1: 4.847, R2_R2: 1.541 } },
 ];
 
-function shade(v: number): string {
+function shadeRgb(v: number): [number, number, number] {
   const t = Math.min(1, v / 5);
   // light sand → deep red
-  const r = Math.round(254 - t * 120);
-  const g = Math.round(240 - t * 205);
-  const b = Math.round(200 - t * 170);
-  return `rgb(${r},${g},${b})`;
+  return [Math.round(254 - t * 120), Math.round(240 - t * 205), Math.round(200 - t * 170)];
+}
+
+function shade(v: number): string {
+  return `rgb(${shadeRgb(v).join(",")})`;
 }
 
 export function InputReadoutGrids() {
@@ -161,7 +163,7 @@ export function InputReadoutGrids() {
                 {(["R1", "R2"] as const).map((input) => {
                   const v = e.cells[`${readout}_${input}` as keyof typeof e.cells];
                   return (
-                    <div key={input} className="flex h-14 items-center justify-center rounded font-mono text-sm font-semibold" style={{ background: shade(v), color: v > 2.8 ? "white" : "#3f3f46" }}>
+                    <div key={input} className="flex h-14 items-center justify-center rounded font-mono text-sm font-semibold" style={{ background: shade(v), color: readableInk(shadeRgb(v)) }}>
                       {v.toFixed(2)}
                     </div>
                   );

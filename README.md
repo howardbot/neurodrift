@@ -196,8 +196,9 @@ Implemented:
 * **Splits** — contiguous, never shuffled. Within a session: first 80 % train, last 20 % test.
   Across sessions: decoders for row *i* are trained on the first 80 % of session *i*; every
   cell in column *j* is evaluated on the last 20 % of session *j*. The diagonal is therefore a
-  held-out within-session estimate, all cells share training-set size, and each column shares
-  one test block.
+  held-out within-session estimate, every cell in a row trains on the same block (the decoder
+  is refit for each set of neurons the row session shares with a test session), and each
+  column shares one test block.
 * **Jobs** — experiments are saved with their configuration, seed, session snapshot and
   package versions, queued in Redis and run by a single RQ worker that keeps at most ~1 GB of
   session arrays resident. Failures are stored on the experiment (`status = failed`,

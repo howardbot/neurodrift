@@ -18,6 +18,7 @@ export function ResearchTransitions({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const story = useRef<HTMLDivElement>(null);
   const finish = useRef<(() => void) | null>(null);
+  const latest = useRef(0);
 
   // The new story has been committed: let the browser capture it and animate.
   useLayoutEffect(() => {
@@ -34,6 +35,11 @@ export function ResearchTransitions({ children }: { children: ReactNode }) {
       if (url.origin !== window.location.origin || !isStory(window.location.pathname) || !isStory(url.pathname)) return;
       if (url.pathname === window.location.pathname || !("startViewTransition" in document) || prefersReducedMotion()) return;
       e.preventDefault(); // Next's <Link> leaves a prevented click alone.
+      // A click while an earlier transition still waits for its page: release that one now
+      // (the new transition replaces it) rather than leaving it to its timeout, and only let
+      // the newest transition remove the class, so a stale clean-up cannot strip it mid-way.
+      finish.current?.();
+      const id = ++latest.current;
       const el = story.current;
       el?.classList.add("research-story");
       const transition = document.startViewTransition(
@@ -49,7 +55,9 @@ export function ResearchTransitions({ children }: { children: ReactNode }) {
             router.push(url.pathname + url.search + url.hash);
           }),
       );
-      transition.finished.finally(() => el?.classList.remove("research-story"));
+      transition.finished.finally(() => {
+        if (latest.current === id) el?.classList.remove("research-story");
+      });
     };
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
