@@ -210,7 +210,7 @@ export function MobileHeader() {
   return (
     <header
       data-sticky-header=""
-      className="sticky top-0 z-40 flex h-12 items-center gap-3 border-b border-zinc-200/80 bg-white/95 px-4 dark:border-zinc-800/80 dark:bg-zinc-900/95 md:hidden"
+      className="sticky top-0 z-40 flex h-12 items-center gap-3 border-b border-zinc-200/80 bg-white px-4 dark:border-zinc-800/80 dark:bg-zinc-900 md:hidden"
     >
       <Link href="/" className="flex min-h-11 shrink-0 items-center gap-2">
         <Logo size={18} />

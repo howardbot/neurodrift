@@ -19,6 +19,16 @@ const SHAPES: { id: Shape; label: string }[] = [
   { id: "sphere", label: "Low-poly sphere" },
 ];
 
+// three.js, the orbit controls and the teapot. The modules are fetched and evaluated while
+// the browser is idle after the page has loaded, so that work neither delays the page nor
+// lands in the middle of a scroll; WebGL itself starts only when the demo nears the viewport.
+const loadThree = () =>
+  Promise.all([
+    import("three"),
+    import("three/examples/jsm/controls/OrbitControls.js"),
+    import("three/examples/jsm/geometries/TeapotGeometry.js"),
+  ]);
+
 interface Settings {
   mode: ViewMode;
   smooth: boolean;
@@ -43,10 +53,13 @@ export function StereoRendererDemo() {
   const [marker, setMarker] = useState(true);
   const [spin, setSpin] = useState(true);
   const [failed, setFailed] = useState<"load" | "webgl" | null>(null);
-  // three.js and WebGL start only once the demo nears the viewport, so the page's text
+  // WebGL starts only once the demo nears the viewport, so the page's text
   // and figures come first; until then the mount shows a same-size placeholder.
   const [near, setNear] = useState(false);
   const [ready, setReady] = useState(false);
+  // "Loading…" is only true once JavaScript runs; the server-rendered placeholder says the
+  // demo needs JavaScript instead.
+  const [hydrated, setHydrated] = useState(false);
   const settings = useRef<Settings>({ mode, smooth, eyeFraction, marker, spin });
   settings.current = { mode, smooth, eyeFraction, marker, spin };
   const shapeRef = useRef<(s: Shape) => void>(() => {});
@@ -56,7 +69,15 @@ export function StereoRendererDemo() {
   const requestRender = useRef<() => void>(() => {});
 
   useEffect(() => {
+    setHydrated(true);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setSpin(false);
+    const warm = () => void loadThree().catch(() => {});
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(warm, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = setTimeout(warm, 1500);
+    return () => clearTimeout(id);
   }, []);
 
   useEffect(() => {
@@ -86,11 +107,7 @@ export function StereoRendererDemo() {
     (async () => {
       let modules;
       try {
-        modules = await Promise.all([
-          import("three"),
-          import("three/examples/jsm/controls/OrbitControls.js"),
-          import("three/examples/jsm/geometries/TeapotGeometry.js"),
-        ]);
+        modules = await loadThree();
       } catch {
         // Typically a chunk that no longer exists after a deploy; a reload fetches the new one.
         if (!disposed) setFailed("load");
@@ -308,7 +325,11 @@ export function StereoRendererDemo() {
         aria-label="Interactive 3D model renderer; drag to rotate"
         role="img"
       >
-        {!ready && <div className="absolute inset-0 flex items-center justify-center text-xs text-zinc-500">Loading the 3D demo…</div>}
+        {!ready && (
+          <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-xs text-zinc-500">
+            {hydrated ? "Loading the 3D demo…" : <noscript>The interactive 3D demo needs JavaScript.</noscript>}
+          </div>
+        )}
       </div>
       <div className="flex flex-wrap gap-1.5">
         {MODES.map((m) => (
