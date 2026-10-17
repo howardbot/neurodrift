@@ -326,7 +326,7 @@ export function StereoRendererDemo() {
         role="img"
       >
         {!ready && (
-          <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-xs text-zinc-500">
+          <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-xs text-zinc-300">
             {hydrated ? "Loading the 3D demo…" : <noscript>The interactive 3D demo needs JavaScript.</noscript>}
           </div>
         )}

@@ -125,7 +125,7 @@ export function Sidebar() {
           </nav>
         </div>
       )}
-      <div className="mt-auto flex items-center gap-1.5 px-2.5 pt-4 text-[11px] text-zinc-400">
+      <div className="mt-auto flex items-center gap-1.5 px-2.5 pt-4 text-[11px] text-zinc-500">
         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/80" />
         NeuroDrift v0.1
       </div>

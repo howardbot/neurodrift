@@ -82,8 +82,8 @@ export default function CrossDayDecoding() {
       <Section eyebrow="The idea" title="Why test both directions?">
         <p>
           If the brain&apos;s signals simply wandered at random between the two blocks, learning a decoder on the first block and testing it
-          on the second (<span className="font-medium text-[#c2410c]">forward</span>) should be about as hard as the reverse (
-          <span className="font-medium text-[#2f5d9e]">reverse</span>). A consistent difference between the two directions would mean the
+          on the second (<span className="font-medium text-[#c2410c] dark:text-orange-400">forward</span>) should be about as hard as the reverse (
+          <span className="font-medium text-[#2f5d9e] dark:text-accent-300">reverse</span>). A consistent difference between the two directions would mean the
           change has some structure — for example, that activity after the new learning contains patterns the earlier activity did not.
         </p>
       </Section>

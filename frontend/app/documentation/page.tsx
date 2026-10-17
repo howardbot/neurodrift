@@ -80,8 +80,9 @@ np.savez("R1_D01.npz", X=X, Y=Y, timestamps=t, trial_ids=trial_ids, neuron_ids=u
         <p>
           For sessions S<sub>1</sub>…S<sub>N</sub>, the decoder for row <em>i</em> is trained on the first 80 % of S<sub>i</sub>, and
           every cell in column <em>j</em> is evaluated on the last 20 % of S<sub>j</sub>, restricted to the neurons the two
-          sessions share. The diagonal is therefore a held-out within-session estimate and all cells use the same amount of
-          training data. Lower off-diagonal performance is not by itself evidence of neural representational drift:
+          sessions share. The diagonal is therefore a held-out within-session estimate and every cell in a row trains on the
+          same block of time bins; the decoder is refit for each set of shared neurons, so when units turn over between
+          sessions a row contains several fits. Lower off-diagonal performance is not by itself evidence of neural representational drift:
           behaviour, recording quality and neuron turnover also differ between sessions, and NeuroDrift reports these
           separately.
         </p>

@@ -38,8 +38,11 @@ Browser ──► nginx ──► /        Next.js (standalone server, client-re
    not comparable (different training-set sizes, different test sets). NeuroDrift
    trains every decoder for row *i* on the **first 80 %** of Sᵢ and evaluates every
    cell in column *j* on the **last 20 %** of Sⱼ. Each row therefore uses one
-   decoder, each column one test block, and the diagonal is an honest held-out
-   within-session estimate. This is shown in the UI.
+   training block and each column one test block, and the diagonal is an honest
+   held-out within-session estimate. Because every pair is restricted to the neurons
+   both sessions share (decision 4), the row's decoder is refit on that block for each
+   distinct shared-neuron set — one fit per row when all sessions share the same
+   neurons, several when units turn over. This is shown in the UI.
 2. **Contiguous splits.** Time bins are autocorrelated, so splits are contiguous
    blocks, never shuffled. No gap is inserted between blocks in V1 (documented).
 3. **Normalisation.** Features are z-scored with the training block's μ/σ only;

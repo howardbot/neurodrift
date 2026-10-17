@@ -101,6 +101,20 @@ body {
   }
 }
 
+/* Dark mode: muted zinc-500 text is ~3.7:1 and accent-600 text ~2.7:1 on the dark
+   backgrounds, below WCAG AA (4.5:1). Lift both unless the element picks its own dark
+   colour. Kept in the base layer so hover/focus variants (same specificity, later) win. */
+@layer base {
+  @media (prefers-color-scheme: dark) {
+    .text-zinc-500:not([class*="dark:text-"]) {
+      color: theme("colors.zinc.400");
+    }
+    .text-accent-600:not([class*="dark:text-"]) {
+      color: theme("colors.accent.300");
+    }
+  }
+}
+
 /* Scroll reveal (components/motion.tsx). Only content that starts below the fold is
    ever hidden, so server-rendered HTML is fully visible without JavaScript. */
 [data-reveal="hidden"] {
