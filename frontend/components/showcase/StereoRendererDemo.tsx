@@ -43,9 +43,14 @@ export function StereoRendererDemo() {
   const [marker, setMarker] = useState(true);
   const [spin, setSpin] = useState(true);
   const [failed, setFailed] = useState(false);
+  // three.js and WebGL start only once the demo nears the viewport, so the page's text
+  // and figures come first; until then the mount shows a same-size placeholder.
+  const [near, setNear] = useState(false);
+  const [ready, setReady] = useState(false);
   const settings = useRef<Settings>({ mode, smooth, eyeFraction, marker, spin });
   settings.current = { mode, smooth, eyeFraction, marker, spin };
   const shapeRef = useRef<(s: Shape) => void>(() => {});
+  const requestRender = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setSpin(false);
@@ -53,7 +58,24 @@ export function StereoRendererDemo() {
 
   useEffect(() => {
     const mount = mountRef.current;
-    if (!mount) return;
+    if (!mount || near) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setNear(true);
+      return;
+    }
+    const io = new IntersectionObserver(([entry]) => entry?.isIntersecting && setNear(true), { rootMargin: "300px 0px" });
+    io.observe(mount);
+    return () => io.disconnect();
+  }, [near]);
+
+  // Settings changes need a frame even when nothing is spinning.
+  useEffect(() => {
+    requestRender.current();
+  }, [mode, smooth, eyeFraction, marker, spin, shape]);
+
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount || !near) return;
     let disposed = false;
     let frame = 0;
     let cleanup = () => {};
@@ -146,27 +168,44 @@ export function StereoRendererDemo() {
           targetR.setSize(width * pr, height * pr);
         };
         resize();
-        const ro = new ResizeObserver(resize);
+        // Render on demand: a frame is drawn only while something moves (auto-rotation, a
+        // drag and its damping) or after a change, and never while the demo is off screen.
+        let visible = true;
+        const schedule = () => {
+          if (!frame && visible && !disposed) frame = requestAnimationFrame(loop);
+        };
+        requestRender.current = schedule;
+
+        const ro = new ResizeObserver(() => {
+          resize();
+          schedule();
+        });
         ro.observe(mount);
 
-        let visible = true;
         const io = new IntersectionObserver(([entry]) => {
           visible = entry?.isIntersecting ?? true;
+          if (visible) schedule();
         });
         io.observe(mount);
+        controls.addEventListener("change", schedule);
 
         let lastSmooth: boolean | null = null;
-        const render = () => {
-          frame = requestAnimationFrame(render);
+        const loop = () => {
+          frame = 0;
           if (!visible) return;
+          controls.autoRotate = settings.current.spin;
+          // update() applies auto-rotation and damping; true while the camera still moves.
+          const moving = controls.update();
+          render();
+          if (settings.current.spin || moving) schedule();
+        };
+        const render = () => {
           const s = settings.current;
           if (s.smooth !== lastSmooth) {
             material.flatShading = !s.smooth;
             material.needsUpdate = true;
             lastSmooth = s.smooth;
           }
-          controls.autoRotate = s.spin;
-          controls.update();
           fusion.visible = s.marker;
           // Fusion marker on the front of the canonical sphere, facing the viewer.
           fusion.position.copy(camera.position).normalize().multiplyScalar(1.08);
@@ -209,12 +248,15 @@ export function StereoRendererDemo() {
           renderer.setRenderTarget(null);
           renderer.render(quadScene, quadCamera);
         };
-        render();
+        schedule();
+        setReady(true);
 
         cleanup = () => {
           cancelAnimationFrame(frame);
+          requestRender.current = () => {};
           ro.disconnect();
           io.disconnect();
+          controls.removeEventListener("change", schedule);
           controls.dispose();
           mesh.geometry.dispose();
           material.dispose();
@@ -233,7 +275,7 @@ export function StereoRendererDemo() {
       disposed = true;
       cleanup();
     };
-  }, []);
+  }, [near]);
 
   useEffect(() => {
     shapeRef.current(shape);
@@ -243,7 +285,16 @@ export function StereoRendererDemo() {
 
   return (
     <div className="space-y-4">
-      <div ref={mountRef} className="overflow-hidden rounded bg-[#1c1c1f]" aria-label="Interactive 3D model renderer; drag to rotate" role="img" />
+      {/* Sized like the canvas (min(420, max(260, 55% of the width))) before it exists, so the
+          page does not shift when WebGL starts. */}
+      <div
+        ref={mountRef}
+        className={`relative overflow-hidden rounded bg-[#1c1c1f] ${ready ? "" : "aspect-[100/55] max-h-[420px] min-h-[260px]"}`}
+        aria-label="Interactive 3D model renderer; drag to rotate"
+        role="img"
+      >
+        {!ready && <div className="absolute inset-0 flex items-center justify-center text-xs text-zinc-500">Loading the 3D demo…</div>}
+      </div>
       <div className="flex flex-wrap gap-1.5">
         {MODES.map((m) => (
           <button

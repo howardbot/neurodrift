@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Config, Data, Layout, PlotMouseEvent } from "plotly.js";
 
-type PlotlyModule = typeof import("plotly.js-dist-min");
+import { loadPlotly, type PlotlyModule } from "@/lib/plotly";
 
 function usePrefersDark(): boolean {
   const [dark, setDark] = useState(false);
@@ -56,7 +56,7 @@ function mergeLayout(base: Partial<Layout>, layout: Partial<Layout>): Partial<La
   return merged as Partial<Layout>;
 }
 
-/** Thin wrapper around Plotly; the ~3 MB bundle is loaded lazily on first render. */
+/** Thin wrapper around Plotly; the ~1.4 MB cartesian bundle is loaded lazily on first render. */
 export function Plot({
   data,
   layout = {},
@@ -86,7 +86,7 @@ export function Plot({
   useEffect(() => {
     let cancelled = false;
     const el = ref.current;
-    import("plotly.js-dist-min")
+    loadPlotly()
       .then((mod) => {
         if (cancelled || !el) return;
         const Plotly = ((mod as unknown as { default?: PlotlyModule }).default ?? mod) as PlotlyModule;

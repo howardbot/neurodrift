@@ -93,7 +93,7 @@ export function Sidebar() {
   const project = useProjectNav(pathname);
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-zinc-200 bg-white/80 px-3 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-zinc-200 bg-white px-3 py-4 dark:border-zinc-800 dark:bg-zinc-900 md:flex">
       <Link href="/" className="group mb-2 flex items-center gap-2 rounded-md px-2.5 py-1 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/60">
         <Logo />
         <span className="leading-tight">
@@ -210,7 +210,7 @@ export function MobileHeader() {
   return (
     <header
       data-sticky-header=""
-      className="sticky top-0 z-40 flex h-12 items-center gap-3 border-b border-zinc-200/80 bg-white/80 px-4 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/80 md:hidden"
+      className="sticky top-0 z-40 flex h-12 items-center gap-3 border-b border-zinc-200/80 bg-white/95 px-4 dark:border-zinc-800/80 dark:bg-zinc-900/95 md:hidden"
     >
       <Link href="/" className="flex min-h-11 shrink-0 items-center gap-2">
         <Logo size={18} />

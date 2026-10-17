@@ -23,15 +23,15 @@ function PcaPlots({ pca }: { pca: SessionPca }) {
 
   const tr = pca.trajectory;
   const timecourses = useMemo<Data[]>(
-    () => tr.pcs.map((y, i) => ({ type: "scattergl", mode: "lines", x: tr.time, y, name: `PC${i + 1}`, line: { width: 1.2 } })),
+    () => tr.pcs.map((y, i) => ({ type: "scatter", mode: "lines", x: tr.time, y, name: `PC${i + 1}`, line: { width: 1.2 } })),
     [tr],
   );
   const plane = useMemo<Data[]>(() => {
     const [pc1, pc2] = tr.pcs;
     const colour = tr.behaviour[0] ?? [];
     return [
-      { type: "scattergl", mode: "lines", x: pc1, y: pc2, line: { color: "rgba(113,113,122,0.35)", width: 1 }, hoverinfo: "skip", showlegend: false },
-      { type: "scattergl", mode: "markers", x: pc1, y: pc2, marker: { size: 3, color: colour, colorscale: "RdBu", showscale: true, colorbar: { thickness: 8, title: { text: "Y₀", side: "right" } } }, hovertemplate: "PC1 %{x:.2f}<br>PC2 %{y:.2f}<extra></extra>", showlegend: false },
+      { type: "scatter", mode: "lines", x: pc1, y: pc2, line: { color: "rgba(113,113,122,0.35)", width: 1 }, hoverinfo: "skip", showlegend: false },
+      { type: "scatter", mode: "markers", x: pc1, y: pc2, marker: { size: 3, color: colour, colorscale: "RdBu", showscale: true, colorbar: { thickness: 8, title: { text: "Y₀", side: "right" } } }, hovertemplate: "PC1 %{x:.2f}<br>PC2 %{y:.2f}<extra></extra>", showlegend: false },
     ];
   }, [tr]);
 

@@ -115,13 +115,13 @@ function ActivityPlots({ qc }: { qc: SessionQc }) {
 function TracePlots({ qc, nOutputs }: { qc: SessionQc; nOutputs: number }) {
   const t = qc.traces;
   const xTitle = t.time_unit === "s" ? "time (s)" : "time bin";
-  const targets = useMemo<Data[]>(() => t.targets.map((y, j) => ({ type: "scattergl", mode: "lines", x: t.time, y, name: outputLabel(j, nOutputs), line: { width: 1 } })), [t, nOutputs]);
+  const targets = useMemo<Data[]>(() => t.targets.map((y, j) => ({ type: "scatter", mode: "lines", x: t.time, y, name: outputLabel(j, nOutputs), line: { width: 1 } })), [t, nOutputs]);
   const neurons = useMemo<Data[]>(() => {
     // Stack the example neurons with a fixed vertical offset, like a raster of rate traces.
     const spans = t.neurons.map((y) => Math.max(...y) - Math.min(...y) || 1);
     const step = Math.max(...spans) * 1.1;
     return t.neurons.map((y, i) => ({
-      type: "scattergl",
+      type: "scatter",
       mode: "lines",
       x: t.time,
       y: y.map((v) => v + i * step),

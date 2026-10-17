@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { DemoButton } from "@/components/DemoButton";
+import { warmPlotly } from "@/lib/plotly";
 import { Badge, Button, ErrorBox, PageHeader, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { formatDate } from "@/lib/format";
@@ -49,6 +50,8 @@ function CreateProjectForm() {
 }
 
 export default function ProjectsPage() {
+  // Every project link leads to plots: fetch the chart library while the page is idle.
+  useEffect(() => warmPlotly(), []);
   const { data, error, loading } = useApi(api.listProjects, "projects");
 
   return (
