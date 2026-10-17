@@ -13,7 +13,8 @@
 //      scrolling ancestor (overflow-x auto/scroll) holding it inside the viewport. Clipping
 //      by overflow hidden/clip only counts for decorative (aria-hidden) content and for
 //      text truncated with an ellipsis; anything else is content cut off;
-//   3. a horizontally scrollable container does not scroll under a touch swipe;
+//   3. a horizontally scrollable container does not scroll under a touch swipe, or the
+//      swipe also counts as a tap and navigates;
 //   4. a scroll-revealed block is still hidden after scrolling through the page;
 //   5. a glossary term does not open on tap, its bubble leaves the viewport or overlaps
 //      the sticky header, or a second tap, Escape or a tap elsewhere does not close it.
@@ -172,6 +173,7 @@ async function checkSwipes(page, cdp) {
       return { x: r.left + r.width * 0.75, y: Math.min(Math.max(r.top + r.height / 2, 60), window.innerHeight - 20), label: el.tagName.toLowerCase() + "." + String(el.className).split(/\\s+/).slice(0, 3).join(".") };
     })()`);
     if (!box) continue;
+    const before = page.url();
     await page.waitForTimeout(150);
     const steps = 10;
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: box.x, y: box.y }] });
@@ -180,6 +182,11 @@ async function checkSwipes(page, cdp) {
     }
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
     await page.waitForTimeout(400);
+    // A swipe is not a tap: it must not also follow a link or open a chart's detail page.
+    if (page.url() !== before) {
+      bad.push(`horizontal swipe on ${box.label} navigated to ${page.url()}`);
+      break;
+    }
     const moved = await page.evaluate(`(() => { const el = (${scrollers})()[${i}]; return el ? el.scrollLeft : null; })()`);
     if (moved !== null && moved < 20) bad.push(`horizontal swipe does not scroll ${box.label} (scrollLeft ${Math.round(moved)})`);
   }
