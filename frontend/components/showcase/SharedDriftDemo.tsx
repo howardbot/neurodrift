@@ -92,7 +92,7 @@ export function SharedDriftDemo() {
         <div className="flex justify-between text-[11px] text-zinc-400"><span>first trial</span><span>trial {N_TRIALS}</span></div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[1fr_1fr_1.3fr]">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)]">
         <Scatter a={sim.a} b={sim.b} label="Raw responses" r={sim.rRaw} />
         <Scatter a={sim.aRes} b={sim.bRes} label="After removing slow drift" r={sim.rRes} />
         <div className="space-y-4 text-sm">

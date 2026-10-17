@@ -52,9 +52,9 @@ function PrimerStep({ n, title, last, children }: { n: number; title: string; la
   );
 }
 
-function SectionHeading({ id, eyebrow, title, children }: { id?: string; eyebrow: string; title: string; children?: ReactNode }) {
+function SectionHeading({ eyebrow, title, children }: { eyebrow: string; title: string; children?: ReactNode }) {
   return (
-    <Reveal id={id} className="mb-8 scroll-mt-6">
+    <Reveal className="mb-8">
       <div className="mb-1.5 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-accent-600 dark:text-accent-300">
         <span className="h-px w-5 bg-gradient-to-r from-accent-500 to-transparent" />
         {eyebrow}
@@ -115,7 +115,7 @@ export default function Home() {
       </section>
 
       {/* Primer */}
-      <section id="primer" className="mb-20 scroll-mt-6">
+      <section id="primer" className="mb-20">
         <SectionHeading eyebrow="Primer" title="Neuroscience in two minutes" />
         <PrimerStep n={1} title="Neurons talk in spikes">
           <p>
@@ -161,12 +161,13 @@ export default function Home() {
       </section>
 
       {/* Projects */}
-      <section className="mb-20">
-        <SectionHeading id="projects" eyebrow="Research" title="Projects">
+      {/* The anchor sits on the untransformed section, not on the Reveal inside it. */}
+      <section id="projects" className="mb-20">
+        <SectionHeading eyebrow="Research" title="Projects">
           Each page explains the question in plain language, shows an interactive illustration, and describes what I built.
           Unpublished projects show methods, not results.
         </SectionHeading>
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           {RESEARCH.map((p, i) => (
             <ProjectCard key={p.slug} project={p} index={i} />
           ))}
@@ -178,7 +179,7 @@ export default function Home() {
         <div className="card relative isolate overflow-hidden p-6 md:p-8">
           <div aria-hidden="true" className="absolute -right-20 -top-24 -z-10 h-72 w-72 animate-drift rounded-full bg-accent-400/20 blur-3xl dark:bg-accent-500/15" />
           <div aria-hidden="true" className="absolute -bottom-24 left-1/3 -z-10 h-56 w-56 animate-drift-slow rounded-full bg-violet-400/15 blur-3xl dark:bg-violet-500/10" />
-          <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
             <div>
               <div className="text-xs font-medium uppercase tracking-wider text-accent-600 dark:text-accent-300">Software I built</div>
               <h2 className="mt-1 text-xl font-semibold md:text-2xl">NeuroDrift: measuring how decoders hold up across days</h2>

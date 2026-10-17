@@ -80,7 +80,7 @@ export function PopulationDecodingDemo() {
   const arm = R - 28;
 
   return (
-    <div className="grid items-center gap-6 md:grid-cols-[300px_1fr]">
+    <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[300px_minmax(0,1fr)]">
       <svg
         ref={svgRef}
         viewBox="-150 -150 300 300"

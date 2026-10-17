@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import type { Data } from "plotly.js";
 import { Plot } from "@/components/Plot";
 
@@ -62,15 +62,28 @@ export function MatrixHeatmap({
     return {
       data: [trace],
       layout: {
-        xaxis: { title: { text: "test session" }, tickangle: n > 8 ? -45 : 0, type: "category" as const, showgrid: false },
-        yaxis: { title: { text: "train session" }, autorange: "reversed" as const, type: "category" as const, showgrid: false },
+        // No zoom or pan on a small category matrix: on touch screens Plotly's drag layer would
+        // otherwise swallow the swipe that scrolls a wide matrix sideways (clicks still fire).
+        dragmode: false as const,
+        xaxis: { title: { text: "test session" }, tickangle: n > 8 ? -45 : 0, type: "category" as const, showgrid: false, fixedrange: true },
+        yaxis: { title: { text: "train session" }, autorange: "reversed" as const, type: "category" as const, showgrid: false, fixedrange: true },
         margin: { l: 90, r: 20, t: 10, b: 80 },
       },
     };
   }, [names, z, spec, hover, customdata, n]);
 
+  // Plotly reports a click at the end of every touch, even one that scrolled the matrix or
+  // the page. When the browser takes a touch over for scrolling it cancels the pointer, so
+  // such a swipe is remembered and does not open a pair; a tap still does.
+  const panned = useRef(false);
+
   return (
-    <div className="overflow-x-auto">
+    <div
+      className="overflow-x-auto"
+      onPointerDownCapture={() => (panned.current = false)}
+      onPointerCancelCapture={() => (panned.current = true)}
+      onScroll={() => (panned.current = true)}
+    >
       <div style={{ minWidth: Math.max(420, 120 + n * 44) }} className={onSelect ? "cursor-pointer" : ""}>
         <Plot
           data={data}
@@ -78,7 +91,7 @@ export function MatrixHeatmap({
           height={Math.max(340, 60 + n * 40)}
           onClick={(e) => {
             const p = e.points[0];
-            if (!p || !onSelect) return;
+            if (!p || !onSelect || panned.current) return;
             const i = names.indexOf(String(p.y));
             const j = names.indexOf(String(p.x));
             if (i >= 0 && j >= 0) onSelect([i, j]);

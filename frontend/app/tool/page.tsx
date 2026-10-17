@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DemoButton } from "@/components/DemoButton";
 import { Reveal } from "@/components/motion";
 import { DriftMatrix } from "@/components/showcase/Glyphs";
@@ -47,7 +48,7 @@ export const metadata = { title: "NeuroDrift tool" };
 export default function ToolLanding() {
   return (
     <div className="mx-auto max-w-4xl py-10">
-      <section className="relative grid gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+      <section className="relative grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
         <HeroGlow />
         <div>
           <div className="mb-1.5 animate-fade-up text-xs font-medium uppercase tracking-wider text-accent-600 dark:text-accent-300">The tool</div>
@@ -67,7 +68,7 @@ export default function ToolLanding() {
         </div>
       </section>
 
-      <div className="mt-14 grid gap-4 md:grid-cols-3">
+      <div className="mt-14 grid grid-cols-1 gap-4 md:grid-cols-3">
         {topics.map((t, i) => (
           <Reveal key={t.title} delay={i * 100} className="card card-hover group p-5">
             <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-accent-50 text-accent-600 transition-transform duration-300 group-hover:scale-110 dark:bg-accent-500/10 dark:text-accent-300">
@@ -91,7 +92,7 @@ export default function ToolLanding() {
           Input is one <code className="font-mono text-xs">.npz</code> file per session with arrays{" "}
           <code className="font-mono text-xs">X</code> (time bins × neurons) and{" "}
           <code className="font-mono text-xs">Y</code> (time bins × behavioural outputs). See the{" "}
-          <a href="/documentation" className="text-accent-600 underline-offset-2 hover:underline">documentation</a>.
+          <Link href="/documentation" className="text-accent-600 underline-offset-2 hover:underline">documentation</Link>.
         </p>
       </Reveal>
     </div>

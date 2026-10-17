@@ -216,7 +216,7 @@ export default function ExperimentPage() {
             <Link href={`/projects/${e.project_id}`} className="hover:underline">{project.data?.name ?? "…"}</Link>
           </span>
         }
-        title={<span className="flex items-center gap-2">{e.name} <StatusBadge status={e.status} /></span>}
+        title={<span className="flex flex-wrap items-center gap-x-2 gap-y-1">{e.name} <StatusBadge status={e.status} /></span>}
         description={`${e.sessions.length} sessions · ${e.sessions.length ** 2} train/test combinations · created ${new Date(e.created_at).toLocaleString("en-CA", { hour12: false })}`}
         actions={
           <>
@@ -260,7 +260,7 @@ export default function ExperimentPage() {
             <Stat label="Unavailable pairs" value={matrix.data!.summary.n_unavailable} hint="Pairs whose neurons could not be aligned" />
           </div>
 
-          <div className="grid gap-6 2xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 2xl:grid-cols-2">
             <Card
               title="Decoder generalisation"
               subtitle="Rows train, columns test. Click a cell to open the pair comparison."
@@ -349,7 +349,7 @@ export default function ExperimentPage() {
             </p>
           </Card>
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
             <Card title="Session summaries" subtitle="Transfer means exclude the diagonal. Lower transfer does not by itself indicate neural drift: behaviour and recording quality also differ.">
               <SessionSummary decoder={decoder} subspace={subspace} />
             </Card>

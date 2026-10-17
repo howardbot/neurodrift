@@ -58,7 +58,7 @@ function Metadata({ session, onSaved }: { session: Session; onSaved: () => void 
     ["Recording date", session.recording_date ?? "—"],
     ["Bin size", session.bin_size_ms ? `${session.bin_size_ms} ms` : "—"],
     ["Session order", session.session_order],
-    ["Original file", <span key="f" className="font-mono text-xs">{session.original_filename || "—"}</span>],
+    ["Original file", <span key="f" className="block whitespace-normal break-all font-mono text-xs">{session.original_filename || "—"}</span>],
     ["File size", formatBytes(session.file_size_bytes)],
     ["SHA-256", <span key="h" className="font-mono text-xs" title={session.sha256}>{session.sha256.slice(0, 16)}…</span>],
     ["Optional arrays", [session.has_timestamps && "timestamps", session.has_trial_ids && "trial_ids", session.has_neuron_ids && "neuron_ids"].filter(Boolean).join(", ") || "none"],
@@ -73,7 +73,7 @@ function Metadata({ session, onSaved }: { session: Session; onSaved: () => void 
           {rows.map(([k, v]) => (
             <div key={k} className="contents">
               <dt className="text-zinc-500">{k}</dt>
-              <dd className="min-w-0 truncate">{v}</dd>
+              <dd className="min-w-0 [overflow-wrap:anywhere]">{v}</dd>
             </div>
           ))}
         </dl>
@@ -104,7 +104,7 @@ function ActivityPlots({ qc }: { qc: SessionQc }) {
   }, [qc]);
   const common = { showlegend: false, margin: { l: 50, r: 10, t: 10, b: 44 } };
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <div><div className="text-xs font-medium text-zinc-500">Mean activity per neuron</div><Plot data={means} layout={{ ...common, xaxis: { title: { text: "mean per bin" } }, yaxis: { title: { text: "neurons" } } }} height={220} /></div>
       <div><div className="text-xs font-medium text-zinc-500">Variance per neuron</div><Plot data={vars} layout={{ ...common, xaxis: { title: { text: "variance" } }, yaxis: { title: { text: "neurons" } } }} height={220} /></div>
       <div><div className="text-xs font-medium text-zinc-500">Mean vs variance (red: zero variance)</div><Plot data={scatter} layout={{ ...common, xaxis: { title: { text: "mean" } }, yaxis: { title: { text: "variance" } } }} height={220} /></div>
@@ -195,7 +195,7 @@ export default function SessionPage() {
         <Stat label="NaN" value={summary.nan_count} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
         <Metadata session={s} onSaved={session.reload} />
         <Card title="Activity statistics" subtitle={summary.count_like ? "X looks like spike counts (non-negative integers)." : "X is not integer-valued; treated as generic activity features."}>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -204,19 +204,21 @@ export default function SessionPage() {
             <Stat label="Median neuron var" value={formatNumber(summary.median_neuron_var)} />
             <Stat label="Silent neurons" value={summary.n_silent_neurons} hint="All-zero columns" />
           </div>
-          <table className="table-base mt-4">
-            <thead><tr><th>Output</th><th className="text-right">Mean</th><th className="text-right">Variance</th><th className="text-right">SD</th></tr></thead>
-            <tbody>
-              {summary.target_mean.map((m, j) => (
-                <tr key={j}>
-                  <td>{outputLabel(j, s.n_outputs)}</td>
-                  <td className="num text-right font-mono">{formatNumber(m)}</td>
-                  <td className="num text-right font-mono">{formatNumber(summary.target_var[j])}</td>
-                  <td className="num text-right font-mono">{formatNumber(summary.target_std[j])}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="mt-4 overflow-x-auto">
+            <table className="table-base">
+              <thead><tr><th>Output</th><th className="text-right">Mean</th><th className="text-right">Variance</th><th className="text-right">SD</th></tr></thead>
+              <tbody>
+                {summary.target_mean.map((m, j) => (
+                  <tr key={j}>
+                    <td>{outputLabel(j, s.n_outputs)}</td>
+                    <td className="num text-right font-mono">{formatNumber(m)}</td>
+                    <td className="num text-right font-mono">{formatNumber(summary.target_var[j])}</td>
+                    <td className="num text-right font-mono">{formatNumber(summary.target_std[j])}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Card>
       </div>
 

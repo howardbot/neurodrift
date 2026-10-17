@@ -49,14 +49,19 @@ export default {
           "0%, 100%": { transform: "scale(1)", filter: "brightness(1)" },
           "50%": { transform: "scale(0.82)", filter: "brightness(1.25)" },
         },
+        "menu-in": {
+          from: { opacity: "0", transform: "translate3d(0, -4px, 0)" },
+        },
         float: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-3px)" },
         },
       },
       animation: {
-        "fade-up": `fade-up 0.8s ${ease} both`,
-        "page-in": `page-in 0.45s ${ease} both`,
+        // `backwards`, not `both`: a filled end state leaves a transform on the element,
+        // which would make it the containing block of every position:fixed descendant.
+        "fade-up": `fade-up 0.8s ${ease} backwards`,
+        "page-in": `page-in 0.45s ${ease} backwards`,
         drift: "drift 18s ease-in-out infinite",
         "drift-slow": "drift 26s ease-in-out infinite reverse",
         "gradient-x": "gradient-x 8s ease-in-out infinite",
@@ -65,6 +70,7 @@ export default {
         "wave-x": "wave-x 6s linear infinite",
         "cell-pulse": "cell-pulse 3.6s ease-in-out infinite",
         float: "float 4s ease-in-out infinite",
+        "menu-in": `menu-in 0.16s ${ease} backwards`,
       },
     },
   },

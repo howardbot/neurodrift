@@ -74,8 +74,8 @@ export function ExperimentConfigForm({ projectId, sessions }: { projectId: strin
         <span className="label">Sessions (analysis order = session order)</span>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
           {sessions.map((s) => (
-            <label key={s.id} className="flex items-center gap-1.5 font-mono">
-              <input type="checkbox" checked={selected.includes(s.id)} onChange={() => toggle(s.id)} />
+            <label key={s.id} className="flex min-w-0 max-w-full items-start gap-1.5 font-mono [overflow-wrap:anywhere]">
+              <input type="checkbox" className="mt-1 shrink-0" checked={selected.includes(s.id)} onChange={() => toggle(s.id)} />
               {s.name}
             </label>
           ))}

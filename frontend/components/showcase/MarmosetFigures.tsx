@@ -147,7 +147,7 @@ function shade(v: number): string {
 
 export function InputReadoutGrids() {
   return (
-    <div className="grid gap-6 sm:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
       {ENERGY.map((e) => (
         <div key={e.title}>
           <div className="mb-2 text-center text-xs font-semibold text-zinc-700 dark:text-zinc-300">{e.title}</div>
@@ -195,7 +195,7 @@ const VERDICT_STYLE = {
 
 export function ExplanationsTested() {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {TESTED.map((t) => (
         <div key={t.idea} className="card card-hover p-4">
           <div className="text-sm font-semibold leading-snug">{t.idea}?</div>

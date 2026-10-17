@@ -48,7 +48,7 @@ export function DisparityDemo() {
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
           <div className="mb-1 text-xs font-medium text-zinc-500">Seen from above</div>
           <svg viewBox={`0 0 ${sceneW} ${sceneH}`} className="mx-auto w-full max-w-[320px]" role="img" aria-label="Top-down view of two eyes, a fixation point and a slanted surface">
@@ -82,7 +82,7 @@ export function DisparityDemo() {
           </svg>
         </div>
       </div>
-      <div className="grid gap-4 text-sm sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
         <label className="block">
           <span className="label">Surface tilt (slant): {slant}°</span>
           <input type="range" min={-60} max={60} value={slant} onChange={(e) => setSlant(Number(e.target.value))} className="w-full accent-[#2f5d9e]" />

@@ -68,12 +68,13 @@ export function Card({
   return (
     <section id={id} className={`card ${className}`}>
       {(title || actions) && (
-        <header className="flex items-start justify-between gap-4 rounded-t-lg border-b border-zinc-200 bg-zinc-50/60 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-900/60">
-          <div>
+        // Wraps on narrow screens: the actions drop below the title instead of off-screen.
+        <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 rounded-t-lg border-b border-zinc-200 bg-zinc-50/60 px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-900/60">
+          <div className="min-w-0 flex-1 basis-40 [overflow-wrap:anywhere]">
             {title && <h2 className="text-sm font-semibold">{title}</h2>}
             {subtitle && <p className="mt-0.5 text-xs text-zinc-500">{subtitle}</p>}
           </div>
-          {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+          {actions && <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">{actions}</div>}
         </header>
       )}
       <div className="p-4">{children}</div>
@@ -113,9 +114,11 @@ export function PageHeader({
 }) {
   return (
     <div className="mb-6 flex animate-fade-up flex-wrap items-end justify-between gap-4">
-      <div className="min-w-0">
+      {/* Long names wrap rather than truncate: on a phone the end of a name (a badge, the
+          test session) is often the part that matters. */}
+      <div className="min-w-0 [overflow-wrap:anywhere]">
         {eyebrow && <div className="mb-1 text-xs text-zinc-500">{eyebrow}</div>}
-        <h1 className="truncate text-xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
         {description && <p className="mt-1 max-w-3xl text-sm text-zinc-600 dark:text-zinc-400">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

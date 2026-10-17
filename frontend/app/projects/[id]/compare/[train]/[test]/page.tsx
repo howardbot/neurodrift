@@ -24,8 +24,8 @@ function pct(v: number | null | undefined, digits = 1): string {
 function Row({ label, value, note }: { label: string; value: ReactNode; note?: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-1.5 last:border-0 dark:border-zinc-800">
-      <span className="text-sm text-zinc-600 dark:text-zinc-400">{label}</span>
-      <span className="text-right">
+      <span className="min-w-0 text-sm text-zinc-600 dark:text-zinc-400">{label}</span>
+      <span className="min-w-0 text-right [overflow-wrap:anywhere]">
         <span className="num font-mono text-sm">{value}</span>
         {note && <span className="ml-2 text-xs text-zinc-500">{note}</span>}
       </span>
@@ -38,7 +38,7 @@ function Headline({ c }: { c: PairComparison }) {
   const rep = c.representation;
   const beh = c.behaviour;
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <Card title="Decoder generalisation">
         {d ? (
           <>
@@ -96,13 +96,13 @@ function RepresentationPlots({ c }: { c: PairComparison }) {
   );
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div>
-        <div className="text-xs font-medium text-zinc-500">Principal angles between top-{rep.k} subspaces ({rep.n_neurons_used} neurons)</div>
+        <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Principal angles between top-{rep.k} subspaces ({rep.n_neurons_used} neurons)</div>
         <Plot data={angles} layout={{ xaxis: { title: { text: "angle index" }, dtick: 1 }, yaxis: { title: { text: "degrees" }, range: [0, 90] }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={260} />
       </div>
       <div>
-        <div className="text-xs font-medium text-zinc-500">Variance of {c.test.name} (test block) captured by each set of PCs</div>
+        <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Variance of {c.test.name} (test block) captured by each set of PCs</div>
         <Plot data={capture} layout={{ xaxis: { title: { text: "number of PCs" }, dtick: 1 }, yaxis: { title: { text: "% variance" }, rangemode: "tozero" }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={260} />
       </div>
       {rep.degenerate && (
@@ -127,13 +127,13 @@ function ActivityPlots({ c }: { c: PairComparison }) {
   }, [act, c.train.name, c.test.name]);
   return (
     <div className="space-y-3">
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div>
-          <div className="text-xs font-medium text-zinc-500">Mean activity per shared neuron ({act.unit})</div>
+          <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Mean activity per shared neuron ({act.unit})</div>
           <Plot data={scatter} layout={{ xaxis: { title: { text: c.train.name } }, yaxis: { title: { text: c.test.name } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={260} />
         </div>
         <div>
-          <div className="text-xs font-medium text-zinc-500">Neuron-level change ({c.test.name} − {c.train.name}, {act.unit})</div>
+          <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Neuron-level change ({c.test.name} − {c.train.name}, {act.unit})</div>
           <Plot data={hist} layout={{ xaxis: { title: { text: `Δ mean activity (${act.unit})` } }, yaxis: { title: { text: "neurons" } }, margin: { l: 50, r: 10, t: 10, b: 44 } }} height={260} />
         </div>
       </div>
@@ -167,16 +167,16 @@ function BehaviourPlots({ c }: { c: PairComparison }) {
   }, [beh, c.train.name, c.test.name]);
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {hists.map((h, k) => (
           <div key={k}>
-            <div className="text-xs font-medium text-zinc-500">{outputLabel(c.outputs[k] ?? k, nAll)} distribution</div>
+            <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">{outputLabel(c.outputs[k] ?? k, nAll)} distribution</div>
             <Plot data={h} layout={{ barmode: "overlay", bargap: 0, xaxis: { title: { text: "value" } }, yaxis: { title: { text: "bins" } }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={240} />
           </div>
         ))}
         {paths && (
           <div>
-            <div className="text-xs font-medium text-zinc-500">Example: first 400 bins in output space (Y₀ vs Y₁)</div>
+            <div className="text-xs font-medium text-zinc-500 [overflow-wrap:anywhere]">Example: first 400 bins in output space (Y₀ vs Y₁)</div>
             <Plot data={paths} layout={{ xaxis: { title: { text: "Y₀" } }, yaxis: { title: { text: "Y₁" }, scaleanchor: "x" }, margin: { l: 50, r: 10, t: 10, b: 70 } }} height={240} />
           </div>
         )}
@@ -299,7 +299,7 @@ function ComparePage() {
         <BehaviourPlots c={c} />
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card title="Sessions"><div className="-mx-4 -my-4 overflow-x-auto"><Metadata c={c} /></div></Card>
         <Card title="Reading this page">
           <ul className="list-disc space-y-1.5 pl-5 text-sm text-zinc-600 dark:text-zinc-400">

@@ -51,7 +51,7 @@ function PcaPlots({ pca }: { pca: SessionPca }) {
           height={230}
         />
       </div>
-      <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
           <div className="text-xs font-medium text-zinc-500">PC time courses — first {formatNumber(tr.time.length)} bins ({tr.smooth_bins}-bin boxcar, display only)</div>
           <Plot data={timecourses} layout={{ xaxis: { title: { text: xTitle } }, yaxis: { title: { text: "projection" } }, margin: { l: 50, r: 10, t: 10, b: 60 } }} height={260} />
