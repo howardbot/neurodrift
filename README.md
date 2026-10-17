@@ -2,10 +2,13 @@
 
 **Measure neural representation drift and decoder stability across recording sessions.**
 
-The site also hosts a plain-language research showcase (`/` and `/research/*`): four
-projects explained for readers outside neuroscience, each with an interactive toy
-illustration. Only already-public results are shown; unpublished projects describe
-questions and methods.
+The site is also Qin Liu's personal website: a home page (`/`) and an About page (`/about`)
+with research experience, selected work, education and contact, plus a plain-language
+research showcase (`/research/*`) — four projects explained for readers outside
+neuroscience, each with an interactive toy illustration. Only already-public results are
+shown; unpublished projects describe questions and methods. Personal details live in one
+file, [`frontend/content/profile.ts`](frontend/content/profile.ts); the repository is
+public, so only details meant to be public belong there.
 
 NeuroDrift is a lightweight web application for studying the cross-session stability of
 neural population representations and linear neural decoders. Upload one `.npz` file per

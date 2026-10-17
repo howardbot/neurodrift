@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { DemoButton } from "@/components/DemoButton";
 import { Reveal } from "@/components/motion";
+import { Chips, ContactButtons, GitHubIcon, LabTimeline, MailIcon, SectionHeading } from "@/components/profile/ProfileBlocks";
 import { DriftMatrix } from "@/components/showcase/Glyphs";
 import { HeroRaster } from "@/components/showcase/HeroRaster";
 import { PopulationDecodingDemo } from "@/components/showcase/PopulationDecodingDemo";
-import { Figure, HeroGlow, ProjectCard, SkillList, Term } from "@/components/showcase/Story";
+import { Figure, HeroGlow, ProjectCard, Term } from "@/components/showcase/Story";
+import { PROFILE } from "@/content/profile";
 import { RESEARCH } from "@/content/research";
 
 function LiveDot({ tone = "emerald" }: { tone?: "emerald" | "accent" }) {
@@ -53,19 +55,6 @@ function PrimerStep({ n, title, last, children }: { n: number; title: string; la
   );
 }
 
-function SectionHeading({ eyebrow, title, children }: { eyebrow: string; title: string; children?: ReactNode }) {
-  return (
-    <Reveal className="mb-8">
-      <div className="mb-1.5 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-accent-600 dark:text-accent-300">
-        <span className="h-px w-5 bg-gradient-to-r from-accent-500 to-transparent" />
-        {eyebrow}
-      </div>
-      <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">{title}</h2>
-      {children && <p className="mt-2 max-w-3xl text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-400">{children}</p>}
-    </Reveal>
-  );
-}
-
 export default function Home() {
   return (
     <div className="mx-auto max-w-5xl py-6">
@@ -75,25 +64,30 @@ export default function Home() {
         <div className="max-w-3xl">
           <div className="mb-5 inline-flex animate-fade-up items-center gap-2 rounded-full border border-accent-500/20 bg-white/80 px-3 py-1 text-xs font-medium text-accent-700 shadow-sm dark:bg-zinc-900/60 dark:text-accent-200">
             <LiveDot tone="accent" />
-            Qin Liu · Neuroscience research
+            {PROFILE.field} · UW–Madison
           </div>
-          <h1 className="animate-fade-up text-[2rem] font-semibold leading-[1.15] tracking-tight [animation-delay:80ms] md:text-[2.9rem] md:leading-[1.1]">
+          <h1 className="animate-fade-up text-[2.75rem] font-semibold leading-none tracking-tight md:text-[4rem]">{PROFILE.name}</h1>
+          <p className="mt-2 animate-fade-up text-sm font-medium text-zinc-600 [animation-delay:60ms] dark:text-zinc-400">{PROFILE.affiliation}</p>
+          <p className="mt-6 animate-fade-up text-[1.4rem] font-semibold leading-snug tracking-tight [animation-delay:120ms] md:text-[1.9rem] md:leading-[1.2]">
             How does the brain turn what we see into what we do —{" "}
             <span className="text-gradient">and can we read those signals reliably?</span>
-          </h1>
-          <p className="mt-6 animate-fade-up text-lg leading-relaxed text-zinc-600 [animation-delay:160ms] dark:text-zinc-400">
-            I analyse recordings from individual neurons in monkeys and marmosets. My projects ask how brain areas share
-            information, how two eyes create a sense of depth, how stable &ldquo;brain-reading&rdquo; decoders are from day to day,
-            and how far we can trust the tools that pick single neurons out of noisy recordings. This site explains that work for
-            people outside neuroscience — no background needed.
           </p>
-          <div className="mt-7 flex animate-fade-up flex-wrap gap-3 [animation-delay:240ms]">
-            <a href="#primer" className="btn btn-primary group">
-              Start with the 2-minute primer
+          <p className="mt-5 animate-fade-up text-lg leading-relaxed text-zinc-600 [animation-delay:180ms] dark:text-zinc-400">{PROFILE.tagline}</p>
+          <Chips items={PROFILE.interests} className="mt-5 animate-fade-up [animation-delay:220ms]" />
+          <div className="mt-7 flex animate-fade-up flex-wrap gap-3 [animation-delay:260ms]">
+            <a href="#projects" className="btn btn-primary group">
+              Explore the research
               <span className="inline-block transition-transform duration-200 group-hover:translate-y-0.5">↓</span>
             </a>
-            <a href="#projects" className="btn btn-outline group">
-              Jump to the projects <span className="arrow">→</span>
+            <Link href="/about" className="btn btn-outline group">
+              About me <span className="arrow">→</span>
+            </Link>
+            <a href={`mailto:${PROFILE.email}`} className="btn btn-outline">
+              <MailIcon />
+              Email
+            </a>
+            <a href={PROFILE.github} className="btn btn-outline px-3" rel="me noopener" target="_blank" aria-label="GitHub">
+              <GitHubIcon />
             </a>
           </div>
         </div>
@@ -115,9 +109,31 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Projects */}
+      {/* The anchor sits on the untransformed section, not on the Reveal inside it. */}
+      <section id="projects" className="mb-20">
+        <SectionHeading eyebrow="Research" title="Four questions about reading the brain">
+          I analyse recordings from individual neurons in monkeys and marmosets: how brain areas share information, how two
+          eyes create a sense of depth, how stable &ldquo;brain-reading&rdquo; decoders are from day to day, and how far we can
+          trust the tools that pick single neurons out of noisy recordings. Each page explains the question in plain language
+          with an interactive illustration. Unpublished projects show methods, not results.
+        </SectionHeading>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {RESEARCH.map((p, i) => (
+            <ProjectCard key={p.slug} project={p} index={i} />
+          ))}
+        </div>
+        <Reveal className="mt-6 text-sm text-zinc-600 dark:text-zinc-400">
+          New to neuroscience?{" "}
+          <a href="#primer" className="group font-medium text-accent-600 dark:text-accent-300">
+            Start with the two-minute primer <span className="inline-block transition-transform duration-200 group-hover:translate-y-0.5">↓</span>
+          </a>
+        </Reveal>
+      </section>
+
       {/* Primer */}
       <section id="primer" className="mb-20">
-        <SectionHeading eyebrow="Primer" title="Neuroscience in two minutes" />
+        <SectionHeading eyebrow="Primer" title="Neuroscience in two minutes">No background needed: the four ideas behind every project above.</SectionHeading>
         <PrimerStep n={1} title="Neurons talk in spikes">
           <p>
             Your brain has about 86 billion neurons. They communicate with brief electrical pulses called{" "}
@@ -161,18 +177,17 @@ export default function Home() {
         </PrimerStep>
       </section>
 
-      {/* Projects */}
-      {/* The anchor sits on the untransformed section, not on the Reveal inside it. */}
-      <section id="projects" className="mb-20">
-        <SectionHeading eyebrow="Research" title="Projects">
-          Each page explains the question in plain language, shows an interactive illustration, and describes what I built.
-          Unpublished projects show methods, not results.
+      {/* Experience */}
+      <section id="experience" className="mb-20">
+        <SectionHeading eyebrow="Experience" title="Where I work">
+          Four labs across neural decoding, recording hardware, 3D vision and control. Projects with a story on this site link to it.
         </SectionHeading>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          {RESEARCH.map((p, i) => (
-            <ProjectCard key={p.slug} project={p} index={i} />
-          ))}
-        </div>
+        <LabTimeline />
+        <Reveal className="mt-6">
+          <Link href="/about#experience" className="group text-sm font-medium text-accent-600 dark:text-accent-300">
+            What I do in each lab, education and toolbox <span className="arrow">→</span>
+          </Link>
+        </Reveal>
       </section>
 
       {/* NeuroDrift */}
@@ -210,18 +225,23 @@ export default function Home() {
         </div>
       </Reveal>
 
-      {/* Toolbox */}
-      <section className="mb-8">
-        <SectionHeading eyebrow="Skills" title="Toolbox" />
-        <SkillList
-          groups={[
-            { label: "Neural data analysis", items: ["Decoding: Kalman filters, ridge regression, support vector machines", "Dimensionality reduction and alignment: PCA, CCA, subspace angles", "Statistics: block bootstrap, permutation and sign-flip tests, multiple-comparison control"] },
-            { label: "Electrophysiology", items: ["Single- and multi-unit recordings from tetrodes and multi-electrode implants", "Spike sorting with Kilosort 4 and Plexon Offline Sorter", "Receptive-field mapping and waveform classification"] },
-            { label: "Experiments and modelling", items: ["Stereo 3D stimulus rendering with OpenGL / Psychtoolbox", "Population models of binocular disparity processing", "Synthetic data and simulations to test analyses"] },
-            { label: "Engineering", items: ["Python (NumPy, SciPy, scikit-learn), MATLAB", "Reproducible pipelines with integrity checks and checksummed result snapshots", "Full-stack web apps: this site (Next.js, FastAPI, Docker)"] },
-          ]}
-        />
-      </section>
+      {/* Contact */}
+      <Reveal as="section" className="mb-8">
+        <div id="contact" className="card relative isolate overflow-hidden p-6 md:p-8">
+          <div aria-hidden="true" data-pause-offscreen="" className="pointer-events-none absolute inset-0 -z-10">
+            <div className="glow absolute -left-32 -top-40 h-[24rem] w-[24rem] animate-drift-slow [--glow-alpha:0.16] [--glow:90_141_205] dark:[--glow-alpha:0.12] dark:[--glow:59_111_182]" />
+          </div>
+          <div className="text-xs font-medium uppercase tracking-wider text-accent-600 dark:text-accent-300">Contact</div>
+          <h2 className="mt-1 text-xl font-semibold md:text-2xl">Let&apos;s talk brains and machines.</h2>
+          <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+            Reach out about research, collaborations, or a lab position — I&apos;m always glad to compare notes on decoding and neural
+            data.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <ContactButtons />
+          </div>
+        </div>
+      </Reveal>
     </div>
   );
 }
