@@ -27,7 +27,7 @@ function DriftGlyph() {
       <g className="transition-transform duration-700 ease-out group-hover:-translate-y-2">
         <path
           d="M12 52c22-26 44-32 66-14s38 18 70-12"
-          className="animate-dash-flow stroke-zinc-400 dark:stroke-zinc-500"
+          className="animate-drift-y stroke-zinc-400 [animation-duration:3.6s] dark:stroke-zinc-500"
           strokeWidth={2.2}
           fill="none"
           strokeLinecap="round"
@@ -61,7 +61,7 @@ function StereoGlyph() {
         <g key={y}>
           <circle cx={18} cy={y} r={7} className="fill-white stroke-zinc-400 dark:fill-zinc-900" strokeWidth={1.4} />
           <circle cx={21} cy={y} r={3} className="fill-accent-600 dark:fill-accent-300" />
-          <path d={`M26 ${y} L118 32`} className="animate-dash-flow stroke-accent-500/60" strokeWidth={1.2} strokeDasharray="2 4" />
+          <path d={`M26 ${y} L118 32`} className={`animate-ray-pulse stroke-accent-500/60 ${y > 30 ? "[animation-delay:-1.2s]" : ""}`} strokeWidth={1.2} strokeDasharray="2 4" />
         </g>
       ))}
       <g className="origin-center transition-transform duration-700 ease-out [transform-box:fill-box] group-hover:rotate-[18deg]">
@@ -101,7 +101,7 @@ export function ProjectGlyph({ slug }: { slug: string }) {
   const Glyph = GLYPHS[slug];
   if (!Glyph) return null;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="mx-auto block overflow-hidden" aria-hidden="true">
+    <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className="mx-auto block overflow-hidden" aria-hidden="true" data-pause-offscreen="">
       <Glyph />
     </svg>
   );
@@ -118,7 +118,7 @@ export function DriftMatrix({ n = 6 }: { n?: number }) {
     return { i, j, v: 0.12 + 0.86 * Math.exp(-Math.abs(i - j) / 1.4) };
   });
   return (
-    <div aria-hidden="true" className="select-none">
+    <div aria-hidden="true" className="select-none" data-pause-offscreen="">
       <div className="mb-1.5 pl-6 font-mono text-[10px] text-zinc-400">test day →</div>
       <div className="flex gap-1.5">
         <div className="w-4 pt-1 font-mono text-[10px] leading-none text-zinc-400 [writing-mode:vertical-rl]">train day →</div>

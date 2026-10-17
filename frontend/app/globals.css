@@ -45,13 +45,21 @@ body {
   .card {
     @apply rounded-lg border border-zinc-200 bg-white shadow-[0_1px_2px_rgba(24,24,27,0.04)] dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none;
   }
-  /* Lift and tint on hover, for cards that are links or invite exploration. */
+  /* Lift on hover and settle on press, for cards that are links or invite exploration.
+     Only transform and opacity animate: the hover shadow sits on ::after and fades in. */
   .card-hover {
-    transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out), border-color 0.2s;
-    @apply hover:-translate-y-0.5 hover:border-accent-500/60 hover:shadow-[0_12px_32px_-12px_rgba(47,93,158,0.28)] dark:hover:border-accent-400/50 dark:hover:shadow-[0_12px_32px_-12px_rgba(0,0,0,0.6)];
+    @apply relative transition-transform duration-300 ease-out hover:-translate-y-0.5 hover:border-accent-500/60 active:translate-y-0 active:scale-[0.99] dark:hover:border-accent-400/50;
   }
+  .card-hover::after {
+    content: "";
+    @apply pointer-events-none absolute -inset-px rounded-[inherit] opacity-0 shadow-[0_12px_32px_-12px_rgba(47,93,158,0.28)] transition-opacity duration-300 ease-out dark:shadow-[0_12px_32px_-12px_rgba(0,0,0,0.6)];
+  }
+  .card-hover:hover::after {
+    @apply opacity-100;
+  }
+  /* Buttons lift a pixel on hover and press down; colours change without a transition. */
   .btn {
-    @apply inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-200 active:scale-[0.98];
+    @apply inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-transform duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.97];
   }
   .btn-primary {
     @apply bg-accent-600 text-white shadow-sm shadow-accent-600/25 hover:bg-accent-700 hover:shadow-md hover:shadow-accent-600/30;
@@ -64,7 +72,7 @@ body {
     @apply inline-block transition-transform duration-200 group-hover:translate-x-1;
   }
   .text-gradient {
-    @apply bg-gradient-to-r from-accent-600 via-sky-500 to-violet-500 bg-[length:200%_auto] bg-clip-text text-transparent dark:from-accent-300 dark:via-sky-300 dark:to-violet-300;
+    @apply bg-gradient-to-r from-accent-600 via-sky-500 to-violet-500 bg-clip-text text-transparent dark:from-accent-300 dark:via-sky-300 dark:to-violet-300;
   }
   .input {
     @apply w-full max-w-full rounded border border-zinc-300 bg-white px-2.5 py-1.5 text-sm outline-none
@@ -141,25 +149,101 @@ body {
   animation-play-state: paused !important;
 }
 
-/* A path drawn on as it appears. Needs pathLength="1" on the SVG element. */
-.draw-path {
-  stroke-dasharray: 1;
-  animation: draw-path 2.4s var(--ease-out) 0.2s both;
+/* The step the reader has reached (components/ScrollSteps.tsx): its badge grows a little and
+   a ring fades in. Transform/opacity only; the text itself is never dimmed. */
+.step-badge {
+  transition: transform 0.3s var(--ease-out);
 }
-[data-reveal="hidden"] .draw-path {
+.step-badge::after {
+  content: "";
+  @apply pointer-events-none absolute -inset-1 rounded-full opacity-0 ring-2 ring-accent-500/40 transition-opacity duration-300 dark:ring-accent-300/40;
+}
+.step-badge[data-active] {
+  transform: scale(1.15);
+}
+.step-badge[data-active]::after {
+  @apply opacity-100;
+}
+
+/* One research story replacing another (components/ResearchTransitions.tsx). Only the
+   story moves: the rest of the page swaps at once, and the group does not morph its size
+   (the stories have different heights). Transform/opacity only. */
+.research-story {
+  view-transition-name: research-story;
+}
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-group(research-story) {
   animation: none;
-  stroke-dashoffset: 1;
 }
-@keyframes draw-path {
+::view-transition-old(research-story) {
+  animation: research-out 0.16s ease-in both;
+}
+::view-transition-new(research-story) {
+  animation: research-in 0.3s var(--ease-out) both;
+}
+@keyframes research-out {
+  to {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+}
+@keyframes research-in {
   from {
-    stroke-dashoffset: 1;
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+}
+
+/* One-time chart reveal (components/PlotReveal.tsx): covers in the card colour fade out
+   band by band, or slide off to the right. Transform/opacity only. */
+[data-plot-reveal="playing"] .plot-cover-row {
+  animation: plot-row-out 0.42s var(--ease-out) both;
+}
+[data-plot-reveal="playing"] .plot-cover-wipe {
+  transform-origin: right center;
+  animation: plot-wipe-out 0.9s var(--ease-out) both;
+}
+@keyframes plot-row-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes plot-wipe-out {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* A trace "drawn on" as its block scrolls into view: a cover in the card colour slides off
+   to the right (transform only). It only exists while a Reveal is hidden or just shown, so
+   with JavaScript off, reduced motion or a block already on screen, nothing is covered. */
+.trace-cover {
+  transform: scaleX(0);
+  transform-origin: right center;
+}
+[data-reveal="hidden"] .trace-cover {
+  transform: scaleX(1);
+}
+[data-reveal="shown"] .trace-cover {
+  animation: trace-wipe 2s var(--ease-out) 0.15s both;
+}
+@keyframes trace-wipe {
+  from {
+    transform: scaleX(1);
   }
   to {
-    stroke-dashoffset: 0;
+    transform: scaleX(0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
   *,
   ::before,
   ::after {

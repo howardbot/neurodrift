@@ -107,7 +107,7 @@ export function UploadSessionForm({ projectId, onUploaded }: { projectId: string
       </div>
       {busy && (
         <div className="h-1.5 overflow-hidden rounded bg-zinc-200 dark:bg-zinc-800">
-          <div className="h-full bg-accent-600 transition-all" style={{ width: `${Math.round((progress ?? 0) * 100)}%` }} />
+          <div className="h-full origin-left bg-accent-600 transition-transform" style={{ transform: `scaleX(${progress ?? 0})` }} />
         </div>
       )}
       {error && <ErrorBox error={error} />}

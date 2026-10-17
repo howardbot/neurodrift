@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Reveal, ScrollProgress } from "@/components/motion";
+import { ScrollSteps } from "@/components/ScrollSteps";
 import { ProjectGlyph } from "@/components/showcase/Glyphs";
 import { RESEARCH, type ResearchProject } from "@/content/research";
 
@@ -28,7 +29,7 @@ export function ProjectHero({ project }: { project: ResearchProject }) {
       <ScrollProgress />
       <HeroGlow />
       <div className="mb-4 flex animate-fade-up flex-wrap items-center gap-2 text-xs text-zinc-500">
-        <Link href="/" className="transition-colors hover:text-accent-600">Research</Link>
+        <Link href="/" className="hover:text-accent-600">Research</Link>
         <span className="text-zinc-300 dark:text-zinc-700">/</span>
         <span>{project.status}</span>
         {project.context && (
@@ -46,7 +47,7 @@ export function ProjectHero({ project }: { project: ResearchProject }) {
         {project.tags.map((t) => (
           <span
             key={t}
-            className="rounded-full border border-zinc-200 bg-white/80 px-2.5 py-0.5 text-xs text-zinc-600 transition-colors hover:border-accent-500/60 hover:text-accent-700 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-400 dark:hover:text-accent-200"
+            className="rounded-full border border-zinc-200 bg-white/80 px-2.5 py-0.5 text-xs text-zinc-600 hover:border-accent-500/60 hover:text-accent-700 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-400 dark:hover:text-accent-200"
           >
             {t}
           </span>
@@ -80,7 +81,7 @@ export function Figure({ children, caption, label }: { children: ReactNode; capt
       {label && (
         <div className="flex items-center gap-2 border-b border-zinc-200 bg-zinc-50/60 px-4 py-2 text-[11px] font-medium uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60">
           {interactive && (
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-2 w-2" data-pause-offscreen="">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-reduce:hidden" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
@@ -96,12 +97,11 @@ export function Figure({ children, caption, label }: { children: ReactNode; capt
 
 export function Steps({ items }: { items: { title: string; body: ReactNode }[] }) {
   return (
-    <div className="relative">
-      <span aria-hidden="true" className="absolute bottom-3 left-3 top-3 w-px -translate-x-1/2 bg-gradient-to-b from-accent-500/50 via-zinc-200 to-transparent dark:via-zinc-800" />
+    <ScrollSteps>
       <ol className="space-y-5">
         {items.map((item, i) => (
           <Reveal as="li" key={item.title} delay={i * 90} className="relative flex gap-4">
-            <span className="relative mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-500 to-accent-700 font-mono text-xs font-semibold text-white shadow-sm shadow-accent-600/30 ring-4 ring-zinc-50 dark:ring-zinc-950">
+            <span data-step="" className="step-badge relative mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-500 to-accent-700 font-mono text-xs font-semibold text-white shadow-sm shadow-accent-600/30 ring-4 ring-zinc-50 dark:ring-zinc-950">
               {i + 1}
             </span>
             <div>
@@ -111,7 +111,7 @@ export function Steps({ items }: { items: { title: string; body: ReactNode }[] }
           </Reveal>
         ))}
       </ol>
-    </div>
+    </ScrollSteps>
   );
 }
 
@@ -153,17 +153,17 @@ export function SkillList({ groups }: { groups: { label: string; items: string[]
 export function ProjectCard({ project, index }: { project: ResearchProject; index: number }) {
   return (
     <Reveal delay={(index % 2) * 110} className="h-full">
-      <Link href={`/research/${project.slug}`} className="card card-hover group flex h-full flex-col overflow-hidden">
-        <div className="relative border-b border-zinc-100 bg-gradient-to-br from-accent-50/80 via-white to-violet-50/50 px-5 py-3 dark:border-zinc-800 dark:from-accent-700/10 dark:via-zinc-900 dark:to-violet-500/5">
+      <Link href={`/research/${project.slug}`} className="card card-hover group flex h-full flex-col">
+        <div className="relative rounded-t-lg border-b border-zinc-100 bg-gradient-to-br from-accent-50/80 via-white to-violet-50/50 px-5 py-3 dark:border-zinc-800 dark:from-accent-700/10 dark:via-zinc-900 dark:to-violet-500/5">
           <ProjectGlyph slug={project.slug} />
           <span className="absolute left-5 top-3 font-mono text-xs text-zinc-400">0{index + 1}</span>
         </div>
         <div className="flex flex-1 flex-col p-5">
-          <h3 className="text-base font-semibold leading-snug transition-colors group-hover:text-accent-600 dark:group-hover:text-accent-300">{project.title}</h3>
+          <h3 className="text-base font-semibold leading-snug group-hover:text-accent-600 dark:group-hover:text-accent-300">{project.title}</h3>
           <p className="mt-2 flex-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{project.hook}</p>
           <div className="mt-4 flex items-center justify-between gap-3 text-xs text-zinc-500">
             <span>{project.status}</span>
-            <span className="arrow shrink-0 text-accent-600 opacity-0 transition-all group-hover:opacity-100 dark:text-accent-300">Read →</span>
+            <span className="arrow shrink-0 text-accent-600 opacity-0 transition-[opacity,transform] group-hover:opacity-100 dark:text-accent-300">Read →</span>
           </div>
         </div>
       </Link>
@@ -176,7 +176,7 @@ export function NextProject({ current }: { current: string }) {
   const next = RESEARCH[(i + 1) % RESEARCH.length]!;
   return (
     <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
-      <Link href="/" className="group text-sm text-zinc-500 transition-colors hover:text-accent-600">
+      <Link href="/" className="group text-sm text-zinc-500 hover:text-accent-600">
         <span className="inline-block transition-transform duration-200 group-hover:-translate-x-1">←</span> All research
       </Link>
       <Link href={`/research/${next.slug}`} className="card card-hover group px-4 py-3 text-right text-sm">
