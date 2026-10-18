@@ -61,6 +61,51 @@ function GuideGlyph({ slug }: { slug: string }) {
       </svg>
     );
   }
+  if (slug === "family-tree") {
+    const nodes: [number, number][] = [[100, 10], [58, 32], [142, 32], [30, 54], [86, 54], [124, 54], [170, 54]];
+    const links = [[0, 1], [0, 2], [1, 3], [1, 4], [2, 5], [2, 6], [4, 5]];
+    return (
+      <svg viewBox="0 0 200 64" className="h-16 w-full" aria-hidden="true">
+        {links.map(([a, b]) => {
+          const [x0, y0] = nodes[a!]!;
+          const [x1, y1] = nodes[b!]!;
+          const tie = y0 === y1;
+          return (
+            <path
+              key={`${a}${b}`}
+              d={tie ? `M${x0} ${y0 - 4} Q${(x0 + x1) / 2} ${y0 - 14}, ${x1} ${y1 - 4}` : `M${x0} ${y0 + 5} C${x0} ${y0 + 13}, ${x1} ${y1 - 13}, ${x1} ${y1 - 5}`}
+              fill="none"
+              strokeDasharray={tie ? "2 3" : undefined}
+              className={tie ? "stroke-rose-400" : "stroke-zinc-400 dark:stroke-zinc-500"}
+              strokeWidth={1.4}
+            />
+          );
+        })}
+        {nodes.map(([x, y], i) => (
+          <rect key={i} x={x - 14} y={y - 5} width={28} height={10} rx={5} className={i === 6 ? "fill-accent-600 dark:fill-accent-300" : ["fill-amber-300", "fill-sky-300", "fill-emerald-300", "fill-violet-300"][i % 4]} />
+        ))}
+      </svg>
+    );
+  }
+  if (slug === "sorting-methods") {
+    const clusters: [number, number, string][] = [[46, 40, "fill-sky-500"], [72, 20, "fill-violet-500"], [92, 44, "fill-rose-500"]];
+    return (
+      <svg viewBox="0 0 200 64" className="h-16 w-full" aria-hidden="true">
+        {clusters.flatMap(([cx, cy, cls], c) =>
+          Array.from({ length: 14 }, (_, i) => {
+            // Sunflower spiral: evenly filled round clusters.
+            const a = i * 2.39996 + c;
+            const r = Math.sqrt((i + 0.5) / 14) * 11;
+            return <circle key={`${c}-${i}`} cx={cx + Math.cos(a) * r} cy={cy + Math.sin(a) * r * 0.75} r={1.6} className={cls} opacity={0.85} />;
+          }),
+        )}
+        <rect x={30} y={28} width={32} height={24} rx={2} fill="none" className="stroke-accent-600 dark:stroke-accent-300" strokeWidth={1.4} strokeDasharray="4 2" />
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <rect key={i} x={124} y={8 + i * 8.5} width={[64, 52, 44, 36, 26, 18][i]} height={4} rx={2} className="fill-accent-500/70 dark:fill-accent-300/70" />
+        ))}
+      </svg>
+    );
+  }
   const pts = Array.from({ length: 80 }, (_, i) => {
     const spike = [12, 31, 47, 63].includes(i) ? -22 : 0;
     return `${i ? "L" : "M"}${(i / 79) * 120},${32 + Math.sin(i / 6) * 6 + spike}`;

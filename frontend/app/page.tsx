@@ -182,8 +182,9 @@ export default function Home() {
       {/* Field guide */}
       <section id="field-guide" className="mb-20">
         <SectionHeading eyebrow="Field guide" title="How do you listen to a brain?">
-          Three short, interactive explainers behind everything above: the electrodes neuroscientists use, from the scalp to the inside of
-          a single cell; how a raw recording becomes the numbers a decoder reads; and where in the brain my recordings come from.
+          Five short, interactive explainers behind everything above: the electrodes neuroscientists use, from the scalp to the inside of
+          a single cell; how a raw recording becomes the numbers a decoder reads; how spike sorting is done; where in the brain my
+          recordings come from; and the family tree of the researchers who built the field.
         </SectionHeading>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {GUIDES.map((g, i) => (
