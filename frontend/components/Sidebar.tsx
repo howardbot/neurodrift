@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCurrentProject, type ProjectRef } from "@/components/CurrentProject";
 import { Logo } from "@/components/Logo";
+import { GUIDES } from "@/content/learn";
 import { RESEARCH } from "@/content/research";
 
 const SHORT_TITLES: Record<string, string> = {
@@ -42,6 +43,13 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    heading: "Field guide",
+    items: [
+      { href: "/learn", label: "Overview", active: (p) => p === "/learn" },
+      ...GUIDES.map((g) => ({ href: `/learn/${g.slug}`, label: g.short, active: (p: string) => p === `/learn/${g.slug}` })),
+    ],
+  },
+  {
     heading: "NeuroDrift tool",
     items: [
       { href: "/tool", label: "Overview", active: (p) => p === "/tool" },
@@ -62,10 +70,11 @@ function projectItems(project: ProjectRef): NavItem[] {
   ];
 }
 
-/** Project navigation is shown inside the tool, not on the research pages (or the glossary). */
+/** Project navigation is shown inside the tool, not on the research pages, field guide or glossary. */
 function useProjectNav(pathname: string): ProjectRef | null {
   const project = useCurrentProject();
-  const isResearch = pathname === "/" || pathname === "/about" || pathname.startsWith("/research") || pathname === "/glossary";
+  const isResearch =
+    pathname === "/" || pathname === "/about" || pathname.startsWith("/research") || pathname.startsWith("/learn") || pathname === "/glossary";
   return project && !isResearch ? project : null;
 }
 

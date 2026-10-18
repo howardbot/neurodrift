@@ -260,6 +260,13 @@ body {
   }
 }
 
+/* A trace redrawn when its content changes (e.g. picking another electrode): a cover in
+   the card colour, keyed to the content, slides off to the right. Transform only. */
+.trace-redraw {
+  transform-origin: right center;
+  animation: trace-wipe 1.1s var(--ease-out) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
