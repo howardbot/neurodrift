@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { BRAIN_AREAS, ELECTRODES, GUIDES, SPECIES, TREE_ERAS, TREE_LINKS, TREE_PEOPLE, TREE_TIES } from "@/content/learn";
+import { BCI_CHECKED, BCI_DEPTHS, BCI_LANDSCAPE, BCI_STAGES } from "@/content/bciToday";
+import { BRAIN_AREAS, ELECTRODES, GUIDE_GROUPS, GUIDES, SPECIES, TREE_ERAS, TREE_LINKS, TREE_PEOPLE, TREE_TIES } from "@/content/learn";
 import { RESEARCH } from "@/content/research";
 import { ancestors, connection, crowdedPairs, linkCollisions, mentorsOf } from "@/lib/tree";
 
@@ -67,5 +68,27 @@ describe("family tree", () => {
     for (let i = 1; i < path.length; i++) expect(path[i]!.from).toBe(path[i - 1]!.to);
     expect(connection("qin", "qin")).toEqual([]);
     expect(connection("qin", "nicolelis")).toBeNull();
+  });
+});
+
+describe("field guide index", () => {
+  it("puts every guide in a known group and features three on the home page", () => {
+    const groups = new Set(GUIDE_GROUPS.map((g) => g.id));
+    for (const g of GUIDES) expect(groups.has(g.group), g.slug).toBe(true);
+    expect(GUIDES.filter((g) => g.featured).length).toBe(3);
+  });
+});
+
+describe("BCIs today", () => {
+  it("dates the page and sources every entry", () => {
+    expect(Number.isNaN(Date.parse(BCI_CHECKED))).toBe(false);
+    const depths = new Set(BCI_DEPTHS.map((d) => d.id));
+    const stages = new Set(BCI_STAGES.map((s) => s.id));
+    for (const e of BCI_LANDSCAPE) {
+      expect(depths.has(e.depth) && stages.has(e.stage), e.id).toBe(true);
+      expect(e.sources.length, e.id).toBeGreaterThan(0);
+      for (const s of e.sources) expect(s.url.startsWith("https://"), s.url).toBe(true);
+    }
+    expect(new Set(BCI_LANDSCAPE.map((e) => e.id)).size).toBe(BCI_LANDSCAPE.length);
   });
 });

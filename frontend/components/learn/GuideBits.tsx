@@ -61,6 +61,69 @@ function GuideGlyph({ slug }: { slug: string }) {
       </svg>
     );
   }
+  if (slug === "decoders") {
+    const paths = [
+      ["M18 52 C40 50, 60 20, 92 26 S140 40, 150 30", "stroke-amber-500"],
+      ["M18 52 C50 46, 80 30, 110 30 S140 30, 150 30", "stroke-accent-600 dark:stroke-accent-300"],
+      ["M18 52 C30 30, 70 44, 100 22 S135 36, 150 30", "stroke-violet-500"],
+    ] as const;
+    return (
+      <svg viewBox="0 0 200 64" className="h-16 w-full" aria-hidden="true">
+        {paths.map(([d, cls]) => (
+          <path key={d} d={d} fill="none" className={cls} strokeWidth={2} strokeLinecap="round" strokeOpacity={0.85} />
+        ))}
+        <circle cx={150} cy={30} r={9} className="fill-emerald-500/15 stroke-emerald-500" strokeWidth={1.4} />
+        <circle cx={150} cy={30} r={2.5} className="fill-emerald-500" />
+        {Array.from({ length: 4 }, (_, r) =>
+          Array.from({ length: 6 }, (_, c) => (
+            <rect key={`${r}${c}`} x={168 + c * 4.5} y={14 + r * 9} width={3} height={6} rx={1} className="fill-zinc-400 dark:fill-zinc-500" opacity={[0.3, 0.9, 0.5, 0.2, 0.7, 0.4][(r + c) % 6]} />
+          )),
+        )}
+      </svg>
+    );
+  }
+  if (slug === "drift") {
+    return (
+      <svg viewBox="0 0 200 64" className="h-16 w-full" aria-hidden="true">
+        {Array.from({ length: 4 }, (_, r) =>
+          Array.from({ length: 8 }, (_, c) => {
+            const isNew = [3, 9, 14, 20, 27, 30].includes(r * 8 + c);
+            return <rect key={`${r}${c}`} x={10 + c * 11} y={8 + r * 12} width={9} height={9} rx={2} className={isNew ? "fill-amber-500" : "fill-accent-500 dark:fill-accent-300"} opacity={isNew ? 0.9 : 0.35 + ((r * 3 + c) % 5) * 0.13} />;
+          }),
+        )}
+        <path d="M110 14 C130 16, 150 30, 190 52" fill="none" className="stroke-rose-500" strokeWidth={2} strokeLinecap="round" />
+        <path d="M110 14 C130 15, 160 18, 190 19" fill="none" className="stroke-accent-600 dark:stroke-accent-300" strokeWidth={2} strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (slug === "seeing-3d") {
+    const dots = (x0: number, shift: number) =>
+      Array.from({ length: 13 * 13 }, (_, i) => {
+        const x = i % 13;
+        const y = Math.floor(i / 13);
+        const inside = x >= 4 && x < 9 && y >= 4 && y < 9;
+        const sx = inside ? (x + shift + 13) % 13 : x;
+        return ((sx * 7 + y * 13 + sx * y) % 5) < 2 ? <rect key={i} x={x0 + x * 3.6} y={8 + y * 3.6} width={3} height={3} className={inside ? "fill-accent-600 dark:fill-accent-300" : "fill-zinc-500 dark:fill-zinc-400"} /> : null;
+      });
+    return (
+      <svg viewBox="0 0 200 64" className="h-16 w-full" aria-hidden="true">
+        {dots(44, 0)}
+        {dots(106, 1)}
+      </svg>
+    );
+  }
+  if (slug === "bcis-today") {
+    return (
+      <svg viewBox="0 0 200 64" className="h-16 w-full" aria-hidden="true">
+        <path d="M20 62 C20 20, 60 4, 100 4 S180 20, 180 62" fill="none" className="stroke-zinc-400 dark:stroke-zinc-500" strokeWidth={5} />
+        <path d="M32 62 C32 28, 64 14, 100 14 S168 28, 168 62" className="fill-zinc-200/80 dark:fill-zinc-700/60" />
+        {[[62, 30, 4, "fill-accent-600 dark:fill-accent-300"], [100, 16, 4, "fill-emerald-500"], [136, 26, 4, "fill-amber-500"], [118, 44, 4, "fill-violet-500"], [80, 48, 4, "fill-sky-500"]].map(([x, y, r, cls]) => (
+          <circle key={`${x}`} cx={x as number} cy={y as number} r={r as number} className={cls as string} />
+        ))}
+        <path d="M118 44 L118 30 M80 48 L80 34" className="stroke-zinc-400" strokeWidth={1} strokeDasharray="2 2" />
+      </svg>
+    );
+  }
   if (slug === "family-tree") {
     const nodes: [number, number][] = [[100, 10], [58, 32], [142, 32], [30, 54], [86, 54], [124, 54], [170, 54]];
     const links = [[0, 1], [0, 2], [1, 3], [1, 4], [2, 5], [2, 6], [4, 5]];

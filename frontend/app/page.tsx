@@ -12,6 +12,8 @@ import { PROFILE } from "@/content/profile";
 import { GUIDES } from "@/content/learn";
 import { RESEARCH } from "@/content/research";
 
+const NUMBER_WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
+
 function LiveDot({ tone = "emerald" }: { tone?: "emerald" | "accent" }) {
   const colour = tone === "emerald" ? "bg-emerald-500" : "bg-accent-500";
   return (
@@ -182,15 +184,20 @@ export default function Home() {
       {/* Field guide */}
       <section id="field-guide" className="mb-20">
         <SectionHeading eyebrow="Field guide" title="How do you listen to a brain?">
-          Five short, interactive explainers behind everything above: the electrodes neuroscientists use, from the scalp to the inside of
-          a single cell; how a raw recording becomes the numbers a decoder reads; how spike sorting is done; where in the brain my
-          recordings come from; and the family tree of the researchers who built the field.
+          {NUMBER_WORDS[GUIDES.length] ?? GUIDES.length} short, interactive explainers behind everything above: how neurons are recorded and sorted, how decoders turn
+          spikes into movement and why they drift, how we see in 3D, and who is building brain–computer interfaces today. Three to start
+          with:
         </SectionHeading>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {GUIDES.map((g, i) => (
+          {GUIDES.filter((g) => g.featured).map((g, i) => (
             <GuideCard key={g.slug} guide={g} index={i} />
           ))}
         </div>
+        <Reveal className="mt-6">
+          <Link href="/learn" className="group text-sm font-medium text-accent-600 dark:text-accent-300">
+            All {GUIDES.length} field guides <span className="arrow">→</span>
+          </Link>
+        </Reveal>
       </section>
 
       {/* Experience */}

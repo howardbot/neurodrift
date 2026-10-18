@@ -71,27 +71,27 @@ export const GLOSSARY = {
   "binocular-disparity": {
     term: "Binocular disparity",
     definition: "The difference in where a point lands on the left and right retinas. Points nearer or farther than where you are looking produce disparities of opposite sign.",
-    usedIn: ["/research/3d-vision", "/learn/brain-map"],
+    usedIn: ["/research/3d-vision", "/learn/brain-map", "/learn/seeing-3d"],
   },
   "brain-computer-interface": {
     term: "Brain–computer interface",
     definition: "A system that records brain activity and translates it into commands for a computer cursor, robotic arm or other device.",
-    usedIn: ["/research/cross-day-decoding", "/learn/electrodes", "/learn/brain-map", "/learn/sorting-methods", "/learn/family-tree"],
+    usedIn: ["/research/cross-day-decoding", "/learn/electrodes", "/learn/brain-map", "/learn/sorting-methods", "/learn/family-tree", "/learn/decoders", "/learn/drift", "/learn/bcis-today"],
   },
   cca: {
     term: "CCA",
     definition: "Canonical correlation analysis: rotates two sets of signals so that their shared structure lines up as closely as possible.",
-    usedIn: ["/research/cross-day-decoding"],
+    usedIn: ["/research/cross-day-decoding", "/learn/drift"],
   },
   cip: {
     term: "CIP",
     definition: "Caudal intraparietal area: a region in parietal cortex, further along the visual pathway, involved in perceiving the 3D orientation of surfaces and linking vision to action.",
-    usedIn: ["/research/shared-variability", "/learn/brain-map"],
+    usedIn: ["/research/shared-variability", "/learn/brain-map", "/learn/seeing-3d"],
   },
   decoder: {
     term: "Decoder",
     definition: "A mathematical model that maps recorded neural activity to a quantity of interest, such as arm position or what the animal is looking at.",
-    usedIn: ["/", "/research/cross-day-decoding", "/learn/signal-chain", "/learn/sorting-methods"],
+    usedIn: ["/", "/research/cross-day-decoding", "/learn/signal-chain", "/learn/sorting-methods", "/learn/decoders", "/learn/drift"],
   },
   "disparity-gradient-detectors": {
     term: "Disparity-gradient detectors",
@@ -101,7 +101,7 @@ export const GLOSSARY = {
   "kalman-filter": {
     term: "Kalman filter",
     definition: "A decoder that combines what the neural activity says right now with a prediction of where the hand should be, given where it just was. It is widely used in brain–computer interfaces.",
-    usedIn: ["/research/cross-day-decoding"],
+    usedIn: ["/research/cross-day-decoding", "/learn/decoders"],
   },
   "kilosort-4": {
     term: "Kilosort 4",
@@ -111,7 +111,7 @@ export const GLOSSARY = {
   pca: {
     term: "PCA",
     definition: "Principal component analysis: finds the few combined activity patterns that capture most of the variation across many channels.",
-    usedIn: ["/research/cross-day-decoding"],
+    usedIn: ["/research/cross-day-decoding", "/learn/drift"],
   },
   "receptive-field": {
     term: "Receptive field",
@@ -151,12 +151,12 @@ export const GLOSSARY = {
   tuning: {
     term: "Tuning",
     definition: "How a neuron's firing rate changes with some property of the world or the body. A neuron 'tuned' to rightward reaches fires most when the arm moves right.",
-    usedIn: ["/"],
+    usedIn: ["/", "/learn/decoders"],
   },
   v3a: {
     term: "V3A",
     definition: "A visual area in the back of the brain that helps process three-dimensional structure, such as depth and surface orientation.",
-    usedIn: ["/research/shared-variability", "/learn/brain-map"],
+    usedIn: ["/research/shared-variability", "/learn/brain-map", "/learn/seeing-3d"],
   },
   ecog: {
     term: "ECoG",
@@ -221,7 +221,32 @@ export const GLOSSARY = {
   "electrode-drift": {
     term: "Electrode drift",
     definition: "Slow movement of an electrode relative to the brain tissue, over minutes to days. It changes how each neuron's spikes look on the channels, which can confuse spike sorting and decoders.",
-    usedIn: ["/learn/sorting-methods"],
+    usedIn: ["/learn/sorting-methods", "/learn/drift"],
+  },
+  "neural-manifold": {
+    term: "Neural manifold",
+    definition: "The small set of coordinated activity patterns a large population of neurons actually uses, out of all the patterns it could in principle produce. Many neurons, few patterns.",
+    usedIn: ["/learn/drift"],
+  },
+  "early-feasibility-study": {
+    term: "Early feasibility study",
+    definition: "A small first trial of a new medical device in people, usually under ten participants, to check that it is safe and works well enough to justify a larger trial.",
+    usedIn: ["/learn/bcis-today"],
+  },
+  "pivotal-trial": {
+    term: "Pivotal trial",
+    definition: "The larger trial a regulator relies on to decide whether a medical device can be sold, with goals and measurements fixed in advance.",
+    usedIn: ["/learn/bcis-today"],
+  },
+  "cochlear-implant": {
+    term: "Cochlear implant",
+    definition: "An implant that turns sound into electrical pulses delivered to the hearing nerve, giving a sense of sound to people with severe deafness. The most widely used neural implant.",
+    usedIn: ["/learn/bcis-today"],
+  },
+  "deep-brain-stimulation": {
+    term: "Deep brain stimulation",
+    definition: "Electrodes placed deep in the brain that deliver steady electrical pulses, used mainly to reduce the tremor and stiffness of Parkinson's disease.",
+    usedIn: ["/learn/bcis-today"],
   },
 } satisfies Record<string, GlossaryEntry>;
 
