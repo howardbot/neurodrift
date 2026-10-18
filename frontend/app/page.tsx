@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { DemoButton } from "@/components/DemoButton";
+import { GuideCard } from "@/components/learn/GuideBits";
 import { Reveal } from "@/components/motion";
 import { Chips, ContactButtons, GitHubIcon, LabTimeline, MailIcon, SectionHeading } from "@/components/profile/ProfileBlocks";
 import { DriftMatrix } from "@/components/showcase/Glyphs";
@@ -8,6 +9,7 @@ import { HeroRaster } from "@/components/showcase/HeroRaster";
 import { PopulationDecodingDemo } from "@/components/showcase/PopulationDecodingDemo";
 import { Figure, HeroGlow, ProjectCard, Term } from "@/components/showcase/Story";
 import { PROFILE } from "@/content/profile";
+import { GUIDES } from "@/content/learn";
 import { RESEARCH } from "@/content/research";
 
 function LiveDot({ tone = "emerald" }: { tone?: "emerald" | "accent" }) {
@@ -175,6 +177,19 @@ export default function Home() {
             my projects tackles one of these problems.
           </p>
         </PrimerStep>
+      </section>
+
+      {/* Field guide */}
+      <section id="field-guide" className="mb-20">
+        <SectionHeading eyebrow="Field guide" title="How do you listen to a brain?">
+          Two short, interactive explainers behind everything above: the electrodes neuroscientists use, from the scalp to the inside of a
+          single cell, and how a raw recording becomes the numbers a decoder reads.
+        </SectionHeading>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {GUIDES.map((g, i) => (
+            <GuideCard key={g.slug} guide={g} index={i} />
+          ))}
+        </div>
       </section>
 
       {/* Experience */}

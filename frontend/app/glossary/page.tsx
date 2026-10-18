@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HeroGlow } from "@/components/showcase/Story";
+import { GUIDES } from "@/content/learn";
 import { glossaryEntries, RESEARCH } from "@/content/research";
 
 export const metadata = {
@@ -7,10 +8,12 @@ export const metadata = {
   description: "Plain-language definitions of the neuroscience and analysis terms used on this site.",
 };
 
-// Page names for the "Used in" links: the home page's primer and the research stories.
+// Page names for the "Used in" links: the home page's primer, the research stories and the
+// field guides.
 const PAGE_NAMES: Record<string, string> = {
   "/": "Neuroscience in two minutes",
   ...Object.fromEntries(RESEARCH.map((r) => [`/research/${r.slug}`, r.title])),
+  ...Object.fromEntries(GUIDES.map((g) => [`/learn/${g.slug}`, g.title])),
 };
 
 export default function Glossary() {

@@ -76,7 +76,7 @@ export const GLOSSARY = {
   "brain-computer-interface": {
     term: "Brain–computer interface",
     definition: "A system that records brain activity and translates it into commands for a computer cursor, robotic arm or other device.",
-    usedIn: ["/research/cross-day-decoding"],
+    usedIn: ["/research/cross-day-decoding", "/learn/electrodes"],
   },
   cca: {
     term: "CCA",
@@ -91,7 +91,7 @@ export const GLOSSARY = {
   decoder: {
     term: "Decoder",
     definition: "A mathematical model that maps recorded neural activity to a quantity of interest, such as arm position or what the animal is looking at.",
-    usedIn: ["/", "/research/cross-day-decoding"],
+    usedIn: ["/", "/research/cross-day-decoding", "/learn/signal-chain"],
   },
   "disparity-gradient-detectors": {
     term: "Disparity-gradient detectors",
@@ -131,12 +131,12 @@ export const GLOSSARY = {
   "spike-sorting": {
     term: "Spike sorting",
     definition: "The process of detecting spikes in a recording and assigning each one to the neuron that most likely produced it, based on its shape across the recording channels.",
-    usedIn: ["/research/spike-sorting"],
+    usedIn: ["/research/spike-sorting", "/learn/signal-chain"],
   },
   spikes: {
     term: "Spikes",
     definition: "Also called action potentials: a neuron's voltage jumps up and back down in about a millisecond, and the pulse travels to other neurons.",
-    usedIn: ["/"],
+    usedIn: ["/", "/learn/electrodes", "/learn/signal-chain"],
   },
   "surface-normal": {
     term: "Surface normal",
@@ -146,7 +146,7 @@ export const GLOSSARY = {
   tetrodes: {
     term: "Tetrodes",
     definition: "An electrode bundle of four closely spaced recording wires. A spike looks slightly different on each wire, which helps tell neighbouring neurons apart.",
-    usedIn: ["/research/shared-variability", "/research/spike-sorting"],
+    usedIn: ["/research/shared-variability", "/research/spike-sorting", "/learn/electrodes"],
   },
   tuning: {
     term: "Tuning",
@@ -157,6 +157,36 @@ export const GLOSSARY = {
     term: "V3A",
     definition: "A visual area in the back of the brain that helps process three-dimensional structure, such as depth and surface orientation.",
     usedIn: ["/research/shared-variability"],
+  },
+  ecog: {
+    term: "ECoG",
+    definition: "Electrocorticography: a grid of disc electrodes laid directly on the surface of the brain, usually during epilepsy surgery. Sharper than EEG because the skull is out of the way.",
+    usedIn: ["/learn/electrodes"],
+  },
+  eeg: {
+    term: "EEG",
+    definition: "Electroencephalography: electrodes on the scalp pick up the summed electrical activity of millions of neurons. Safe and painless, but blurry in space.",
+    usedIn: ["/learn/electrodes"],
+  },
+  "local-field-potential": {
+    term: "Local field potential",
+    definition: "The slow part of the voltage recorded inside the brain, below a few hundred hertz. It mostly reflects the inputs arriving at many neurons near the electrode rather than individual spikes.",
+    usedIn: ["/learn/electrodes", "/learn/signal-chain"],
+  },
+  neuropixels: {
+    term: "Neuropixels",
+    definition: "A silicon probe about as wide as a hair with hundreds to thousands of recording sites along its shank, used to record hundreds of neurons across brain regions at once.",
+    usedIn: ["/learn/electrodes"],
+  },
+  "patch-clamp": {
+    term: "Patch clamp",
+    definition: "A glass pipette with a tip about a micrometre wide is sealed onto one neuron's membrane, so it can record the voltage inside that single cell, including inputs too small to trigger a spike.",
+    usedIn: ["/learn/electrodes"],
+  },
+  "utah-array": {
+    term: "Utah array",
+    definition: "A 4 × 4 mm bed of 100 silicon needles, each 1–1.5 mm long, pressed into the cortex. It records spikes at 100 places at once and is the sensor in most human brain–computer interface trials.",
+    usedIn: ["/learn/electrodes"],
   },
 } satisfies Record<string, GlossaryEntry>;
 
