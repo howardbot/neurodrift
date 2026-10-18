@@ -2,7 +2,7 @@ import Link from "next/link";
 import { GuideCard } from "@/components/learn/GuideBits";
 import { Reveal } from "@/components/motion";
 import { HeroGlow } from "@/components/showcase/Story";
-import { GUIDES } from "@/content/learn";
+import { GUIDE_GROUPS, GUIDES } from "@/content/learn";
 
 export const metadata = {
   title: "Field guide",
@@ -24,9 +24,21 @@ export default function FieldGuide() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {GUIDES.map((g, i) => (
-          <GuideCard key={g.slug} guide={g} index={i} />
+      <div className="space-y-12">
+        {GUIDE_GROUPS.map((group) => (
+          <section key={group.id} aria-labelledby={`group-${group.id}`}>
+            <Reveal className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 id={`group-${group.id}`} className="text-xs font-medium uppercase tracking-wider text-accent-600 dark:text-accent-300">
+                {group.id}
+              </h2>
+              <p className="text-sm text-zinc-500">{group.blurb}</p>
+            </Reveal>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {GUIDES.filter((g) => g.group === group.id).map((g, i) => (
+                <GuideCard key={g.slug} guide={g} index={i} />
+              ))}
+            </div>
+          </section>
         ))}
       </div>
 

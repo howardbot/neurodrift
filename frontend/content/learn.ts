@@ -2,12 +2,24 @@
 // from widely cited papers (named where a number comes from one); numbers are rounded and
 // meant to convey orders of magnitude, not device specifications.
 
+export type GuideGroup = "Recording" | "Decoding" | "The brain" | "The field";
+
+export const GUIDE_GROUPS: { id: GuideGroup; blurb: string }[] = [
+  { id: "Recording", blurb: "How we listen to neurons and turn their chatter into data." },
+  { id: "Decoding", blurb: "How that data becomes a moving cursor, and why it stops working." },
+  { id: "The brain", blurb: "Where my recordings come from, and what those areas do." },
+  { id: "The field", blurb: "The people, the companies and the questions." },
+];
+
 export interface Guide {
   slug: string;
   title: string;
   short: string;
   hook: string;
   minutes: number;
+  group: GuideGroup;
+  /** Shown on the home page. */
+  featured?: boolean;
 }
 
 export const GUIDES: Guide[] = [
@@ -17,6 +29,8 @@ export const GUIDES: Guide[] = [
     short: "Electrodes",
     hook: "From a frog's leg in 1791 to probes with thousands of contacts: how we pick up the brain's electrical chatter, and what each kind of electrode can and cannot hear.",
     minutes: 8,
+    group: "Recording",
+    featured: true,
   },
   {
     slug: "signal-chain",
@@ -24,6 +38,7 @@ export const GUIDES: Guide[] = [
     short: "Spike to dataset",
     hook: "A recording is just a wiggly voltage. Follow it through filtering, spike detection and sorting until it becomes the table of numbers a decoder reads.",
     minutes: 6,
+    group: "Recording",
   },
   {
     slug: "sorting-methods",
@@ -31,6 +46,24 @@ export const GUIDES: Guide[] = [
     short: "Sorting methods",
     hook: "One electrode hears several neurons at once. From voltage windows set by hand to algorithms that sort thousands of channels: how researchers tell neurons apart, and how they choose a method today.",
     minutes: 8,
+    group: "Recording",
+  },
+  {
+    slug: "decoders",
+    title: "Decoders 101: from spikes to a moving cursor",
+    short: "Decoders 101",
+    hook: "Move your pointer and three cursors chase it, each driven by the same simulated neurons through a different decoder: the population vector, a Kalman filter and a small neural network.",
+    minutes: 7,
+    group: "Decoding",
+    featured: true,
+  },
+  {
+    slug: "drift",
+    title: "Why decoders break overnight",
+    short: "Decoder drift",
+    hook: "The neurons an implant hears change from day to day, so yesterday's decoder slowly fails. Watch it happen over a simulated month, then fix it by lining up the brain's activity patterns.",
+    minutes: 6,
+    group: "Decoding",
   },
   {
     slug: "brain-map",
@@ -38,6 +71,24 @@ export const GUIDES: Guide[] = [
     short: "Brain map",
     hook: "The areas my recordings come from, on one map: where they sit, what they do, and how a signal travels from what we see to what we do.",
     minutes: 6,
+    group: "The brain",
+  },
+  {
+    slug: "seeing-3d",
+    title: "Seeing in 3D: two flat pictures, one deep world",
+    short: "Seeing in 3D",
+    hook: "Each eye sees a slightly different picture. Drag an object to see how the difference changes, then find a shape hidden in random dots that only both eyes together can see.",
+    minutes: 6,
+    group: "The brain",
+    featured: true,
+  },
+  {
+    slug: "bcis-today",
+    title: "Brain–computer interfaces today",
+    short: "BCIs today",
+    hook: "Who is implanting what, where each device sits, how far along it is, and the ethical questions that come with reading the brain. Dated, sourced and recently checked.",
+    minutes: 8,
+    group: "The field",
   },
   {
     slug: "family-tree",
@@ -45,6 +96,7 @@ export const GUIDES: Guide[] = [
     short: "Family tree",
     hook: "Science is passed down like a family trade. Trace who trained whom, from the Nobel laureates who discovered the synapse to the labs building brain–computer interfaces today, and see where I fit in.",
     minutes: 7,
+    group: "The field",
   },
 ];
 
