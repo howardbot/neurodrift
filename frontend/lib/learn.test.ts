@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { BRAIN_AREAS, ELECTRODES, GUIDES, SPECIES } from "@/content/learn";
+import { BRAIN_AREAS, ELECTRODES, GUIDES, SPECIES, TREE_ERAS, TREE_LINKS, TREE_PEOPLE, TREE_TIES } from "@/content/learn";
 import { RESEARCH } from "@/content/research";
+import { ancestors, connection, crowdedPairs, linkCollisions, mentorsOf } from "@/lib/tree";
 
 describe("field guide content", () => {
   it("has unique guide slugs", () => {
@@ -30,5 +31,41 @@ describe("field guide content", () => {
     const crowd = ELECTRODES.map((e) => e.crowd);
     expect(crowd[0]).toBe(1);
     expect(crowd[crowd.length - 1]).toBe(0);
+  });
+});
+
+describe("family tree", () => {
+  it("links only people who are on the tree, mentor above trainee", () => {
+    const people = new Map(TREE_PEOPLE.map((p) => [p.id, p]));
+    expect(people.size).toBe(TREE_PEOPLE.length);
+    for (const l of TREE_LINKS) {
+      expect(people.has(l.from), l.from).toBe(true);
+      expect(people.has(l.to), l.to).toBe(true);
+      expect(people.get(l.to)!.row, `${l.from}→${l.to}`).toBeGreaterThan(people.get(l.from)!.row);
+    }
+    for (const t of TREE_TIES) expect(people.has(t.a) && people.has(t.b), `${t.a}–${t.b}`).toBe(true);
+  });
+
+  it("draws no line through anyone's name, and no two names overlap", () => {
+    expect(linkCollisions()).toEqual([]);
+    expect(crowdedPairs()).toEqual([]);
+  });
+
+  it("gives every person a link to someone, and keeps rows within the eras", () => {
+    for (const p of TREE_PEOPLE) {
+      expect(TREE_LINKS.some((l) => l.from === p.id || l.to === p.id), p.id).toBe(true);
+      expect(p.row).toBeLessThan(TREE_ERAS.length);
+    }
+  });
+
+  it("connects me to my three labs and finds chains between branches", () => {
+    expect(mentorsOf("qin").map((l) => l.from).sort()).toEqual(["hai", "hatsopoulos", "rosenberg"]);
+    expect(ancestors("qin").has("donoghue")).toBe(true);
+    const path = connection("qin", "hubel")!;
+    expect(path[0]!.from).toBe("qin");
+    expect(path.at(-1)!.to).toBe("hubel");
+    for (let i = 1; i < path.length; i++) expect(path[i]!.from).toBe(path[i - 1]!.to);
+    expect(connection("qin", "qin")).toEqual([]);
+    expect(connection("qin", "nicolelis")).toBeNull();
   });
 });

@@ -76,7 +76,7 @@ export const GLOSSARY = {
   "brain-computer-interface": {
     term: "Brain–computer interface",
     definition: "A system that records brain activity and translates it into commands for a computer cursor, robotic arm or other device.",
-    usedIn: ["/research/cross-day-decoding", "/learn/electrodes", "/learn/brain-map"],
+    usedIn: ["/research/cross-day-decoding", "/learn/electrodes", "/learn/brain-map", "/learn/sorting-methods", "/learn/family-tree"],
   },
   cca: {
     term: "CCA",
@@ -91,7 +91,7 @@ export const GLOSSARY = {
   decoder: {
     term: "Decoder",
     definition: "A mathematical model that maps recorded neural activity to a quantity of interest, such as arm position or what the animal is looking at.",
-    usedIn: ["/", "/research/cross-day-decoding", "/learn/signal-chain"],
+    usedIn: ["/", "/research/cross-day-decoding", "/learn/signal-chain", "/learn/sorting-methods"],
   },
   "disparity-gradient-detectors": {
     term: "Disparity-gradient detectors",
@@ -106,7 +106,7 @@ export const GLOSSARY = {
   "kilosort-4": {
     term: "Kilosort 4",
     definition: "An open-source spike-sorting algorithm that learns a template waveform for each neuron and matches it across channels and time. It is fast and reproducible but still needs checking.",
-    usedIn: ["/research/spike-sorting"],
+    usedIn: ["/research/spike-sorting", "/learn/sorting-methods"],
   },
   pca: {
     term: "PCA",
@@ -131,7 +131,7 @@ export const GLOSSARY = {
   "spike-sorting": {
     term: "Spike sorting",
     definition: "The process of detecting spikes in a recording and assigning each one to the neuron that most likely produced it, based on its shape across the recording channels.",
-    usedIn: ["/research/spike-sorting", "/learn/signal-chain"],
+    usedIn: ["/research/spike-sorting", "/learn/signal-chain", "/learn/sorting-methods"],
   },
   spikes: {
     term: "Spikes",
@@ -146,7 +146,7 @@ export const GLOSSARY = {
   tetrodes: {
     term: "Tetrodes",
     definition: "An electrode bundle of four closely spaced recording wires. A spike looks slightly different on each wire, which helps tell neighbouring neurons apart.",
-    usedIn: ["/research/shared-variability", "/research/spike-sorting", "/learn/electrodes"],
+    usedIn: ["/research/shared-variability", "/research/spike-sorting", "/learn/electrodes", "/learn/sorting-methods"],
   },
   tuning: {
     term: "Tuning",
@@ -176,7 +176,7 @@ export const GLOSSARY = {
   neuropixels: {
     term: "Neuropixels",
     definition: "A silicon probe about as wide as a hair with hundreds to thousands of recording sites along its shank, used to record hundreds of neurons across brain regions at once.",
-    usedIn: ["/learn/electrodes"],
+    usedIn: ["/learn/electrodes", "/learn/sorting-methods"],
   },
   "patch-clamp": {
     term: "Patch clamp",
@@ -186,7 +186,7 @@ export const GLOSSARY = {
   "utah-array": {
     term: "Utah array",
     definition: "A 4 × 4 mm bed of 100 silicon needles, each 1–1.5 mm long, pressed into the cortex. It records spikes at 100 places at once and is the sensor in most human brain–computer interface trials.",
-    usedIn: ["/learn/electrodes"],
+    usedIn: ["/learn/electrodes", "/learn/sorting-methods"],
   },
   "dorsal-stream": {
     term: "Dorsal stream",
@@ -197,6 +197,31 @@ export const GLOSSARY = {
     term: "Sulcus",
     definition: "A groove in the folded surface of the brain (plural: sulci). Sulci such as the central sulcus serve as landmarks for finding brain areas; the ridges between them are called gyri.",
     usedIn: ["/learn/brain-map"],
+  },
+  "doctoral-advisor": {
+    term: "Doctoral advisor",
+    definition: "The professor who supervises a PhD student's research, usually for four to six years. Academic family trees are mostly built from these links.",
+    usedIn: ["/learn/family-tree"],
+  },
+  postdoc: {
+    term: "Postdoc",
+    definition: "A postdoctoral researcher: someone who has finished a PhD and spends a few years in an established lab, learning new methods, before starting a lab of their own.",
+    usedIn: ["/learn/family-tree"],
+  },
+  "threshold-crossings": {
+    term: "Threshold crossings",
+    definition: "Every moment the voltage on a channel dips past a set level, counted as a spike without working out which neuron fired it. Most clinical brain–computer interfaces decode from these.",
+    usedIn: ["/learn/sorting-methods"],
+  },
+  "template-matching": {
+    term: "Template matching",
+    definition: "Spike sorting that learns each neuron's typical waveform across all the nearby channels (its template), then finds every place that template occurs in the recording, even where spikes overlap.",
+    usedIn: ["/learn/sorting-methods"],
+  },
+  "electrode-drift": {
+    term: "Electrode drift",
+    definition: "Slow movement of an electrode relative to the brain tissue, over minutes to days. It changes how each neuron's spikes look on the channels, which can confuse spike sorting and decoders.",
+    usedIn: ["/learn/sorting-methods"],
   },
 } satisfies Record<string, GlossaryEntry>;
 
