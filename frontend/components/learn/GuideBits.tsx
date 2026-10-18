@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Reveal, ScrollProgress } from "@/components/motion";
+import { OUTLINE, SULCI } from "@/components/learn/brainShapes";
 import { ScrollSteps } from "@/components/ScrollSteps";
 import { HeroGlow } from "@/components/showcase/Story";
 import { DEVICE_POINTS, DOUBLING_YEARS, GUIDES, type Guide, type TimelineEvent } from "@/content/learn";
@@ -42,6 +43,20 @@ function GuideGlyph({ slug }: { slug: string }) {
         <path d="M164 0 L170 52 L176 0 Z" className="fill-accent-500/40 stroke-accent-600 dark:stroke-accent-300" />
         {[[110, 46], [150, 40], [186, 52], [52, 50]].map(([x, y]) => (
           <path key={x} d={`M${x} ${y! - 4} L${x! + 3} ${y! + 2} L${x! - 3} ${y! + 2} Z`} className="fill-zinc-400 dark:fill-zinc-500" />
+        ))}
+      </svg>
+    );
+  }
+  if (slug === "brain-map") {
+    return (
+      <svg viewBox="40 20 560 320" className="h-16 w-full" aria-hidden="true">
+        <path d={OUTLINE} className="fill-zinc-100 stroke-zinc-400 dark:fill-zinc-800 dark:stroke-zinc-500" strokeWidth={6} />
+        {SULCI.slice(0, 3).map((s) => (
+          <path key={s.d} d={s.d} fill="none" className="stroke-zinc-400 dark:stroke-zinc-500" strokeWidth={5} strokeLinecap="round" />
+        ))}
+        <path d="M552 182 C532 162, 512 150, 499 140 C490 124, 478 106, 466 100 C430 90, 360 82, 300 82 C270 84, 252 90, 248 96 C256 112, 266 124, 284 140" fill="none" className="stroke-accent-600 dark:stroke-accent-300" strokeWidth={9} strokeLinecap="round" />
+        {[[550, 178], [499, 140], [466, 100], [248, 96], [284, 140]].map(([x, y]) => (
+          <circle key={x} cx={x} cy={y} r={16} className="fill-accent-500 dark:fill-accent-300" />
         ))}
       </svg>
     );

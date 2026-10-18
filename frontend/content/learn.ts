@@ -25,6 +25,13 @@ export const GUIDES: Guide[] = [
     hook: "A recording is just a wiggly voltage. Follow it through filtering, spike detection and sorting until it becomes the table of numbers a decoder reads.",
     minutes: 6,
   },
+  {
+    slug: "brain-map",
+    title: "Where in the brain?",
+    short: "Brain map",
+    hook: "The areas my recordings come from, on one map: where they sit, what they do, and how a signal travels from what we see to what we do.",
+    minutes: 6,
+  },
 ];
 
 export function guideBySlug(slug: string): Guide {
@@ -209,3 +216,118 @@ export const DEVICE_POINTS: DevicePoint[] = [
 
 /** Stevenson & Kording (2011): simultaneously recorded neurons double roughly every 7 years. */
 export const DOUBLING_YEARS = 7;
+
+// ---------------------------------------------------------------------------------------
+// Brain map (/learn/brain-map)
+// ---------------------------------------------------------------------------------------
+
+export type AreaId = "v1" | "v3a" | "cip" | "pmd" | "m1";
+
+export interface BrainArea {
+  id: AreaId;
+  short: string;
+  name: string;
+  where: string;
+  does: string;
+  fact: string;
+  /** Research stories that record from this area (slugs in content/research.ts). */
+  projects: string[];
+  /** Where on the schematic (viewBox 600 × 380): label anchor. */
+  label: [number, number];
+}
+
+// Plain-language summaries of textbook knowledge. Positions on the map are schematic.
+export const BRAIN_AREAS: BrainArea[] = [
+  {
+    id: "v1",
+    short: "V1",
+    name: "Primary visual cortex",
+    where: "At the very back of the brain.",
+    does: "The first stop in the cortex for signals from the eyes. Each neuron watches a small patch of the visual field and responds best to edges at a particular angle; many also compare the two eyes' views, the first step towards depth.",
+    fact: "David Hubel and Torsten Wiesel discovered these edge-detecting cells with tungsten microelectrodes in the late 1950s, work recognised with the 1981 Nobel Prize.",
+    projects: [],
+    label: [588, 236],
+  },
+  {
+    id: "v3a",
+    short: "V3A",
+    name: "Visual area V3A",
+    where: "Just in front of V1, near the top of the back of the brain.",
+    does: "Part of the visual pathway that deals with space. Its neurons care about the 3D layout of a scene — how far things are and which way surfaces face — partly by comparing the images from the two eyes.",
+    fact: "Much of V3A lies hidden inside folds of the cortex, so experimenters usually rely on brain scans to aim electrodes at it.",
+    projects: ["shared-variability", "3d-vision"],
+    label: [534, 94],
+  },
+  {
+    id: "cip",
+    short: "CIP",
+    name: "Caudal intraparietal area",
+    where: "At the back end of the intraparietal sulcus, a deep groove in the parietal lobe.",
+    does: "Combines depth cues into the 3D orientation of surfaces: whether a plane tilts towards you or away, left or right. It sits where seeing a surface turns into using it, for example to reach for it or look at it.",
+    fact: "Neurons here can signal a surface's tilt from different cues, such as the difference between the two eyes' images or the texture on the surface.",
+    projects: ["shared-variability", "3d-vision"],
+    label: [438, 68],
+  },
+  {
+    id: "pmd",
+    short: "PMd",
+    name: "Dorsal premotor cortex",
+    where: "Near the top of the brain, just in front of the primary motor cortex.",
+    does: "Helps plan movements. Its activity changes while an animal prepares to reach, often well before the arm starts to move.",
+    fact: "Because it carries plans, not just commands, some brain–computer interfaces record here as well as in the primary motor cortex.",
+    projects: [],
+    label: [204, 72],
+  },
+  {
+    id: "m1",
+    short: "M1",
+    name: "Primary motor cortex",
+    where: "A strip just in front of the central sulcus, running from the top of the brain down its side.",
+    does: "Sends commands down the spinal cord to move the body, with different parts of the strip controlling different body parts. Many of its neurons fire most for movements in one preferred direction — the idea behind the decoding demo on the home page.",
+    fact: "In the 1980s Apostolos Georgopoulos showed that adding up many motor-cortex neurons' preferred directions, each weighted by its activity, predicts the direction of the arm's movement: the population vector.",
+    projects: ["cross-day-decoding"],
+    label: [320, 24],
+  },
+];
+
+export interface Species {
+  id: "human" | "macaque" | "marmoset";
+  name: string;
+  /** Typical adult brain mass, grams (rounded). */
+  grams: number;
+  /** Neurons in the whole brain (Azevedo et al. 2009; Herculano-Houzel et al. 2007). */
+  neurons: string;
+  neuronsUnit: string;
+  folds: string;
+  note: string;
+}
+
+export const SPECIES: Species[] = [
+  {
+    id: "human",
+    name: "Human",
+    grams: 1350,
+    neurons: "86",
+    neuronsUnit: "billion neurons",
+    folds: "Deeply folded",
+    note: "Most areas have a counterpart in monkeys, which is why monkey recordings teach us about our own brains.",
+  },
+  {
+    id: "macaque",
+    name: "Rhesus macaque",
+    grams: 90,
+    neurons: "6.4",
+    neuronsUnit: "billion neurons",
+    folds: "Folded",
+    note: "The classic animal for studies of vision, including the surface-orientation experiments that V3A and CIP are best known from.",
+  },
+  {
+    id: "marmoset",
+    name: "Common marmoset",
+    grams: 8,
+    neurons: "0.6",
+    neuronsUnit: "billion neurons",
+    folds: "Almost smooth",
+    note: "With few folds, most of the motor cortex lies on the surface, where an electrode array can reach it. The cross-day decoding recordings are from marmosets.",
+  },
+];
