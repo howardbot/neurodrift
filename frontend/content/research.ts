@@ -71,12 +71,12 @@ export const GLOSSARY = {
   "binocular-disparity": {
     term: "Binocular disparity",
     definition: "The difference in where a point lands on the left and right retinas. Points nearer or farther than where you are looking produce disparities of opposite sign.",
-    usedIn: ["/research/3d-vision"],
+    usedIn: ["/research/3d-vision", "/learn/brain-map"],
   },
   "brain-computer-interface": {
     term: "Brain–computer interface",
     definition: "A system that records brain activity and translates it into commands for a computer cursor, robotic arm or other device.",
-    usedIn: ["/research/cross-day-decoding", "/learn/electrodes"],
+    usedIn: ["/research/cross-day-decoding", "/learn/electrodes", "/learn/brain-map"],
   },
   cca: {
     term: "CCA",
@@ -86,7 +86,7 @@ export const GLOSSARY = {
   cip: {
     term: "CIP",
     definition: "Caudal intraparietal area: a region in parietal cortex, further along the visual pathway, involved in perceiving the 3D orientation of surfaces and linking vision to action.",
-    usedIn: ["/research/shared-variability"],
+    usedIn: ["/research/shared-variability", "/learn/brain-map"],
   },
   decoder: {
     term: "Decoder",
@@ -156,7 +156,7 @@ export const GLOSSARY = {
   v3a: {
     term: "V3A",
     definition: "A visual area in the back of the brain that helps process three-dimensional structure, such as depth and surface orientation.",
-    usedIn: ["/research/shared-variability"],
+    usedIn: ["/research/shared-variability", "/learn/brain-map"],
   },
   ecog: {
     term: "ECoG",
@@ -187,6 +187,16 @@ export const GLOSSARY = {
     term: "Utah array",
     definition: "A 4 × 4 mm bed of 100 silicon needles, each 1–1.5 mm long, pressed into the cortex. It records spikes at 100 places at once and is the sensor in most human brain–computer interface trials.",
     usedIn: ["/learn/electrodes"],
+  },
+  "dorsal-stream": {
+    term: "Dorsal stream",
+    definition: "The 'where' or 'how' pathway: a chain of visual areas running from the back of the brain up into the parietal lobe, specialised for space, depth and guiding actions such as reaching.",
+    usedIn: ["/learn/brain-map"],
+  },
+  sulcus: {
+    term: "Sulcus",
+    definition: "A groove in the folded surface of the brain (plural: sulci). Sulci such as the central sulcus serve as landmarks for finding brain areas; the ridges between them are called gyri.",
+    usedIn: ["/learn/brain-map"],
   },
 } satisfies Record<string, GlossaryEntry>;
 
