@@ -8,7 +8,7 @@ export const PROFILE = {
   affiliation: "Computer Science & Neurobiology · University of Wisconsin–Madison",
   tagline:
     "I study how populations of neurons encode movement and vision — building the decoding pipelines, statistics, and recording hardware that let us read intention out of cortex.",
-  interests: ["Neural decoding", "Population geometry", "Brain–machine interfaces", "Visual neuroscience", "Reinforcement learning", "Recording hardware"],
+  interests: ["Neural population dynamics", "Motor control", "Neural decoding", "Intracortical brain–computer interfaces", "Computational neuroscience"],
   email: "qliu385@wisc.edu",
   github: "https://github.com/howardbot",
   location: "Madison, Wisconsin",
@@ -35,42 +35,42 @@ export interface Lab {
 export const LABS: Lab[] = [
   {
     name: "Hatsopoulos Lab",
-    years: "2026 — Present",
+    years: "May 2026 — Present",
     institution: "University of Chicago",
     pi: "Prof. Nicholas Hatsopoulos",
     summary:
-      "Building a cross-day neural decoding pipeline for marmoset motor cortex — spike binning, causal smoothing, PCA/CCA manifold alignment, and Kalman decoding of reach kinematics. Discovered and characterized a directional asymmetry in cross-day transfer, validated with decoder-independent controls and bootstrap statistics.",
-    tags: ["Neural decoding", "Manifold alignment", "Kalman filter"],
+      "Built a cross-day neural decoding pipeline for marmoset motor cortex — spike preprocessing, PCA/CCA-based population alignment, and Kalman/Wiener decoding of reach kinematics. Identified and characterized a directional cross-session decoding asymmetry, robust across preprocessing, decoders, target variables and dimensionality, and tested competing explanations (neural variability, behavioral coverage, population subspaces, readout remapping) with decoder-independent, matched-control, bootstrap and surrogate analyses.",
+    tags: ["Neural decoding", "Population alignment", "Kalman / Wiener"],
     stories: ["cross-day-decoding"],
   },
   {
     name: "Hai Lab",
-    years: "2025 — Present",
+    years: "Mar. 2025 — Present",
     institution: "UW–Madison",
     pi: "Prof. Aviad Hai",
     summary:
-      "Neural data pipelines for multi-channel recordings — spike detection, sorting, firing-rate and functional-connectivity analysis across cortical regions — and RF characterization of miniature neural devices through automated VNA frequency sweeps fused with microscope imaging.",
-    tags: ["Connectivity", "RF / VNA", "Automation"],
+      "Analysis pipelines for multi-channel neural recordings — spike detection and sorting, firing-rate and latency analysis, and functional connectivity across neural populations — and machine-learning approaches for identifying and validating functional interactions. Also characterizes miniature neural devices through micro-probe and SMA interfaces, VNA frequency sweeps, and automated microscope/VNA pipelines for resonance detection and repeatability.",
+    tags: ["Connectivity", "Machine learning", "RF / VNA"],
     stories: [],
   },
   {
     name: "Rosenberg Lab",
-    years: "2024 — Present",
+    years: "May 2024 — Present",
     institution: "UW–Madison",
     pi: "Prof. Ari Rosenberg",
     summary:
-      "3D stereoscopic visual stimulation for primate electrophysiology in Psychtoolbox — disparity manipulation, multi-view rendering, and fusion-based fixation control — with population analysis of disparity coding and an ~80% runtime reduction on population-level models.",
+      "Stereoscopic visual stimulation for macaque electrophysiology with Psychtoolbox and Datapixx — disparity manipulation, multi-view rendering, and fixation control. Analyzed responses in macaque CIP and V3A, comparing traditional spike sorting with Kilosort-derived units (receptive fields, firing rates, population responses), and cut the runtime of large-scale analysis code by about 80%.",
     tags: ["Vision", "Psychtoolbox", "Kilosort"],
     stories: ["3d-vision", "spike-sorting"],
   },
   {
     name: "Hui Lab",
-    years: "2022 — 2023",
-    institution: "Ocean University of China",
+    years: "Aug. 2022 — May 2023",
+    institution: "Qingdao, China",
     pi: "Prof. Hui Ma",
     summary:
-      "Model-free reinforcement-learning controllers for trajectory tracking, and decentralized multi-agent path-planning in simulation — with a focus on stability, convergence, and real-time decision making.",
-    tags: ["Reinforcement learning", "Optimal control", "Multi-agent"],
+      "Reinforcement-learning controllers and multi-agent planning algorithms for robotic trajectory tracking and decentralized coordination, in simulation.",
+    tags: ["Reinforcement learning", "Robotics", "Multi-agent"],
     stories: [],
   },
 ];
@@ -118,15 +118,15 @@ export const WORK: Work[] = [
 ];
 
 export const EDUCATION = [
-  { school: "UW–Madison", years: "2023 — Present", detail: "B.S. Computer Science & Neurobiology" },
-  { school: "Heriot-Watt University", years: "2020 — 2022", detail: "Robotics · Edinburgh" },
-  { school: "Ocean University of China", years: "2020 — 2022", detail: "Computer Science · Qingdao" },
+  { school: "University of Wisconsin–Madison", years: "2023 — Dec. 2026", detail: "B.S. Computer Science & Neurobiology, expected December 2026" },
+  { school: "Heriot-Watt University", years: "2020 — 2022", detail: "Undergraduate, Robotics · Edinburgh, UK" },
+  { school: "Ocean University of China", years: "2020 — 2022", detail: "Undergraduate, Computer Science · Qingdao, China" },
 ];
 
 export const RECOGNITION = [
-  { title: "National Prize — Mathematical Modeling", detail: "National Student Competition · 2022" },
-  { title: "Dean's List", detail: "UW–Madison · 2025" },
-  { title: "Innovation & Entrepreneurship Scholarship", detail: "Ocean University of China · 2021" },
+  { title: "National Second Prize", detail: "China Undergraduate Mathematical Contest in Modeling (CUMCM) · Oct. 2022" },
+  { title: "Dean's List", detail: "University of Wisconsin–Madison · May 2025" },
+  { title: "Innovation and Entrepreneurship Scholarship", detail: "Ocean University of China · Sep. 2021" },
 ];
 
 // Merged from the research site's Toolbox and the personal site's Toolkit.
@@ -136,8 +136,8 @@ export const TOOLKIT = [
     items: [
       "Decoding: Kalman and Wiener filters, ridge regression, support vector machines",
       "Dimensionality reduction and alignment: PCA, CCA, manifold alignment, subspace angles",
-      "Statistics: block bootstrap, permutation and sign-flip tests, multiple-comparison control",
-      "Firing-rate modeling, LFP and functional connectivity",
+      "Statistics: block bootstrap, permutation and sign-flip tests, surrogate testing, multiple-comparison control",
+      "Firing-rate and latency analysis, LFP and functional connectivity",
     ],
   },
   {
@@ -146,7 +146,7 @@ export const TOOLKIT = [
       "Single- and multi-unit recordings from tetrodes and multi-electrode implants",
       "Spike sorting with Kilosort 4 and Plexon Offline Sorter",
       "Receptive-field mapping and waveform classification",
-      "Recording and stimulus hardware: Ripple (xippmex), Datapixx",
+      "Recording and stimulus hardware: Ripple (xippmex), Datapixx; real-time behavioral task control and hardware–software synchronization",
     ],
   },
   {
@@ -164,7 +164,7 @@ export const TOOLKIT = [
   {
     label: "Engineering",
     items: [
-      "Python (NumPy, SciPy, scikit-learn), MATLAB, C / C++",
+      "Python (NumPy, SciPy, pandas, scikit-learn), MATLAB, C / C++",
       "Git, Linux, LaTeX",
       "Reproducible pipelines with integrity checks and checksummed result snapshots",
       "Full-stack web apps: this site (Next.js, FastAPI, Docker)",
