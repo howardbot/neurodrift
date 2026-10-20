@@ -72,7 +72,7 @@ export default function About() {
           <Link href="/tool" className="font-medium text-accent-600 underline-offset-2 hover:underline dark:text-accent-300">
             NeuroDrift
           </Link>
-          , the decoder-stability tool that runs on this site.
+          , the decoder-stability tool that runs on this site, and ScholarOS, my private literature workspace.
         </SectionHeading>
         <WorkGrid />
       </section>
