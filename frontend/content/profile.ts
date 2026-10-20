@@ -118,9 +118,9 @@ export const WORK: Work[] = [
 ];
 
 export const EDUCATION = [
-  { school: "University of Wisconsin–Madison", years: "2023 — Dec. 2026", detail: "B.S. Computer Science & Neurobiology, expected December 2026" },
-  { school: "Heriot-Watt University", years: "2020 — 2022", detail: "Undergraduate, Robotics · Edinburgh, UK" },
-  { school: "Ocean University of China", years: "2020 — 2022", detail: "Undergraduate, Computer Science · Qingdao, China" },
+  { school: "University of Wisconsin–Madison", years: "Sep. 2023 — Dec. 2026", detail: "B.S. Computer Science & Neurobiology, expected December 2026" },
+  { school: "Heriot-Watt University", years: "Sep. 2020 — May 2023", detail: "Undergraduate, Robotics · Edinburgh, UK" },
+  { school: "Ocean University of China", years: "Sep. 2020 — May 2023", detail: "Undergraduate, Computer Science · Qingdao, China" },
 ];
 
 export const RECOGNITION = [
