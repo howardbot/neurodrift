@@ -5,16 +5,16 @@
     "originalHeight": 1440,
     "variants": [
       {
-        "file": "directional_replication_main-1000w.ccfa48c243.webp",
+        "file": "directional_replication_main-1000w.105be7dbfb.webp",
         "width": 1000,
         "height": 615,
-        "bytes": 49984
+        "bytes": 55670
       },
       {
-        "file": "directional_replication_main-2000w.c7f0af9100.webp",
+        "file": "directional_replication_main-2000w.729b5afef8.webp",
         "width": 2000,
         "height": 1231,
-        "bytes": 114866
+        "bytes": 126238
       }
     ]
   },
@@ -24,16 +24,16 @@
     "originalHeight": 1690,
     "variants": [
       {
-        "file": "paired_directional-1000w.bf6cbabd06.webp",
+        "file": "paired_directional-1000w.37a51bdcfb.webp",
         "width": 1000,
         "height": 595,
-        "bytes": 55868
+        "bytes": 52790
       },
       {
-        "file": "paired_directional-2000w.1b77a96c15.webp",
+        "file": "paired_directional-2000w.be723816e6.webp",
         "width": 2000,
         "height": 1190,
-        "bytes": 128672
+        "bytes": 123396
       }
     ]
   }
