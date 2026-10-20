@@ -75,7 +75,7 @@ export default function CrossDayDecoding() {
         </p>
       </Section>
 
-      <Figure label="Experimental design" caption="Two animals (TS and TY) trained on a second task between the recording blocks; one animal (TS) also repeated the design later with no task in between, as a control.">
+      <Figure label="Experimental design" caption="Two animals (marmosets A and B) trained on a second task between the recording blocks; one of them (A) also repeated the design later with no task in between, as a control.">
         <CrossDayDesign />
       </Figure>
 
@@ -134,7 +134,7 @@ export default function CrossDayDecoding() {
         caption={
           <>
             Gap = accuracy (reverse) − accuracy (forward); dots are estimates and bars are 95% intervals across pairs of recording days,
-            using a common 28-trial-per-day protocol. Day pairs: TS 14 × 3, TY 11 × 3, control 3 × 3. Source:{" "}
+            using a common 28-trial-per-day protocol. Day pairs: marmoset A 14 × 3, marmoset B 11 × 3, control 3 × 3. Source:{" "}
             <a className="underline" href={`${REPO}/blob/main/HANDOFF.md`}>public results handoff</a>.
           </>
         }
@@ -174,7 +174,7 @@ export default function CrossDayDecoding() {
         <Callout title="Why I call this a lead, not a discovery" tone="caution">
           Each animal has only three recording days after the in-between period, and day pairs share days, so they are not independent
           replicates. The control was recorded in a different year from the main experiment. One alternative, error-based analysis in
-          animal TY points the other way, and in animal TS the gap disappears when only the last three &ldquo;before&rdquo; days are used. Many analyses were
+          marmoset B points the other way, and in marmoset A the gap disappears when only the last three &ldquo;before&rdquo; days are used. Many analyses were
           run on the same data. The honest summary is a reproducible pattern worth testing on new recordings with a pre-registered
           analysis — not an established mechanism.
         </Callout>

@@ -39,9 +39,9 @@ export function CrossDayDesign() {
 // Correlation gap G = r(reverse) − r(forward), with 95% crossed-date intervals.
 // Source: Marmoset_Decoding_Public, HANDOFF.md, matched28 protocol (published snapshot).
 const GAP_ROWS = [
-  { label: "Animal TS — new training in between", g: 0.1085, lo: 0.0442, hi: 0.1711, colour: "#c2410c" },
-  { label: "Animal TY — new training (replication)", g: 0.1248, lo: 0.0583, hi: 0.1871, colour: "#c2410c" },
-  { label: "Animal TS — no task in between (control)", g: -0.0503, lo: -0.1789, hi: 0.0736, colour: "#71717a" },
+  { label: "Marmoset A — new training in between", g: 0.1085, lo: 0.0442, hi: 0.1711, colour: "#c2410c" },
+  { label: "Marmoset B — new training (replication)", g: 0.1248, lo: 0.0583, hi: 0.1871, colour: "#c2410c" },
+  { label: "Marmoset A — no task in between (control)", g: -0.0503, lo: -0.1789, hi: 0.0736, colour: "#71717a" },
 ];
 
 export function GapChart() {
@@ -79,7 +79,7 @@ export function GapChart() {
 }
 
 
-function SlopePanel({ pairs, title, colour, x0 }: { pairs: [number, number, string][]; title: string; colour: string; x0: number }) {
+function SlopePanel({ pairs, title, colour, x0 }: { pairs: [number, number, number][]; title: string; colour: string; x0: number }) {
   const top = 40;
   const bottom = 250;
   const lo = 0.15;
@@ -122,8 +122,8 @@ export function PairSlopes() {
         );
       })}
       <text x={10} y={145} textAnchor="middle" transform="rotate(-90 10 145)" className="fill-zinc-500 text-[10px]">accuracy (r)</text>
-      <SlopePanel pairs={PAIRED_INTERFERENCE} title="New training in between (TS)" colour="#2f5d9e" x0={30} />
-      <SlopePanel pairs={PAIRED_FORGET} title="No task in between (TS control)" colour="#2f5d9e" x0={310} />
+      <SlopePanel pairs={PAIRED_INTERFERENCE} title="New training in between (marmoset A)" colour="#2f5d9e" x0={30} />
+      <SlopePanel pairs={PAIRED_FORGET} title="No task in between (marmoset A, control)" colour="#2f5d9e" x0={310} />
     </svg>
   );
 }
@@ -132,9 +132,9 @@ export function PairSlopes() {
 // decoder's prediction away from a calibrated reference. Rows: decoder learned on; columns: activity from.
 // Source: Results/current/mechanism/directional_input_readout_replication/absolute_summary.csv
 const ENERGY = [
-  { title: "Animal TS · new training", cells: { R1_R1: 0.76, R1_R2: 3.367, R2_R1: 1.612, R2_R2: 0.604 } },
-  { title: "Animal TY · new training", cells: { R1_R1: 0.683, R1_R2: 3.792, R2_R1: 2.149, R2_R2: 0.812 } },
-  { title: "Animal TS · no task (control)", cells: { R1_R1: 0.52, R1_R2: 1.803, R2_R1: 4.847, R2_R2: 1.541 } },
+  { title: "Marmoset A · new training", cells: { R1_R1: 0.76, R1_R2: 3.367, R2_R1: 1.612, R2_R2: 0.604 } },
+  { title: "Marmoset B · new training", cells: { R1_R1: 0.683, R1_R2: 3.792, R2_R1: 2.149, R2_R2: 0.812 } },
+  { title: "Marmoset A · no task (control)", cells: { R1_R1: 0.52, R1_R2: 1.803, R2_R1: 4.847, R2_R2: 1.541 } },
 ];
 
 function shadeRgb(v: number): [number, number, number] {
