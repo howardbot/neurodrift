@@ -84,6 +84,12 @@ export interface Work {
 
 export const WORK: Work[] = [
   {
+    title: "ScholarOS",
+    summary:
+      "A self-hosted research operating system: a daily literature radar ranked against my research questions, a PDF reader with structured notes, and my library as a semantic map (UMAP + HDBSCAN) and a knowledge graph. Private to my tailnet.",
+    tags: ["FastAPI", "pgvector", "Next.js"],
+  },
+  {
     title: "Cross-day decoding pipeline",
     summary:
       "End-to-end motor decoder: spike binning → causal Gaussian smoothing → PCA → CCA manifold alignment across sessions → Kalman-filter readout of reach kinematics.",

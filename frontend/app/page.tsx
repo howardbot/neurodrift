@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { DemoButton } from "@/components/DemoButton";
+import { ScholarosLink } from "@/components/ScholarosLink";
 import { GuideCard } from "@/components/learn/GuideBits";
 import { Reveal } from "@/components/motion";
 import { Chips, ContactButtons, GitHubIcon, LabTimeline, MailIcon, SectionHeading } from "@/components/profile/ProfileBlocks";
@@ -11,6 +12,28 @@ import { Figure, HeroGlow, ProjectCard, Term } from "@/components/showcase/Story
 import { PROFILE } from "@/content/profile";
 import { GUIDES } from "@/content/learn";
 import { RESEARCH } from "@/content/research";
+
+/** A small literature map: clusters of papers with a few links between them. */
+function ScholarosGlyph() {
+  const clusters: [number, number, string][] = [[52, 58, "fill-accent-500"], [128, 44, "fill-violet-500"], [104, 118, "fill-emerald-500"]];
+  const pts = clusters.flatMap(([cx, cy, cls], c) =>
+    Array.from({ length: 9 }, (_, i) => {
+      const a = i * 2.39996 + c;
+      const r = Math.sqrt((i + 0.5) / 9) * 20;
+      return { x: Math.round(cx + Math.cos(a) * r), y: Math.round(cy + Math.sin(a) * r), cls };
+    }),
+  );
+  return (
+    <svg viewBox="0 0 180 160" className="hidden h-40 w-44 md:block" aria-hidden="true">
+      {[[0, 9], [9, 18], [3, 21], [12, 24]].map(([a, b]) => (
+        <line key={`${a}-${b}`} x1={pts[a!]!.x} y1={pts[a!]!.y} x2={pts[b!]!.x} y2={pts[b!]!.y} className="stroke-zinc-300 dark:stroke-zinc-600" strokeDasharray="3 3" />
+      ))}
+      {pts.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r={i % 9 === 0 ? 5 : 3.2} className={p.cls} opacity={0.85} />
+      ))}
+    </svg>
+  );
+}
 
 const NUMBER_WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
 
@@ -244,6 +267,37 @@ export default function Home() {
               </div>
             </div>
             <DriftMatrix />
+          </div>
+        </div>
+      </Reveal>
+
+      {/* ScholarOS */}
+      <Reveal as="section" className="-mt-14 mb-20">
+        <div className="card relative isolate overflow-hidden p-6 md:p-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+            <div>
+              <div className="text-xs font-medium uppercase tracking-wider text-accent-600 dark:text-accent-300">Software I built · private</div>
+              <h2 className="mt-1 text-xl font-semibold md:text-2xl">ScholarOS: a research operating system for the literature</h2>
+              <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+                Every morning it searches Europe PMC, PubMed, bioRxiv and arXiv for new papers in my area and ranks them by why I
+                should read them, not just what they say. I read and annotate PDFs in it, keep structured notes and research
+                questions with the evidence for and against, and explore my library as a semantic map and a knowledge graph. It runs
+                on the same small server, reachable only from my own devices.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-1.5 text-xs text-zinc-500">
+                {["Next.js", "FastAPI", "PostgreSQL + pgvector", "UMAP + HDBSCAN", "Cytoscape.js", "PDF.js", "Claude API (optional)"].map((t) => (
+                  <span key={t} className="rounded-full border border-zinc-200 bg-white/60 px-2 py-0.5 dark:border-zinc-700 dark:bg-zinc-900/60">
+                    {t}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-6">
+                <ScholarosLink className="group text-sm font-medium text-accent-600 dark:text-accent-300">
+                  Open ScholarOS (on my tailnet) <span className="arrow">↗</span>
+                </ScholarosLink>
+              </div>
+            </div>
+            <ScholarosGlyph />
           </div>
         </div>
       </Reveal>

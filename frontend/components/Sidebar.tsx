@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCurrentProject, type ProjectRef } from "@/components/CurrentProject";
 import { Logo } from "@/components/Logo";
+import { ScholarosLink } from "@/components/ScholarosLink";
 import { GUIDES } from "@/content/learn";
 import { RESEARCH } from "@/content/research";
 
@@ -19,6 +20,10 @@ interface NavItem {
   href: string;
   label: string;
   active: (pathname: string) => boolean;
+  /** Indented under the item above it. */
+  sub?: boolean;
+  /** ScholarOS: a separate private app on the same server (opens in a new tab). */
+  external?: boolean;
 }
 
 interface NavSection {
@@ -50,13 +55,14 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    heading: "NeuroDrift tool",
+    heading: "Tools",
     items: [
-      { href: "/tool", label: "Overview", active: (p) => p === "/tool" },
-      { href: "/projects", label: "Projects", active: (p) => p === "/projects" },
-      { href: "/experiments", label: "Experiments", active: (p) => p.startsWith("/experiments") },
-      { href: "/demo", label: "Demo", active: (p) => p === "/demo" },
-      { href: "/documentation", label: "Documentation", active: (p) => p.startsWith("/documentation") },
+      { href: "/tool", label: "NeuroDrift", active: (p) => p === "/tool" },
+      { href: "/projects", label: "Projects", active: (p) => p === "/projects", sub: true },
+      { href: "/experiments", label: "Experiments", active: (p) => p.startsWith("/experiments"), sub: true },
+      { href: "/demo", label: "Demo", active: (p) => p === "/demo", sub: true },
+      { href: "/documentation", label: "Documentation", active: (p) => p.startsWith("/documentation"), sub: true },
+      { href: "scholaros", label: "ScholarOS", active: () => false, external: true },
     ],
   },
 ];
@@ -88,12 +94,12 @@ function current(item: NavItem, pathname: string): "page" | "true" | undefined {
   return item.href === pathname ? "page" : "true";
 }
 
-function NavLink({ href, children, active, ariaCurrent }: { href: string; children: React.ReactNode; active: boolean; ariaCurrent?: "page" | "true" }) {
+function NavLink({ href, children, active, ariaCurrent, sub }: { href: string; children: React.ReactNode; active: boolean; ariaCurrent?: "page" | "true"; sub?: boolean }) {
   return (
     <Link
       href={href}
       aria-current={ariaCurrent}
-      className={`group relative block rounded-md px-2.5 py-1.5 text-sm before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-accent-600 before:transition-transform before:duration-300 dark:before:bg-accent-300 ${
+      className={`group relative block rounded-md py-1.5 text-sm ${sub ? "pl-5 pr-2.5" : "px-2.5"} before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-accent-600 before:transition-transform before:duration-300 dark:before:bg-accent-300 ${
         active
           ? "bg-accent-50 font-medium text-accent-800 before:scale-y-100 dark:bg-accent-500/10 dark:text-accent-100"
           : "text-zinc-600 before:scale-y-0 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-100"
@@ -122,9 +128,17 @@ export function Sidebar() {
           <div key={section.heading}>
             <Heading>{section.heading}</Heading>
             <div className="space-y-0.5">
-              {section.items.map((item) => (
-                <NavLink key={item.href} href={item.href} active={item.active(pathname)} ariaCurrent={current(item, pathname)}>{item.label}</NavLink>
-              ))}
+              {section.items.map((item) =>
+                item.external ? (
+                  <ScholarosLink key={item.href} className="group block rounded-md px-2.5 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-100">
+                    {item.label} <span className="text-[11px] text-zinc-400">private ↗</span>
+                  </ScholarosLink>
+                ) : (
+                  <NavLink key={item.href} href={item.href} active={item.active(pathname)} ariaCurrent={current(item, pathname)} sub={item.sub}>
+                    {item.label}
+                  </NavLink>
+                ),
+              )}
             </div>
           </div>
         ))}
@@ -150,12 +164,19 @@ export function Sidebar() {
 
 function MenuLink({ item, pathname, onNavigate }: { item: NavItem; pathname: string; onNavigate: () => void }) {
   const active = item.active(pathname);
+  if (item.external) {
+    return (
+      <ScholarosLink className="flex min-h-11 items-center gap-1.5 rounded-md px-3 text-[15px] text-zinc-700 active:bg-zinc-100 dark:text-zinc-300 dark:active:bg-zinc-800">
+        {item.label} <span className="text-xs text-zinc-400">private ↗</span>
+      </ScholarosLink>
+    );
+  }
   return (
     <Link
       href={item.href}
       aria-current={current(item, pathname)}
       onClick={onNavigate}
-      className={`flex min-h-11 items-center rounded-md px-3 text-[15px] ${
+      className={`flex min-h-11 items-center rounded-md text-[15px] ${item.sub ? "pl-6 pr-3" : "px-3"} ${
         active
           ? "bg-accent-50 font-medium text-accent-800 dark:bg-accent-500/15 dark:text-accent-100"
           : "text-zinc-700 active:bg-zinc-100 dark:text-zinc-300 dark:active:bg-zinc-800"
