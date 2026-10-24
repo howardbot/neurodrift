@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { prefersReducedMotion } from "@/components/motion";
 import { LAND_RUNS, LATTICE_SIZE } from "@/content/globeLand";
-import { KIND_LABEL, PLACES, type Place, type PlaceKind } from "@/content/places";
+import { BY_COUNTRY, PLACES, type Place } from "@/content/places";
 import { decodeRuns, latticePoint, lonDelta, toVec, view, type Vec3 } from "@/lib/globe";
 
 // Dotted globe of the places on /places. Canvas 2D: land is a lattice of dots facing the viewer
@@ -11,16 +11,13 @@ import { decodeRuns, latticePoint, lonDelta, toVec, view, type Vec3 } from "@/li
 // still scrolls), click a pin or a place below to fly there. It turns slowly when idle unless the
 // viewer prefers reduced motion, and only animates while on screen.
 
-const KIND_COLOR: Record<PlaceKind, { light: string; dark: string }> = {
-  lived: { light: "#2f5d9e", dark: "#86aedf" }, // accent-600 / accent-300
-  visited: { light: "#d97706", dark: "#fbbf24" }, // amber-600 / amber-400
-};
+const PIN = { light: "#2f5d9e", dark: "#86aedf" }; // accent-600 / accent-300
 const SPIN = 4; // degrees per second when idle
 const TILT = 60; // furthest the view tilts towards a pole
 const DRAG = 0.35; // degrees per pixel dragged
 const clampTilt = (lat: number) => Math.max(-TILT, Math.min(TILT, lat));
 
-const countries = new Set(PLACES.map((p) => p.region.split(",").pop()!.trim())).size;
+const where = (p: Place) => [p.area, p.country].filter(Boolean).join(", ");
 
 export function PlacesGlobe() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -32,7 +29,7 @@ export function PlacesGlobe() {
   // Mutable animation state lives in one ref; React state only drives the panel beside the globe.
   const s = useRef({
     lon: PLACES[0]?.lon ?? 0,
-    lat: 20,
+    lat: 25,
     target: null as { lon: number; lat: number } | null,
     drag: null as { id: number; x: number; y: number; lon: number; lat: number; touch: boolean; moved: boolean } | null,
     selected: null as string | null,
@@ -129,12 +126,12 @@ export function PlacesGlobe() {
       for (const { place, v } of pins) {
         const p = project(v);
         if (p.z < 0.05) continue;
-        const colour = KIND_COLOR[place.kind][isDark ? "dark" : "light"];
+        const colour = PIN[isDark ? "dark" : "light"];
         const focus = place.id === st.selected || place.id === st.hovered;
         ctx.globalAlpha = 0.25 * p.z;
         ctx.fillStyle = colour;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 9 * dpr, 0, 2 * Math.PI);
+        ctx.arc(p.x, p.y, 7 * dpr, 0, 2 * Math.PI);
         ctx.fill();
         if (focus) {
           ctx.globalAlpha = (1 - phase) * p.z;
@@ -146,7 +143,7 @@ export function PlacesGlobe() {
         }
         ctx.globalAlpha = Math.min(1, 0.35 + p.z);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 4.2 * dpr, 0, 2 * Math.PI);
+        ctx.arc(p.x, p.y, 3.6 * dpr, 0, 2 * Math.PI);
         ctx.fill();
         ctx.lineWidth = 1.5 * dpr;
         ctx.strokeStyle = isDark ? "#0a0d13" : "#ffffff";
@@ -246,7 +243,6 @@ export function PlacesGlobe() {
   };
 
   const current = PLACES.find((p) => p.id === selected) ?? null;
-  const byKind = (["lived", "visited"] as PlaceKind[]).map((kind) => ({ kind, places: PLACES.filter((p) => p.kind === kind) })).filter((g) => g.places.length);
 
   return (
     <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_17rem] md:items-center">
@@ -254,7 +250,7 @@ export function PlacesGlobe() {
         ref={canvasRef}
         tabIndex={0}
         role="img"
-        aria-label={`Globe showing ${PLACES.length} places: ${PLACES.map((p) => `${p.name} (${KIND_LABEL[p.kind].toLowerCase()})`).join(", ")}. Arrow keys turn it.`}
+        aria-label={`Globe showing ${PLACES.length} places: ${PLACES.map((p) => p.name).join(", ")}. Arrow keys turn it.`}
         className="mx-auto aspect-square w-full max-w-[30rem] cursor-grab rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent-500 active:cursor-grabbing"
         style={{ touchAction: "pan-y" }}
         onPointerDown={(e) => {
@@ -310,15 +306,12 @@ export function PlacesGlobe() {
       <div className="space-y-4">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{PLACES.length}</span> {PLACES.length === 1 ? "place" : "places"} in{" "}
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{countries}</span> {countries === 1 ? "country" : "countries"}
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{BY_COUNTRY.length}</span> {BY_COUNTRY.length === 1 ? "country" : "countries"}
         </p>
-        {byKind.map(({ kind, places }) => (
-          <div key={kind}>
-            <div className="mb-1.5 flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-              <span className={`h-2 w-2 rounded-full ${kind === "lived" ? "bg-accent-600 dark:bg-accent-300" : "bg-amber-600 dark:bg-amber-400"}`} />
-              {KIND_LABEL[kind]}
-            </div>
-            <div className="flex flex-wrap gap-1.5" role="group" aria-label={KIND_LABEL[kind]}>
+        {BY_COUNTRY.map(({ country, places }) => (
+          <div key={country}>
+            <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-zinc-500">{country}</div>
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label={country}>
               {places.map((p) => (
                 <button
                   key={p.id}
@@ -339,15 +332,11 @@ export function PlacesGlobe() {
             </div>
           </div>
         ))}
-        <div className="min-h-[5.5rem] rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800" aria-live="polite">
+        <div className="min-h-[4rem] rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800" aria-live="polite">
           {current ? (
             <>
               <div className="font-semibold">{current.name}</div>
-              <div className="text-xs text-zinc-500">
-                {current.region}
-                {current.when ? ` · ${current.when}` : ""}
-              </div>
-              {current.note && <p className="mt-1.5 text-zinc-600 dark:text-zinc-400">{current.note}</p>}
+              <div className="text-xs text-zinc-500">{where(current)}</div>
             </>
           ) : (
             <p className="text-zinc-500">Drag to turn the globe. Click a place to fly there.</p>

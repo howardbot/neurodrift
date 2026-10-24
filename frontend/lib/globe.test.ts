@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LAND_RUNS, LAND_SAMPLES, LATTICE_SIZE } from "@/content/globeLand";
-import { PLACES } from "@/content/places";
+import { BY_COUNTRY, PLACES } from "@/content/places";
 import { decodeRuns, latticePoint, lonDelta, nearestLattice, toVec, view } from "@/lib/globe";
 
 const land = new Set(decodeRuns(LAND_RUNS));
@@ -48,12 +48,18 @@ describe("globe view", () => {
 });
 
 describe("places", () => {
-  it("have valid coordinates, unique ids and a known kind", () => {
+  it("have valid coordinates, unique ids and names, and a country", () => {
     expect(new Set(PLACES.map((p) => p.id)).size).toBe(PLACES.length);
+    expect(new Set(PLACES.map((p) => p.name)).size).toBe(PLACES.length);
     for (const p of PLACES) {
       expect(Math.abs(p.lat)).toBeLessThanOrEqual(90);
       expect(Math.abs(p.lon)).toBeLessThanOrEqual(180);
-      expect(["lived", "visited"]).toContain(p.kind);
+      expect(p.country.length).toBeGreaterThan(1);
     }
+  });
+
+  it("are grouped by country without losing any", () => {
+    expect(BY_COUNTRY.flatMap((g) => g.places)).toHaveLength(PLACES.length);
+    expect(BY_COUNTRY.map((g) => g.country)).toEqual(["China", "South Korea", "United States", "Mexico", "Canada"]);
   });
 });

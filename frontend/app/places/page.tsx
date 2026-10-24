@@ -4,7 +4,7 @@ import { PROFILE } from "@/content/profile";
 
 export const metadata = {
   title: "Places",
-  description: `Where ${PROFILE.name} has lived, studied and travelled, on a globe you can turn.`,
+  description: `Places ${PROFILE.name} has been, on a globe you can turn.`,
 };
 
 export default function Places() {
@@ -20,7 +20,7 @@ export default function Places() {
           Where I&apos;ve been
         </h1>
         <p className="mt-4 max-w-2xl animate-fade-up text-lg leading-relaxed text-zinc-700 [animation-delay:140ms] dark:text-zinc-300">
-          The cities I have lived and studied in, and the places I have travelled to.
+          Cities I have been to, on a globe you can turn.
         </p>
       </section>
 
