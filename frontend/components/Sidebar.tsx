@@ -38,6 +38,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/", label: "Home", active: (p) => p === "/" },
       { href: "/about", label: "About", active: (p) => p === "/about" },
+      { href: "/places", label: "Places", active: (p) => p === "/places" },
     ],
   },
   {
