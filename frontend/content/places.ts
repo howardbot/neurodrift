@@ -23,6 +23,13 @@ export const PLACES: Place[] = [
   { id: "chengdu", region: "CN-SC", name: "Chengdu", area: "Sichuan", country: "China", lat: 30.5728, lon: 104.0668 },
   { id: "qingdao", region: "CN-SD", name: "Qingdao", area: "Shandong", country: "China", lat: 36.0671, lon: 120.3826 },
   { id: "taian", region: "CN-SD", name: "Tai'an", area: "Shandong", country: "China", lat: 36.195, lon: 117.089 },
+  { id: "weifang", region: "CN-SD", name: "Weifang", area: "Shandong", country: "China", lat: 36.7069, lon: 119.1618 },
+  { id: "dalian", region: "CN-LN", name: "Dalian", area: "Liaoning", country: "China", lat: 38.914, lon: 121.6147 },
+  { id: "wuxi", region: "CN-JS", name: "Wuxi", area: "Jiangsu", country: "China", lat: 31.4912, lon: 120.3119 },
+  { id: "hangzhou", region: "CN-ZJ", name: "Hangzhou", area: "Zhejiang", country: "China", lat: 30.2741, lon: 120.1551 },
+  { id: "shijiazhuang", region: "CN-HE", name: "Shijiazhuang", area: "Hebei", country: "China", lat: 38.0428, lon: 114.5149 },
+  { id: "zhangjiakou", region: "CN-HE", name: "Zhangjiakou", area: "Hebei", country: "China", lat: 40.7676, lon: 114.8863 },
+  { id: "hohhot", region: "CN-NM", name: "Hohhot", area: "Inner Mongolia", country: "China", lat: 40.8414, lon: 111.7519 },
   { id: "seoul", region: "KR-11", name: "Seoul", country: "South Korea", lat: 37.5665, lon: 126.978 },
   { id: "madison", region: "US-WI", name: "Madison", area: "Wisconsin", country: "United States", lat: 43.0731, lon: -89.4012 },
   { id: "milwaukee", region: "US-WI", name: "Milwaukee", area: "Wisconsin", country: "United States", lat: 43.0389, lon: -87.9065 },
@@ -36,6 +43,7 @@ export const PLACES: Place[] = [
   { id: "san-francisco", region: "US-CA", name: "San Francisco", area: "California", country: "United States", lat: 37.7749, lon: -122.4194 },
   { id: "cancun", region: "MX-ROO", name: "Cancún", area: "Quintana Roo", country: "Mexico", lat: 21.1619, lon: -86.8515 },
   { id: "vancouver", region: "CA-BC", name: "Vancouver", area: "British Columbia", country: "Canada", lat: 49.2827, lon: -123.1207 },
+  { id: "abu-dhabi", region: "AE-AZ", name: "Abu Dhabi", country: "United Arab Emirates", lat: 24.4539, lon: 54.3773 },
 ];
 
 /** Countries in the order they first appear, each with its places. */

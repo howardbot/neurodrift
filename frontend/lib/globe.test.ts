@@ -61,7 +61,7 @@ describe("places", () => {
 
   it("are grouped by country without losing any", () => {
     expect(BY_COUNTRY.flatMap((g) => g.places)).toHaveLength(PLACES.length);
-    expect(BY_COUNTRY.map((g) => g.country)).toEqual(["China", "South Korea", "United States", "Mexico", "Canada"]);
+    expect(BY_COUNTRY.map((g) => g.country)).toEqual(["China", "South Korea", "United States", "Mexico", "Canada", "United Arab Emirates"]);
   });
 });
 
