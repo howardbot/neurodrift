@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LAND_RUNS, LAND_SAMPLES, LATTICE_SIZE } from "@/content/globeLand";
+import { DOT_REGIONS, REGION_CODES } from "@/content/globeRegions";
 import { BY_COUNTRY, PLACES } from "@/content/places";
 import { decodeRuns, latticePoint, lonDelta, nearestLattice, toVec, view } from "@/lib/globe";
 
@@ -61,5 +62,38 @@ describe("places", () => {
   it("are grouped by country without losing any", () => {
     expect(BY_COUNTRY.flatMap((g) => g.places)).toHaveLength(PLACES.length);
     expect(BY_COUNTRY.map((g) => g.country)).toEqual(["China", "South Korea", "United States", "Mexico", "Canada"]);
+  });
+});
+
+
+describe("globe regions", () => {
+  const landOrder = decodeRuns(LAND_RUNS);
+  const regions = DOT_REGIONS.split(",");
+  const regionOf = (p: [number, number]) => {
+    const k = landOrder.indexOf(nearestLattice(p, LATTICE_SIZE));
+    return k >= 0 && regions[k] ? REGION_CODES[parseInt(regions[k], 36)] : undefined;
+  };
+
+  it("has one entry per land dot, all pointing into the code table", () => {
+    expect(regions).toHaveLength(landOrder.length);
+    for (const r of regions) if (r) expect(REGION_CODES[parseInt(r, 36)]).toBeDefined();
+  });
+
+  it("puts dots well inside a region in that region", () => {
+    // Points far from borders: dots are ~180 km apart, so a city near a border (Madison is
+    // ~70 km from Illinois) can have its nearest dot across it.
+    expect(regionOf([-89.9, 44.6])).toBe("US-WI"); // central Wisconsin
+    expect(regionOf([102.7, 30.6])).toBe("CN-SC"); // central Sichuan
+    expect(regionOf([-99.5, 31.5])).toBe("US-TX"); // central Texas
+    expect(regionOf([128.0, 47.5])).toBe("CN-HL"); // central Heilongjiang
+    expect(regionOf([-124.5, 54.0])).toBe("CA-BC"); // central British Columbia
+  });
+
+  it("uses region codes that exist, and shades most visited regions", () => {
+    const withDots = new Set(REGION_CODES);
+    const visited = [...new Set(PLACES.map((p) => p.region))];
+    for (const code of visited) expect(code).toMatch(/^[A-Z]{2}-[A-Z0-9]{1,3}$/);
+    // Shanghai and Seoul are smaller than the gap between dots; their pins mark them.
+    expect(visited.filter((c) => !withDots.has(c)).sort()).toEqual(["CN-SH", "KR-11"]);
   });
 });
