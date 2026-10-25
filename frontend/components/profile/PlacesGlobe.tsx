@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { prefersReducedMotion } from "@/components/motion";
 import { LAND_RUNS, LATTICE_SIZE } from "@/content/globeLand";
+import { DOT_REGIONS, REGION_CODES } from "@/content/globeRegions";
 import { BY_COUNTRY, PLACES, type Place } from "@/content/places";
 import { decodeRuns, latticePoint, lonDelta, toVec, view, type Vec3 } from "@/lib/globe";
 
@@ -17,13 +18,22 @@ const TILT = 60; // furthest the view tilts towards a pole
 const DRAG = 0.35; // degrees per pixel dragged
 const clampTilt = (lat: number) => Math.max(-TILT, Math.min(TILT, lat));
 
+/** Provinces and states with at least one place: their land dots are drawn dark. */
+const VISITED = new Set(PLACES.map((p) => p.region));
+
 const where = (p: Place) => [p.area, p.country].filter(Boolean).join(", ");
 
 export function PlacesGlobe() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
-  const land = useMemo(() => decodeRuns(LAND_RUNS).map((i) => toVec(latticePoint(i, LATTICE_SIZE))), []);
+  const land = useMemo(() => {
+    const regions = DOT_REGIONS.split(",");
+    return decodeRuns(LAND_RUNS).map((i, k) => {
+      const code = regions[k] ? REGION_CODES[parseInt(regions[k], 36)] : undefined;
+      return { v: toVec(latticePoint(i, LATTICE_SIZE)), seen: code !== undefined && VISITED.has(code) };
+    });
+  }, []);
   const pins = useMemo(() => PLACES.map((p) => ({ place: p, v: toVec([p.lon, p.lat]) as Vec3 })), []);
 
   // Mutable animation state lives in one ref; React state only drives the panel beside the globe.
@@ -109,15 +119,19 @@ export function PlacesGlobe() {
       ctx.strokeStyle = isDark ? "rgba(134,174,223,0.22)" : "rgba(47,93,158,0.16)";
       ctx.stroke();
 
-      // Land dots, smaller and fainter towards the rim.
+      // Land dots, smaller and fainter towards the rim: light where I have not been, dark (in the
+      // pin colour) in the provinces and states I have been to, drawn on top.
       const dot = Math.max(1.2 * dpr, r / 150);
-      ctx.fillStyle = isDark ? "#a1a1aa" : "#52525b";
-      for (const v of land) {
-        const [x, y, z] = view(v, st.lon, st.lat);
-        if (z <= 0) continue;
-        ctx.globalAlpha = 0.15 + 0.75 * z;
-        const size = dot * (0.55 + 0.45 * z);
-        ctx.fillRect(c + x * r - size / 2, c - y * r - size / 2, size, size);
+      for (const seen of [false, true]) {
+        ctx.fillStyle = seen ? PIN[isDark ? "dark" : "light"] : isDark ? "#52525b" : "#a1a1aa";
+        for (const d of land) {
+          if (d.seen !== seen) continue;
+          const [x, y, z] = view(d.v, st.lon, st.lat);
+          if (z <= 0) continue;
+          ctx.globalAlpha = seen ? 0.7 + 0.3 * z : 0.28 + 0.5 * z;
+          const size = dot * (seen ? 1.55 : 1) * (0.55 + 0.45 * z);
+          ctx.fillRect(c + x * r - size / 2, c - y * r - size / 2, size, size);
+        }
       }
       ctx.globalAlpha = 1;
 
@@ -245,12 +259,12 @@ export function PlacesGlobe() {
   const current = PLACES.find((p) => p.id === selected) ?? null;
 
   return (
-    <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_17rem] md:items-center">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-center">
       <canvas
         ref={canvasRef}
         tabIndex={0}
         role="img"
-        aria-label={`Globe showing ${PLACES.length} places: ${PLACES.map((p) => p.name).join(", ")}. Arrow keys turn it.`}
+        aria-label={`Globe showing ${PLACES.length} places: ${PLACES.map((p) => p.name).join(", ")}, with the provinces and states they are in shaded. Arrow keys turn it.`}
         className="mx-auto aspect-square w-full max-w-[30rem] cursor-grab rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent-500 active:cursor-grabbing"
         style={{ touchAction: "pan-y" }}
         onPointerDown={(e) => {
@@ -306,8 +320,17 @@ export function PlacesGlobe() {
       <div className="space-y-4">
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">{PLACES.length}</span> {PLACES.length === 1 ? "place" : "places"} in{" "}
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{BY_COUNTRY.length}</span> {BY_COUNTRY.length === 1 ? "country" : "countries"}
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{BY_COUNTRY.length}</span> {BY_COUNTRY.length === 1 ? "country" : "countries"}, across{" "}
+          <span className="font-semibold text-zinc-900 dark:text-zinc-100">{VISITED.size}</span> provinces and states
         </p>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-600 dark:text-zinc-400" aria-hidden="true">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-[2px] bg-accent-600 dark:bg-accent-300" /> Been there
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-[2px] bg-zinc-400 dark:bg-zinc-600" /> Not yet
+          </span>
+        </div>
         {BY_COUNTRY.map(({ country, places }) => (
           <div key={country}>
             <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-zinc-500">{country}</div>
