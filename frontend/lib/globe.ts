@@ -65,3 +65,14 @@ export function nearestLattice(p: LonLat, n: number): number {
   }
   return best;
 }
+
+/**
+ * How a land dot is shaded on /places, from its province or state code (ISO 3166-2, e.g. "CN-SD"):
+ * 2 = a province or state with one of the places, 1 = elsewhere in a country with one of the
+ * places, 0 = anywhere else (or no code).
+ */
+export function shadeOf(code: string | undefined, regions: Set<string>, countries: Set<string>): 0 | 1 | 2 {
+  if (!code) return 0;
+  if (regions.has(code)) return 2;
+  return countries.has(code.slice(0, 2)) ? 1 : 0;
+}

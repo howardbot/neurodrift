@@ -5,7 +5,7 @@ import { prefersReducedMotion } from "@/components/motion";
 import { LAND_RUNS, LATTICE_SIZE } from "@/content/globeLand";
 import { DOT_REGIONS, REGION_CODES } from "@/content/globeRegions";
 import { BY_COUNTRY, PLACES, type Place } from "@/content/places";
-import { decodeRuns, latticePoint, lonDelta, toVec, view, type Vec3 } from "@/lib/globe";
+import { decodeRuns, latticePoint, lonDelta, shadeOf, toVec, view, type Vec3 } from "@/lib/globe";
 
 // Dotted globe of the places on /places. Canvas 2D: land is a lattice of dots facing the viewer
 // (fainter towards the rim), places are pins. Drag to turn it (sideways only on touch, so the page
@@ -14,6 +14,14 @@ import { decodeRuns, latticePoint, lonDelta, toVec, view, type Vec3 } from "@/li
 // and fully zoomed out, unless the viewer prefers reduced motion, and only animates while on screen.
 
 const PIN = { light: "#2f5d9e", dark: "#86aedf" }; // accent-600 / accent-300
+const TINT = { light: "#5a8dcd", dark: "#3b6fb6" }; // accent-400 / accent-500
+const GREY = { light: "#a1a1aa", dark: "#52525b" }; // zinc-400 / zinc-600
+/** Land dot styles by shade (see shadeOf): opacity is alpha + gain × facing, size is scaled. */
+const SHADES = [
+  { colour: GREY, alpha: 0.28, gain: 0.5, scale: 1 },
+  { colour: TINT, alpha: 0.4, gain: 0.45, scale: 1.2 },
+  { colour: PIN, alpha: 0.7, gain: 0.3, scale: 1.55 },
+] as const;
 const SPIN = 4; // degrees per second when idle
 const TILT = 60; // furthest the view tilts towards a pole
 const DRAG = 0.35; // degrees per pixel dragged, at zoom 1
@@ -24,6 +32,8 @@ const clampZoom = (z: number) => Math.max(1, Math.min(ZOOM_MAX, z));
 
 /** Provinces and states with at least one place: their land dots are drawn dark. */
 const VISITED = new Set(PLACES.map((p) => p.region));
+/** Countries with at least one place (ISO alpha-2): the rest of their land gets a light tint. */
+const VISITED_COUNTRIES = new Set(PLACES.map((p) => p.region.slice(0, 2)));
 
 const where = (p: Place) => [p.area, p.country].filter(Boolean).join(", ");
 
@@ -36,7 +46,7 @@ export function PlacesGlobe() {
     const regions = DOT_REGIONS.split(",");
     return decodeRuns(LAND_RUNS).map((i, k) => {
       const code = regions[k] ? REGION_CODES[parseInt(regions[k], 36)] : undefined;
-      return { v: toVec(latticePoint(i, LATTICE_SIZE)), seen: code !== undefined && VISITED.has(code) };
+      return { v: toVec(latticePoint(i, LATTICE_SIZE)), shade: shadeOf(code, VISITED, VISITED_COUNTRIES) };
     });
   }, []);
   const pins = useMemo(() => PLACES.map((p) => ({ place: p, v: toVec([p.lon, p.lat]) as Vec3 })), []);
@@ -138,21 +148,24 @@ export function PlacesGlobe() {
       ctx.strokeStyle = isDark ? "rgba(134,174,223,0.22)" : "rgba(47,93,158,0.16)";
       ctx.stroke();
 
-      // Land dots, smaller and fainter towards the rim: light where I have not been, dark (in the
-      // pin colour) in the provinces and states I have been to, drawn on top.
+      // Land dots, smaller and fainter towards the rim, in three shades drawn bottom to top: grey
+      // where I have not been, a light tint across countries I have been to, and dark (the pin
+      // colour) in the provinces and states I have been to.
       // Zoomed in, dots grow more slowly than the gaps between them, so the map stays dotted.
       const dot = Math.max(1.2 * dpr, ((w * 0.45) / 150) * st.zoom ** 0.6);
-      for (const seen of [false, true]) {
-        ctx.fillStyle = seen ? PIN[isDark ? "dark" : "light"] : isDark ? "#52525b" : "#a1a1aa";
+      const mode = isDark ? "dark" : "light";
+      for (const shade of [0, 1, 2] as const) {
+        const { colour, alpha, gain, scale } = SHADES[shade];
+        ctx.fillStyle = colour[mode];
         for (const d of land) {
-          if (d.seen !== seen) continue;
+          if (d.shade !== shade) continue;
           const [x, y, z] = view(d.v, st.lon, st.lat);
           if (z <= 0) continue;
           const px = c + x * r;
           const py = c - y * r;
           if (px < -8 || py < -8 || px > w + 8 || py > w + 8) continue;
-          ctx.globalAlpha = seen ? 0.7 + 0.3 * z : 0.28 + 0.5 * z;
-          const size = dot * (seen ? 1.55 : 1) * (0.55 + 0.45 * z);
+          ctx.globalAlpha = alpha + gain * z;
+          const size = dot * scale * (0.55 + 0.45 * z);
           if (size > 3.5 * dpr) {
             ctx.beginPath();
             ctx.arc(px, py, size / 2, 0, 2 * Math.PI);
@@ -309,7 +322,7 @@ export function PlacesGlobe() {
           ref={canvasRef}
           tabIndex={0}
           role="img"
-          aria-label={`Globe showing ${PLACES.length} places: ${PLACES.map((p) => p.name).join(", ")}, with the provinces and states they are in shaded. Arrow keys turn it; plus and minus zoom.`}
+          aria-label={`Globe showing ${PLACES.length} places: ${PLACES.map((p) => p.name).join(", ")}, with the provinces and states they are in shaded dark and the rest of those countries lightly. Arrow keys turn it; plus and minus zoom.`}
           className="aspect-square w-full cursor-grab rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent-500 active:cursor-grabbing"
           style={{ touchAction: "pan-y" }}
           onPointerDown={(e) => {
@@ -428,6 +441,9 @@ export function PlacesGlobe() {
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-600 dark:text-zinc-400" aria-hidden="true">
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-[2px] bg-accent-600 dark:bg-accent-300" /> Been there
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-[2px] bg-accent-400 dark:bg-accent-500" /> Same country
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-[2px] bg-zinc-400 dark:bg-zinc-600" /> Not yet

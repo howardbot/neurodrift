@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { LAND_RUNS, LAND_SAMPLES, LATTICE_SIZE } from "@/content/globeLand";
 import { DOT_REGIONS, REGION_CODES } from "@/content/globeRegions";
 import { BY_COUNTRY, PLACES } from "@/content/places";
-import { decodeRuns, latticePoint, lonDelta, nearestLattice, toVec, view } from "@/lib/globe";
+import { decodeRuns, latticePoint, lonDelta, nearestLattice, shadeOf, toVec, view } from "@/lib/globe";
 
 const land = new Set(decodeRuns(LAND_RUNS));
 
@@ -95,5 +95,31 @@ describe("globe regions", () => {
     for (const code of visited) expect(code).toMatch(/^[A-Z]{2}-[A-Z0-9]{1,3}$/);
     // Shanghai and Seoul are smaller than the gap between dots; their pins mark them.
     expect(visited.filter((c) => !withDots.has(c)).sort()).toEqual(["CN-SH", "KR-11"]);
+  });
+});
+
+describe("shading", () => {
+  const regions = new Set(PLACES.map((p) => p.region));
+  const countries = new Set(PLACES.map((p) => p.region.slice(0, 2)));
+  const landOrder = decodeRuns(LAND_RUNS);
+  const dotRegions = DOT_REGIONS.split(",");
+  const shadeAt = (p: [number, number]) => {
+    const k = landOrder.indexOf(nearestLattice(p, LATTICE_SIZE));
+    const code = k >= 0 && dotRegions[k] ? REGION_CODES[parseInt(dotRegions[k], 36)] : undefined;
+    return shadeOf(code, regions, countries);
+  };
+
+  it("is dark in a visited region, tinted elsewhere in a visited country, grey otherwise", () => {
+    expect(shadeOf("US-TX", regions, countries)).toBe(2);
+    expect(shadeOf("US-WY", regions, countries)).toBe(1);
+    expect(shadeOf("FR-IDF", regions, countries)).toBe(0);
+    expect(shadeOf(undefined, regions, countries)).toBe(0);
+  });
+
+  it("gives the globe's dots the right shade", () => {
+    expect(shadeAt([-99.5, 31.5])).toBe(2); // central Texas
+    expect(shadeAt([-107.5, 43])).toBe(1); // Wyoming
+    expect(shadeAt([128.9, 36.4])).toBe(1); // South Korea outside Seoul
+    expect(shadeAt([2.5, 46.5])).toBe(0); // France
   });
 });
