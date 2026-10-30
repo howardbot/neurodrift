@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { BCI_CHECKED, BCI_DEPTHS, BCI_LANDSCAPE, BCI_STAGES } from "@/content/bciToday";
-import { BRAIN_AREAS, ELECTRODES, GUIDE_GROUPS, GUIDES, SPECIES, TREE_ERAS, TREE_LINKS, TREE_PEOPLE, TREE_TIES } from "@/content/learn";
+import { BCI_CHECKED, BCI_DEPTHS, BCI_LANDSCAPE, BCI_SITES, BCI_STAGES } from "@/content/bciToday";
+import { AREA_GROUPS, BRAIN_AREAS, ELECTRODES, GUIDE_GROUPS, GUIDES, SPECIES, TREE_ERAS, TREE_LINKS, TREE_PEOPLE, TREE_TIES } from "@/content/learn";
 import { RESEARCH } from "@/content/research";
 import { ancestors, connection, crowdedPairs, linkCollisions, mentorsOf } from "@/lib/tree";
 
@@ -19,7 +19,29 @@ describe("field guide content", () => {
       expect(a.label[0], a.id).toBeGreaterThan(0);
       expect(a.label[0], a.id).toBeLessThan(600);
       expect(a.label[1], a.id).toBeGreaterThan(0);
-      expect(a.label[1], a.id).toBeLessThan(340);
+      expect(a.label[1], a.id).toBeLessThan(410);
+    }
+  });
+
+  it("puts every brain area in a group, and every group to use", () => {
+    expect(new Set(BRAIN_AREAS.map((a) => a.id)).size).toBe(BRAIN_AREAS.length);
+    for (const a of BRAIN_AREAS) expect(AREA_GROUPS, a.id).toContain(a.group);
+    for (const g of AREA_GROUPS) expect(BRAIN_AREAS.some((a) => a.group === g), g).toBe(true);
+  });
+
+  it("places each BCI program at a real area, with sources and a marker on the map", () => {
+    const areas = new Set(BRAIN_AREAS.map((a) => a.id));
+    const landscape = new Set(BCI_LANDSCAPE.map((e) => e.id));
+    expect(new Set(BCI_SITES.map((s) => s.id)).size).toBe(BCI_SITES.length);
+    for (const s of BCI_SITES) {
+      expect(areas.has(s.area), s.id).toBe(true);
+      if (s.landscape) expect(landscape.has(s.landscape), s.id).toBe(true);
+      expect(s.sources.length, s.id).toBeGreaterThan(0);
+      for (const src of s.sources) expect(src.url, s.id).toMatch(/^https:\/\//);
+      expect(s.at[0], s.id).toBeGreaterThan(0);
+      expect(s.at[0], s.id).toBeLessThan(600);
+      expect(s.at[1], s.id).toBeGreaterThan(0);
+      expect(s.at[1], s.id).toBeLessThan(410);
     }
   });
 

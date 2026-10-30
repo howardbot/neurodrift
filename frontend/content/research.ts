@@ -161,7 +161,7 @@ export const GLOSSARY = {
   ecog: {
     term: "ECoG",
     definition: "Electrocorticography: a grid of disc electrodes laid directly on the surface of the brain, usually during epilepsy surgery. Sharper than EEG because the skull is out of the way.",
-    usedIn: ["/learn/electrodes"],
+    usedIn: ["/learn/brain-map", "/learn/electrodes"],
   },
   eeg: {
     term: "EEG",
@@ -186,7 +186,7 @@ export const GLOSSARY = {
   "utah-array": {
     term: "Utah array",
     definition: "A 4 × 4 mm bed of 100 silicon needles, each 1–1.5 mm long, pressed into the cortex. It records spikes at 100 places at once and is the sensor in most human brain–computer interface trials.",
-    usedIn: ["/learn/electrodes", "/learn/sorting-methods"],
+    usedIn: ["/learn/brain-map", "/learn/electrodes", "/learn/sorting-methods"],
   },
   "dorsal-stream": {
     term: "Dorsal stream",
@@ -246,7 +246,7 @@ export const GLOSSARY = {
   "deep-brain-stimulation": {
     term: "Deep brain stimulation",
     definition: "Electrodes placed deep in the brain that deliver steady electrical pulses, used mainly to reduce the tremor and stiffness of Parkinson's disease.",
-    usedIn: ["/learn/bcis-today"],
+    usedIn: ["/learn/bcis-today", "/learn/brain-map"],
   },
 } satisfies Record<string, GlossaryEntry>;
 
