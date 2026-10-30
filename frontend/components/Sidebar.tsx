@@ -39,6 +39,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: "/", label: "Home", active: (p) => p === "/" },
       { href: "/about", label: "About", active: (p) => p === "/about" },
       { href: "/places", label: "Places", active: (p) => p === "/places" },
+      { href: "/ideas", label: "Ideas", active: (p) => p === "/ideas" },
     ],
   },
   {
@@ -77,11 +78,11 @@ function projectItems(project: ProjectRef): NavItem[] {
   ];
 }
 
-/** Project navigation is shown inside the tool, not on the research pages, field guide or glossary. */
+/** Project navigation is shown inside the tool, not on the personal and research pages, field guide or glossary. */
 function useProjectNav(pathname: string): ProjectRef | null {
   const project = useCurrentProject();
   const isResearch =
-    pathname === "/" || pathname === "/about" || pathname.startsWith("/research") || pathname.startsWith("/learn") || pathname === "/glossary";
+    pathname === "/" || pathname === "/about" || pathname === "/places" || pathname === "/ideas" || pathname.startsWith("/research") || pathname.startsWith("/learn") || pathname === "/glossary";
   return project && !isResearch ? project : null;
 }
 
