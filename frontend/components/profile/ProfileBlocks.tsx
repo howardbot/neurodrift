@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Reveal } from "@/components/motion";
 import { LABS, PROFILE, WORK } from "@/content/profile";
 import { RESEARCH } from "@/content/research";
+import { anchorOf } from "@/lib/timeline";
 
 /** Eyebrow + title (+ optional lead) used to open every section of the home and About pages. */
 export function SectionHeading({ eyebrow, title, children }: { eyebrow: string; title: string; children?: ReactNode }) {
@@ -80,7 +81,13 @@ export function LabTimeline({ detailed = false }: { detailed?: boolean }) {
       {LABS.map((lab, i) => {
         const last = i === LABS.length - 1;
         return (
-          <Reveal as="li" key={lab.name} delay={detailed ? 0 : i * 60} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-4">
+          <Reveal
+            as="li"
+            key={lab.name}
+            id={detailed ? anchorOf(lab.name) : undefined}
+            delay={detailed ? 0 : i * 60}
+            className="grid scroll-mt-20 grid-cols-[1.25rem_minmax(0,1fr)] gap-x-4"
+          >
             <div className="flex flex-col items-center pt-1.5">
               <span
                 aria-hidden="true"
