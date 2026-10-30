@@ -1,11 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { prefersReducedMotion } from "@/components/motion";
 import { BRAINSTEM, CEREBELLUM, CEREBELLUM_FOLIA, OUTLINE, SULCI } from "@/components/learn/brainShapes";
 import { BCI_SITE_HOW, BCI_SITES, type BciSite, type BciSiteHow } from "@/content/bciToday";
-import { AREA_GROUPS, BRAIN_AREAS, type AreaId, type BrainArea } from "@/content/learn";
+import { AREA_GROUPS, BRAIN_AREAS, BRAIN_ROUTES, type AreaId, type BrainArea, type RouteId } from "@/content/learn";
 import { RESEARCH } from "@/content/research";
 
 // Schematic left hemisphere, front to the left (viewBox 600 × 410), with the cerebellum and
@@ -89,11 +90,15 @@ const DORSAL = "M552 182 C532 162, 512 150, 499 140 C490 124, 478 106, 466 100 C
 const VENTRAL = "M548 196 C522 232, 470 252, 430 266 C390 280, 350 288, 318 290";
 const LANGUAGE = "M330 236 C360 240, 392 236, 404 226 C428 196, 404 152, 350 150 C296 148, 236 174, 192 214 C214 206, 240 198, 262 196";
 
-type RouteId = "action" | "language";
-const ROUTES: { id: RouteId; label: string; steps: AreaId[] }[] = [
-  { id: "action", label: "Seeing to doing", steps: ["v1", "v3a", "cip", "pmd", "m1"] },
-  { id: "language", label: "Hearing to speaking", steps: ["a1", "wernicke", "broca", "speech"] },
-];
+// Routes with a step-by-step guide; "seeing to knowing what" is drawn but not stepped through.
+const ROUTES = BRAIN_ROUTES.filter((r) => r.id !== "what");
+
+// The 3D brain (three.js and a 1.5 MB model) loads only when it is shown.
+const BRAIN_HEIGHT = "h-[min(560px,max(300px,72vw))]";
+const Brain3D = dynamic(() => import("@/components/learn/Brain3D"), {
+  ssr: false,
+  loading: () => <div className={`flex ${BRAIN_HEIGHT} items-center justify-center text-sm text-zinc-500`}>Loading the 3D brain…</div>,
+});
 
 const HOW_FILL: Record<BciSiteHow, string> = {
   cortex: "fill-accent-600 dark:fill-accent-300",
@@ -180,8 +185,10 @@ export function BrainMap() {
   const [showBody, setShowBody] = useState(false);
   const [showDeep, setShowDeep] = useState(false);
   const [showBci, setShowBci] = useState(true);
-  const [routes, setRoutes] = useState({ action: false, language: false, what: false });
+  const [routes, setRoutes] = useState<Record<RouteId, boolean>>({ action: false, language: false, what: false });
   const [animate, setAnimate] = useState(false);
+  const [view, setView] = useState<"3d" | "2d">("3d");
+  const [failure, setFailure] = useState<"load" | "webgl" | null>(null);
   const area = BRAIN_AREAS.find((a) => a.id === selected)!;
   const deepView = showDeep || isDeep(area);
   const route = ROUTES.find((r) => r.steps.includes(selected));
@@ -190,6 +197,20 @@ export function BrainMap() {
 
   // Travelling pulses only after hydration and never with reduced motion.
   useEffect(() => setAnimate(!prefersReducedMotion()), []);
+
+  // Without WebGL there is no 3D brain: show the flat map straight away.
+  useEffect(() => {
+    let gl = false;
+    try {
+      const c = document.createElement("canvas");
+      gl = !!(c.getContext("webgl2") || c.getContext("webgl"));
+    } catch {}
+    if (!gl) fail("webgl");
+  }, []);
+  const fail = (why: "load" | "webgl") => {
+    setFailure(why);
+    setView("2d");
+  };
 
   const goTo = (id: AreaId, routeId: RouteId) => {
     setSelected(id);
@@ -283,6 +304,41 @@ export function BrainMap() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         <div>
+          <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <div className="inline-flex rounded-md border border-zinc-300 p-0.5 text-xs dark:border-zinc-700" role="group" aria-label="View">
+              {(["3d", "2d"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={view === v}
+                  disabled={v === "3d" && failure === "webgl"}
+                  onClick={() => setView(v)}
+                  className={`rounded px-2.5 py-1 font-medium disabled:opacity-40 ${
+                    view === v ? "bg-accent-600 text-white dark:bg-accent-300 dark:text-zinc-900" : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  }`}
+                >
+                  {v === "3d" ? "3D brain" : "Flat map"}
+                </button>
+              ))}
+            </div>
+            {failure && (
+              <span className="text-[11px] text-zinc-500">
+                {failure === "webgl" ? "The 3D brain needs WebGL, which this browser does not offer." : "The 3D brain could not be loaded; reloading the page usually fixes this."}
+              </span>
+            )}
+          </div>
+          {view === "3d" ? (
+            <Brain3D
+              selected={selected}
+              onSelect={setSelected}
+              showBci={showBci}
+              deepView={deepView}
+              showLobes={showLobes}
+              showBody={showBody}
+              routes={routes}
+              onFail={fail}
+            />
+          ) : (
           <svg viewBox="0 0 600 410" className="w-full" aria-hidden="true">
             <defs>
               <clipPath id="brain-clip">
@@ -397,6 +453,7 @@ export function BrainMap() {
 
             <text x={8} y={404} className="fill-zinc-400 text-[9.5px]">left side of the brain, front to the left · schematic, not to scale</text>
           </svg>
+          )}
 
           <div className="mt-2 space-y-2 text-xs text-zinc-600 dark:text-zinc-400">
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -431,6 +488,12 @@ export function BrainMap() {
                       {l.name} lobe
                     </span>
                   ))}
+                {showLobes && view === "3d" && (
+                  <span className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="h-2.5 w-2.5 rounded-sm bg-rose-300/60 dark:bg-rose-400/40" />
+                    insula and cingulate
+                  </span>
+                )}
               </div>
             )}
           </div>

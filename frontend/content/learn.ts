@@ -69,7 +69,7 @@ export const GUIDES: Guide[] = [
     slug: "brain-map",
     title: "Where in the brain?",
     short: "Brain map",
-    hook: "Twenty-one areas on one map: what each does, how signals travel from seeing to doing and from hearing to speaking, and where brain–computer interfaces record.",
+    hook: "Twenty-one areas on a real 3D brain you can turn: what each does, how signals travel from seeing to doing and from hearing to speaking, and where brain–computer interfaces record.",
     minutes: 10,
     group: "The brain",
   },
@@ -313,6 +313,15 @@ export type AreaId =
   | "basal-ganglia"
   | "hippocampus"
   | "amygdala";
+
+export type RouteId = "action" | "what" | "language";
+
+/** Routes a signal takes across the brain map, as the areas it passes through. */
+export const BRAIN_ROUTES: { id: RouteId; label: string; steps: AreaId[] }[] = [
+  { id: "action", label: "Seeing to doing", steps: ["v1", "v3a", "cip", "pmd", "m1"] },
+  { id: "what", label: "Seeing to knowing what", steps: ["v1", "it"] },
+  { id: "language", label: "Hearing to speaking", steps: ["a1", "wernicke", "broca", "speech"] },
+];
 
 export interface BrainArea {
   id: AreaId;

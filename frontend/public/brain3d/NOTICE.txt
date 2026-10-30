@@ -1,0 +1,18 @@
+brain-v1.bin: the 3D brain on /learn/brain-map, made by scripts/make-brain-3d.py.
+
+Surfaces are derived from the MNI ICBM 2009c nonlinear symmetric template:
+
+  Copyright (C) 1993-2004 Louis Collins, McConnell Brain Imaging Centre,
+  Montreal Neurological Institute, McGill University.
+  Permission to use, copy, modify, and distribute this software and
+  its documentation for any purpose and without fee is hereby granted,
+  provided that the above copyright notice appear in all copies.  The
+  authors and McGill University make no representations about the
+  suitability of this software for any purpose.  It is provided "as
+  is" without express or implied warranty.  The authors are not
+  responsible for any data loss, equipment damage, property loss, or
+  injury to subjects or patients resulting from the use or misuse of
+  this software package.
+
+Region labels come from CerebrA (Manera A, Dadar M, Fonov V, Collins DL, 2020),
+https://doi.org/10.12751/g-node.be5e62, dedicated to the public domain under CC0 1.0.
