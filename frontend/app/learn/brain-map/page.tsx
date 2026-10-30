@@ -24,15 +24,24 @@ export default function BrainMapGuide() {
           such as the grooves in the folded surface, each called a <Term id="sulcus">sulcus</Term>.
         </p>
         <p>
-          The map below shows twenty-one of them, from the areas my projects record from to the ones brain–computer interfaces (BCIs) are
-          implanted in. Click an area or its button to see what it does; switch on the body map, the structures hidden beneath the surface,
-          or a route a signal takes through the brain. The dots mark where BCI programs place their electrodes.
+          The brain below is a real one: the average of 152 adult brain scans, with its folds intact. It shows twenty-one areas, from the
+          ones my projects record from to the ones brain–computer interfaces (BCIs) are implanted in. Drag to turn it, click an area or its
+          button to see what it does, and switch on the body map, the structures hidden beneath the surface, or a route a signal takes. The
+          pins mark where BCI programs place their electrodes. The flat map shows the same areas as a simple diagram.
         </p>
       </Section>
 
       <Figure
         label="Interactive · brain map"
-        caption="A schematic primate brain seen from the left, front to the left. Shapes and positions are approximate; several areas, including V3A, CIP and A1, lie largely inside folds and would not be visible on the real surface, and deep structures are drawn where they would sit beneath it. BCI dots are approximate implant sites from the sources listed below. Marmoset brains have the same areas but almost no folds."
+        caption={
+          <>
+            The 3D brain is the MNI ICBM 2009c average human brain (© 1993–2004 Louis Collins, McConnell Brain Imaging Centre, Montreal
+            Neurological Institute, McGill University), with regions from the CerebrA atlas (Manera et al., 2020; public domain). Areas
+            without an atlas label (V3A, MT, CIP, PMd and FEF) are drawn around published coordinates, and every area is approximate: real
+            ones vary from person to person. The flat map is a schematic primate brain seen from the left, front to the left. BCI pins
+            and dots are approximate implant sites from the sources listed below.
+          </>
+        }
       >
         <BrainMap />
       </Figure>
