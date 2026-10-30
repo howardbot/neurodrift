@@ -722,7 +722,8 @@ export default function Brain3D(props: Brain3DProps) {
               {split ? "Join hemispheres" : "Split hemispheres"}
             </button>
           </div>
-          <div className="pointer-events-none absolute bottom-2 right-2 hidden text-[11px] text-zinc-500 sm:block">Drag to turn · Ctrl or ⌘ + scroll to zoom</div>
+          {/* Top left, clear of the buttons along the bottom however narrow the view. */}
+          <div className="pointer-events-none absolute left-2 top-2 hidden text-[11px] text-zinc-500 sm:block">Drag to turn · Ctrl or ⌘ + scroll to zoom</div>
         </>
       )}
     </div>
