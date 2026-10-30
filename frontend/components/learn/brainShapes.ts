@@ -14,3 +14,8 @@ export const SULCI = [
   { d: "M216 80 C206 120, 210 160, 232 196", label: "", at: [0, 0] as const },
 ];
 
+// Below the cerebrum, for the brain map only: the cerebellum and the brainstem running down
+// to the spinal cord.
+export const CEREBELLUM = "M440 292 C446 268, 480 258, 516 262 C548 266, 566 284, 560 306 C554 326, 526 336, 494 334 C462 332, 436 316, 440 292 Z";
+export const CEREBELLUM_FOLIA = ["M452 300 C480 292, 520 292, 552 300", "M456 314 C486 306, 520 306, 548 314", "M468 326 C490 320, 516 320, 536 326"];
+export const BRAINSTEM = "M394 296 C400 330, 404 364, 400 410 L428 410 C428 366, 434 330, 446 300 Z";

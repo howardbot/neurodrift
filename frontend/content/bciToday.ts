@@ -1,4 +1,4 @@
-import type { TimelineEvent } from "@/content/learn";
+import type { AreaId, TimelineEvent } from "@/content/learn";
 
 // The state of implanted brain–computer interfaces (/learn/bcis-today). This page goes
 // stale quickly: every entry says what was reported and when, links its source, and the
@@ -168,6 +168,232 @@ export const BCI_LANDSCAPE: BciEntry[] = [
     status:
       "In a trial of 38 people with advanced dry macular degeneration, published in NEJM in 2025, 26 of the 32 assessed at a year read clinically meaningfully better. CE-marked for sale in Europe in 2026; vision is black-and-white and narrow, like looking through a straw.",
     sources: [{ label: "STAT, July 2026", url: "https://www.statnews.com/2026/07/22/prima-retinal-implant-for-macular-degeneration-us-timeline/" }],
+  },
+];
+
+// ---------------------------------------------------------------------------------------
+// Where BCIs record (/learn/brain-map). Each entry is one program at one brain area, with
+// its main reported result and a source; `at` is the marker on the brain map (viewBox
+// 600 × 410). Re-check with BCI_LANDSCAPE and move BCI_SITES_CHECKED forward.
+// ---------------------------------------------------------------------------------------
+
+export const BCI_SITES_CHECKED = "2026-10-30";
+
+export type BciSiteHow = "cortex" | "surface" | "vessel" | "deep";
+
+export const BCI_SITE_HOW: Record<BciSiteHow, string> = {
+  cortex: "Electrodes in the cortex",
+  surface: "Electrodes on or above the surface",
+  vessel: "Electrodes in a blood vessel",
+  deep: "Leads deep in the brain",
+};
+
+export interface BciSite {
+  id: string;
+  who: string;
+  area: AreaId;
+  how: BciSiteHow;
+  /** What it is used for. */
+  what: string;
+  result: string;
+  /** Entry in BCI_LANDSCAPE, for programs that page covers. */
+  landscape?: string;
+  sources: { label: string; url: string }[];
+  at: [number, number];
+}
+
+export const BCI_SITES: BciSite[] = [
+  {
+    id: "synchron",
+    who: "Synchron",
+    area: "m1",
+    how: "vessel",
+    what: "Clicks and selections to control a computer",
+    result: "The Stentrode is guided up the jugular vein into the large vein along the top of the brain (the superior sagittal sinus), where it lies next to motor cortex.",
+    landscape: "synchron",
+    sources: [{ label: "IEEE Spectrum", url: "https://spectrum.ieee.org/brain-implant-close-to-market" }],
+    at: [330, 33],
+  },
+  {
+    id: "onward",
+    who: "ONWARD, Clinatec and EPFL",
+    area: "m1",
+    how: "surface",
+    what: "Walking again, through spinal cord stimulation",
+    result: "Two 64-electrode implants rest above the leg areas on both sides. In 2023 a man with a spinal cord injury used them to stand, walk and climb stairs.",
+    landscape: "onward",
+    sources: [{ label: "Lorach et al., Nature 2023", url: "https://www.nature.com/articles/s41586-023-06094-5" }],
+    at: [306, 52],
+  },
+  {
+    id: "braingate-hand",
+    who: "BrainGate (Stanford, Brown, Mass General and others)",
+    area: "m1",
+    how: "cortex",
+    what: "Cursors, typing and robotic arms",
+    result: "Utah arrays in the hand area. In 2021 a participant wrote by imagining handwriting, at 90 characters a minute.",
+    landscape: "braingate",
+    sources: [{ label: "Willett et al., Nature 2021", url: "https://www.nature.com/articles/s41586-021-03506-2" }],
+    at: [297, 106],
+  },
+  {
+    id: "neuralink",
+    who: "Neuralink",
+    area: "m1",
+    how: "cortex",
+    what: "Computer and robotic-arm control",
+    result: "Threads are placed in the part of the precentral gyrus that controls the hand, located for each person with fMRI.",
+    landscape: "neuralink",
+    sources: [{ label: "Neuralink PRIME update", url: "https://neuralink.com/blog/prime-study-progress-update/" }],
+    at: [289, 132],
+  },
+  {
+    id: "neuracle",
+    who: "Neuracle NEO (with Tsinghua University)",
+    area: "m1",
+    how: "surface",
+    what: "Grasping with a powered glove after spinal cord injury",
+    result: "Two sets of four electrodes rest on the brain's outer membrane over the hand area, one each side of the central sulcus.",
+    landscape: "neuracle",
+    sources: [{ label: "Preprint, medRxiv", url: "https://www.medrxiv.org/content/10.1101/2024.09.05.24313041" }],
+    at: [310, 120],
+  },
+  {
+    id: "touch",
+    who: "Pittsburgh and Chicago (Cortical Bionics)",
+    area: "s1",
+    how: "cortex",
+    what: "Touch feedback from a robotic hand",
+    result: "Stimulating the hand area makes the participant feel touch on their own fingers and palm. With this feedback, a 2021 participant took half as long to grasp and move objects with a robotic arm.",
+    sources: [{ label: "Flesher et al., Science 2021", url: "https://pubmed.ncbi.nlm.nih.gov/34016775/" }],
+    at: [325, 112],
+  },
+  {
+    id: "caltech-ppc",
+    who: "Caltech (Andersen lab)",
+    area: "ppc",
+    how: "cortex",
+    what: "Reach and grasp goals for a robotic arm or cursor",
+    result: "Arrays in a reach area (5d) and a grasp area (AIP) decoded the goals of imagined movements in 2015, a higher-level signal than motor cortex gives.",
+    sources: [{ label: "Aflalo et al., Science 2015", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4896830/" }],
+    at: [382, 72],
+  },
+  {
+    id: "stanford-speech",
+    who: "Stanford (BrainGate)",
+    area: "speech",
+    how: "cortex",
+    what: "Attempted and imagined speech",
+    result: "62 words a minute in 2023 from arrays in area 6v. In 2025 the team decoded sentences participants only imagined saying, with a mental password to keep the decoder locked.",
+    landscape: "braingate",
+    sources: [
+      { label: "Willett et al., Nature 2023", url: "https://www.nature.com/articles/s41586-023-06377-x" },
+      { label: "NIH on Kunz et al., Cell 2025", url: "https://www.ninds.nih.gov/news-events/news/press-releases/decoding-inner-speech-brain-signals" },
+    ],
+    at: [247, 178],
+  },
+  {
+    id: "ucdavis",
+    who: "UC Davis (BrainGate)",
+    area: "speech",
+    how: "cortex",
+    what: "Speech as text and a synthesised voice",
+    result: "Four arrays in the ventral precentral gyrus of a man with ALS: about 97% of words correct in 2024.",
+    landscape: "braingate",
+    sources: [{ label: "Card et al., NEJM 2024", url: "https://www.nejm.org/doi/full/10.1056/NEJMoa2314132" }],
+    at: [263, 174],
+  },
+  {
+    id: "paradromics",
+    who: "Paradromics",
+    area: "speech",
+    how: "cortex",
+    what: "Real-time speech",
+    result: "One 421-electrode array in the part of motor cortex that controls the lips, tongue and larynx; the first participant was implanted in 2026.",
+    landscape: "paradromics",
+    sources: [{ label: "Paradromics, 2026", url: "https://www.biospace.com/press-releases/paradromics-and-university-of-michigan-complete-first-connexus-bci-implantation-for-the-fda-approved-connect-one-clinical-study" }],
+    at: [279, 186],
+  },
+  {
+    id: "ucsf-speech",
+    who: "UCSF (Chang lab)",
+    area: "speech",
+    how: "surface",
+    what: "Text, voice and a talking avatar",
+    result: "A 253-electrode sheet over speech motor cortex and the superior temporal gyrus decoded speech in 2023, 18 years after a brainstem stroke took the participant's voice.",
+    sources: [{ label: "Metzger et al., Nature 2023", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC10826467/" }],
+    at: [262, 197],
+  },
+  {
+    id: "stanford-44",
+    who: "Stanford (BrainGate)",
+    area: "broca",
+    how: "cortex",
+    what: "Tested as a source for speech decoding",
+    result: "Two arrays in area 44, part of Broca's area, carried little information about the movements of speaking in 2023, unlike area 6v next door.",
+    landscape: "braingate",
+    sources: [{ label: "Willett et al., Nature 2023", url: "https://www.nature.com/articles/s41586-023-06377-x" }],
+    at: [190, 206],
+  },
+  {
+    id: "caltech-smg",
+    who: "Caltech (Andersen lab)",
+    area: "smg",
+    how: "cortex",
+    what: "Inner speech",
+    result: "In 2024 single neurons here responded to words that participants only imagined saying, as well as to words they said.",
+    sources: [{ label: "Caltech, 2024", url: "https://neuroscience.caltech.edu/news/brain-machine-interface-device-predicts-internal-speech-in-second-patient" }],
+    at: [376, 156],
+  },
+  {
+    id: "cortivis",
+    who: "CORTIVIS (Miguel Hernández University, Spain)",
+    area: "v1",
+    how: "cortex",
+    what: "Artificial vision for blind people",
+    result: "In 2021 a 96-electrode array near the border of V1 and V2 let a blind volunteer see spots of light and recognise some letters.",
+    sources: [{ label: "Fernández et al., JCI 2021", url: "https://www.jci.org/articles/view/151331" }],
+    at: [548, 152],
+  },
+  {
+    id: "adbs",
+    who: "Medtronic BrainSense adaptive DBS",
+    area: "basal-ganglia",
+    how: "deep",
+    what: "Self-adjusting stimulation for Parkinson's disease",
+    result: "Approved by the FDA in February 2025: the stimulator reads brain signals through its own leads and adjusts stimulation to match.",
+    sources: [{ label: "Medical Economics, 2025", url: "https://www.medicaleconomics.com/view/fda-approves-first-adaptive-deep-brain-stimulation-system-for-parkinson-s" }],
+    at: [280, 190],
+  },
+  {
+    id: "rns",
+    who: "NeuroPace RNS",
+    area: "hippocampus",
+    how: "deep",
+    what: "Detecting and stopping seizures",
+    result: "Approved in the US since 2013 for focal epilepsy. Leads at the seizure focus, often the hippocampus, watch for a seizure starting and respond with stimulation.",
+    sources: [{ label: "Review, Medical Devices 2015", url: "https://www.dovepress.com/critical-review-of-the-responsive-neurostimulator-system-for-epilepsy-peer-reviewed-fulltext-article-MDER" }],
+    at: [330, 256],
+  },
+  {
+    id: "memory",
+    who: "Wake Forest and USC",
+    area: "hippocampus",
+    how: "deep",
+    what: "A memory prosthesis (research)",
+    result: "In 2018, stimulation patterned on each person's own hippocampal activity improved short-term memory in patients who already had electrodes for epilepsy.",
+    sources: [{ label: "Hampson et al., J Neural Eng 2018", url: "https://pubmed.ncbi.nlm.nih.gov/29589592/" }],
+    at: [372, 244],
+  },
+  {
+    id: "ucsf-depression",
+    who: "UCSF (closed-loop DBS)",
+    area: "amygdala",
+    how: "deep",
+    what: "Severe depression (one patient)",
+    result: "In 2021 an activity pattern in the amygdala triggered brief stimulation of the ventral striatum, and the patient's depression went into remission.",
+    sources: [{ label: "Physics World on Scangos et al., 2021", url: "https://physicsworld.com/a/personalized-brain-stimulation-could-treat-untreatable-depression/" }],
+    at: [284, 268],
   },
 ];
 

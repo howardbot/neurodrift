@@ -69,8 +69,8 @@ export const GUIDES: Guide[] = [
     slug: "brain-map",
     title: "Where in the brain?",
     short: "Brain map",
-    hook: "The areas my recordings come from, on one map: where they sit, what they do, and how a signal travels from what we see to what we do.",
-    minutes: 6,
+    hook: "Twenty-one areas on one map: what each does, how signals travel from seeing to doing and from hearing to speaking, and where brain–computer interfaces record.",
+    minutes: 10,
     group: "The brain",
   },
   {
@@ -287,27 +287,57 @@ export const DOUBLING_YEARS = 7;
 // Brain map (/learn/brain-map)
 // ---------------------------------------------------------------------------------------
 
-export type AreaId = "v1" | "v3a" | "cip" | "pmd" | "m1";
+export type AreaGroup = "Vision" | "Movement & touch" | "Language & hearing" | "Planning" | "Deep structures";
+
+export const AREA_GROUPS: AreaGroup[] = ["Vision", "Movement & touch", "Language & hearing", "Planning", "Deep structures"];
+
+export type AreaId =
+  | "v1"
+  | "v3a"
+  | "mt"
+  | "it"
+  | "cip"
+  | "ppc"
+  | "pmd"
+  | "m1"
+  | "s1"
+  | "cerebellum"
+  | "a1"
+  | "wernicke"
+  | "smg"
+  | "broca"
+  | "speech"
+  | "pfc"
+  | "fef"
+  | "thalamus"
+  | "basal-ganglia"
+  | "hippocampus"
+  | "amygdala";
 
 export interface BrainArea {
   id: AreaId;
   short: string;
+  /** Shorter label on the map, when `short` is too long. */
+  mapLabel?: string;
   name: string;
+  group: AreaGroup;
   where: string;
   does: string;
   fact: string;
   /** Research stories that record from this area (slugs in content/research.ts). */
   projects: string[];
-  /** Where on the schematic (viewBox 600 × 380): label anchor. */
+  /** Where on the schematic (viewBox 600 × 410): label anchor. */
   label: [number, number];
 }
 
-// Plain-language summaries of textbook knowledge. Positions on the map are schematic.
+// Plain-language summaries of textbook knowledge. Positions on the map are schematic. Areas in
+// "Deep structures" lie beneath the cortex and are drawn where they would sit under the surface.
 export const BRAIN_AREAS: BrainArea[] = [
   {
     id: "v1",
     short: "V1",
     name: "Primary visual cortex",
+    group: "Vision",
     where: "At the very back of the brain.",
     does: "The first stop in the cortex for signals from the eyes. Each neuron watches a small patch of the visual field and responds best to edges at a particular angle; many also compare the two eyes' views, the first step towards depth.",
     fact: "David Hubel and Torsten Wiesel discovered these edge-detecting cells with tungsten microelectrodes in the late 1950s, work recognised with the 1981 Nobel Prize.",
@@ -318,6 +348,7 @@ export const BRAIN_AREAS: BrainArea[] = [
     id: "v3a",
     short: "V3A",
     name: "Visual area V3A",
+    group: "Vision",
     where: "Just in front of V1, near the top of the back of the brain.",
     does: "Part of the visual pathway that deals with space. Its neurons care about the 3D layout of a scene — how far things are and which way surfaces face — partly by comparing the images from the two eyes.",
     fact: "Much of V3A lies hidden inside folds of the cortex, so experimenters usually rely on brain scans to aim electrodes at it.",
@@ -325,34 +356,214 @@ export const BRAIN_AREAS: BrainArea[] = [
     label: [534, 94],
   },
   {
+    id: "mt",
+    short: "MT",
+    name: "Middle temporal area (MT, or V5)",
+    group: "Vision",
+    where: "Where the occipital and temporal lobes meet; in monkeys it lies inside the superior temporal sulcus.",
+    does: "Specialised for motion. Most of its neurons respond best to movement in one direction at a preferred speed, whatever the moving object looks like.",
+    fact: "In 1990 William Newsome's lab passed tiny currents through small clusters of MT neurons and changed which way monkeys reported a pattern of dots was moving: stimulating neurons can change what is perceived.",
+    projects: [],
+    label: [478, 226],
+  },
+  {
+    id: "it",
+    short: "IT",
+    name: "Inferior temporal cortex",
+    group: "Vision",
+    where: "Along the lower side of the temporal lobe.",
+    does: "The end of the “what” route: recognising objects and faces, whatever their size, position or lighting.",
+    fact: "Charles Gross found neurons here in the 1970s that responded best to hands and faces. In 2006 Doris Tsao and colleagues found patches in monkey IT where almost every neuron prefers faces.",
+    projects: [],
+    label: [368, 292],
+  },
+  {
     id: "cip",
     short: "CIP",
     name: "Caudal intraparietal area",
+    group: "Vision",
     where: "At the back end of the intraparietal sulcus, a deep groove in the parietal lobe.",
     does: "Combines depth cues into the 3D orientation of surfaces: whether a plane tilts towards you or away, left or right. It sits where seeing a surface turns into using it, for example to reach for it or look at it.",
     fact: "Neurons here can signal a surface's tilt from different cues, such as the difference between the two eyes' images or the texture on the surface.",
     projects: ["shared-variability", "3d-vision"],
-    label: [438, 68],
+    label: [470, 36],
+  },
+  {
+    id: "ppc",
+    short: "PPC",
+    name: "Posterior parietal cortex: reach and grasp",
+    group: "Movement & touch",
+    where: "The upper parietal lobe, in front of CIP, around the intraparietal sulcus.",
+    does: "Turns where things are into plans to act on them: where to reach (area 5d and its neighbours) and how to shape the hand to grasp (the anterior intraparietal area, AIP). Its activity reflects the goal of a movement more than the muscles that make it.",
+    fact: "Damage here can cause optic ataxia: people see an object perfectly well but reach for it in the wrong place.",
+    projects: [],
+    label: [400, 86],
   },
   {
     id: "pmd",
     short: "PMd",
     name: "Dorsal premotor cortex",
+    group: "Movement & touch",
     where: "Near the top of the brain, just in front of the primary motor cortex.",
     does: "Helps plan movements. Its activity changes while an animal prepares to reach, often well before the arm starts to move.",
     fact: "Because it carries plans, not just commands, some brain–computer interfaces record here as well as in the primary motor cortex.",
     projects: [],
-    label: [204, 72],
+    label: [254, 98],
   },
   {
     id: "m1",
     short: "M1",
     name: "Primary motor cortex",
-    where: "A strip just in front of the central sulcus, running from the top of the brain down its side.",
+    group: "Movement & touch",
+    where: "A strip just in front of the central sulcus. Shown here is its upper part, for the legs, arms and hands; the face and mouth part is the speech motor cortex.",
     does: "Sends commands down the spinal cord to move the body, with different parts of the strip controlling different body parts. Many of its neurons fire most for movements in one preferred direction — the idea behind the decoding demo on the home page.",
     fact: "In the 1980s Apostolos Georgopoulos showed that adding up many motor-cortex neurons' preferred directions, each weighted by its activity, predicts the direction of the arm's movement: the population vector.",
     projects: ["cross-day-decoding"],
-    label: [320, 24],
+    label: [316, 22],
+  },
+  {
+    id: "s1",
+    short: "S1",
+    name: "Primary somatosensory cortex",
+    group: "Movement & touch",
+    where: "A strip just behind the central sulcus, alongside M1.",
+    does: "Receives touch, pressure, vibration and the sense of where your limbs are. Like M1 it holds a map of the body, in which the hands and lips take up far more space than the back or legs.",
+    fact: "Wilder Penfield mapped it from the 1930s by gently stimulating the exposed cortex of awake patients during epilepsy surgery and asking what they felt. Drawn to scale, the result is the famous homunculus, with huge hands and lips.",
+    projects: [],
+    label: [354, 22],
+  },
+  {
+    id: "cerebellum",
+    short: "Cerebellum",
+    name: "Cerebellum",
+    group: "Movement & touch",
+    where: "Tucked under the back of the brain, behind the brainstem.",
+    does: "Coordinates and times movements, and keeps them accurate by comparing what you meant to do with what actually happened. It also helps learn new motor skills.",
+    fact: "It holds about 69 of the brain's 86 billion neurons, roughly four in five, in about a tenth of its mass (Azevedo et al., 2009).",
+    projects: [],
+    label: [506, 316],
+  },
+  {
+    id: "a1",
+    short: "A1",
+    name: "Primary auditory cortex",
+    group: "Language & hearing",
+    where: "On the upper surface of the temporal lobe, mostly hidden inside the lateral fissure (Heschl's gyrus).",
+    does: "The first stop in the cortex for sound. Its neurons are laid out by pitch, from low to high, like the keys of a piano: a tonotopic map.",
+    fact: "Cochlear implants, the most widely used neural prosthesis, stimulate the auditory nerve rather than the cortex, and the auditory cortex learns to make sense of their coarse signal.",
+    projects: [],
+    label: [330, 239],
+  },
+  {
+    id: "wernicke",
+    short: "Wernicke",
+    name: "Wernicke's area",
+    group: "Language & hearing",
+    where: "The back of the superior temporal gyrus, usually on the left.",
+    does: "Helps understand spoken and written language: matching the sounds of words to their meaning.",
+    fact: "In 1874 Carl Wernicke described patients with damage here who spoke fluently but with little meaning, and struggled to understand others.",
+    projects: [],
+    label: [404, 231],
+  },
+  {
+    id: "smg",
+    short: "SMG",
+    name: "Supramarginal gyrus",
+    group: "Language & hearing",
+    where: "The lower parietal lobe, curving around the back end of the lateral fissure.",
+    does: "Handles the sounds of words, for example keeping a phone number in mind by repeating it silently, and helps plan skilled actions such as using a tool.",
+    fact: "Damage on the left side can cause apraxia: trouble making skilled movements on request, such as miming the use of a toothbrush, despite normal strength.",
+    projects: [],
+    label: [392, 172],
+  },
+  {
+    id: "broca",
+    short: "Broca",
+    name: "Broca's area",
+    group: "Language & hearing",
+    where: "The lower frontal lobe (inferior frontal gyrus, areas 44 and 45), usually on the left.",
+    does: "Part of the network for producing language and handling grammar. Its exact role is still debated.",
+    fact: "Named after Paul Broca, who in 1861 described a patient who understood speech but could say only one syllable, “tan”, and found damage here after his death.",
+    projects: [],
+    label: [185, 226],
+  },
+  {
+    id: "speech",
+    short: "Speech motor",
+    mapLabel: "Speech",
+    name: "Speech motor cortex",
+    group: "Language & hearing",
+    where: "The lower end of the motor strip and the premotor cortex just in front of it (ventral precentral gyrus, including area 6v), just above the lateral fissure.",
+    does: "Controls the lips, jaw, tongue and larynx. Speaking is one of the most complex movements we make, using about a hundred muscles.",
+    fact: "Years after people lose the ability to speak, through ALS or a brainstem stroke, this area still becomes active when they try to: the signal speech BCIs decode.",
+    projects: [],
+    label: [254, 222],
+  },
+  {
+    id: "pfc",
+    short: "PFC",
+    name: "Prefrontal cortex",
+    group: "Planning",
+    where: "The front of the frontal lobe.",
+    does: "Holds information in mind, follows rules and goals, and plans ahead: the brain's working memory and executive control.",
+    fact: "In 1989 Patricia Goldman-Rakic's lab showed that prefrontal neurons keep firing while a monkey remembers a location during a delay, a neural trace of working memory.",
+    projects: [],
+    label: [142, 144],
+  },
+  {
+    id: "fef",
+    short: "FEF",
+    name: "Frontal eye field",
+    group: "Planning",
+    where: "In front of the premotor cortex, where two grooves (the superior frontal and precentral sulci) meet.",
+    does: "Moves the eyes and directs attention to a place in the visual field.",
+    fact: "A tiny current here makes the eyes jump to a particular point. In the early 2000s Tirin Moore showed that currents too weak to move the eyes still sharpen attention at that point.",
+    projects: [],
+    label: [210, 138],
+  },
+  {
+    id: "thalamus",
+    short: "Thalamus",
+    name: "Thalamus",
+    group: "Deep structures",
+    where: "Deep in the middle of the brain, above the brainstem.",
+    does: "A relay hub: nearly every sense except smell passes through it on the way to the cortex, and it loops with the cortex and basal ganglia to shape movement and attention.",
+    fact: "Deep brain stimulation of one of its nuclei is an established treatment for essential tremor.",
+    projects: [],
+    label: [356, 196],
+  },
+  {
+    id: "basal-ganglia",
+    short: "Basal ganglia",
+    name: "Basal ganglia",
+    group: "Deep structures",
+    where: "Deep beneath the cortex, beside the thalamus.",
+    does: "Help select which movement to make and hold back the others, and take part in habits and reward learning.",
+    fact: "Parkinson's disease kills the dopamine neurons that feed them. Deep brain stimulation of one of these nuclei, the subthalamic nucleus, has eased its symptoms since the 1990s.",
+    projects: [],
+    label: [280, 200],
+  },
+  {
+    id: "hippocampus",
+    short: "Hippocampus",
+    name: "Hippocampus",
+    group: "Deep structures",
+    where: "Curled inside the temporal lobe, on its inner side.",
+    does: "Forms new memories of events and places. Some of its neurons, place cells, fire when an animal is in one particular spot.",
+    fact: "After surgery in 1953 removed much of the hippocampus on both sides to treat his epilepsy, the patient H.M. could no longer form new lasting memories of events, although older memories remained and he could still learn new motor skills.",
+    projects: [],
+    label: [350, 282],
+  },
+  {
+    id: "amygdala",
+    short: "Amygdala",
+    name: "Amygdala",
+    group: "Deep structures",
+    where: "In front of the hippocampus, deep in the temporal lobe.",
+    does: "Flags what is threatening or important, drives emotional reactions, and strengthens memories of emotional events.",
+    fact: "S.M., a woman with damage to both amygdalae, has been studied for decades because she shows strikingly little fear.",
+    projects: [],
+    label: [266, 290],
   },
 ];
 
