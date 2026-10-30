@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { Reveal } from "@/components/motion";
+import { PathTimeline } from "@/components/profile/PathTimeline";
 import { Chips, ContactButtons, GitHubIcon, LabTimeline, MailIcon, SectionHeading, WorkGrid } from "@/components/profile/ProfileBlocks";
 import { HeroGlow, SkillList } from "@/components/showcase/Story";
 import { EDUCATION, PROFILE, RECOGNITION, TOOLKIT } from "@/content/profile";
 import { projectBySlug } from "@/content/research";
+import { monthOf } from "@/lib/timeline";
 
 export const metadata = {
   title: "About",
@@ -54,6 +56,15 @@ export default function About() {
             </dl>
           </aside>
         </div>
+      </section>
+
+      {/* Timeline */}
+      <section id="timeline" className="mb-20 scroll-mt-20">
+        <SectionHeading eyebrow="Timeline" title="The path so far.">
+          Study, research and recognition since 2020 on one time axis, coloured by city. Hover over or tab to an entry for details;
+          select one to jump to its full description below.
+        </SectionHeading>
+        <PathTimeline initialNow={monthOf(new Date())} />
       </section>
 
       {/* Experience */}
