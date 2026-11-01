@@ -45,8 +45,31 @@ export const IDEAS: Idea[] = [
     ],
   },
   {
-    slug: "agency",
+    slug: "seeing",
     n: 2,
+    part: "Mind",
+    title: "We see a small part of what reaches our eyes",
+    short: "How little we see",
+    reading: [
+      { who: "Sperling", year: 1960, title: "The information available in brief visual presentations", where: "Psychological Monographs" },
+      { who: "Simons & Chabris", year: 1999, title: "Gorillas in our midst: sustained inattentional blindness for dynamic events", where: "Perception" },
+      {
+        who: "Rao & Ballard",
+        year: 1999,
+        title: "Predictive coding in the visual cortex: a functional interpretation of some extra-classical receptive-field effects",
+        where: "Nature Neuroscience",
+      },
+      { who: "O'Regan & Noë", year: 2001, title: "A sensorimotor account of vision and visual consciousness", where: "Behavioral and Brain Sciences" },
+      { who: "Koch et al.", year: 2006, title: "How much the eye tells the brain", where: "Current Biology" },
+      { who: "Raichle", year: 2006, title: "The brain's dark energy", where: "Science" },
+      { who: "Cohen, Dennett & Kanwisher", year: 2016, title: "What is the bandwidth of perceptual experience?", where: "Trends in Cognitive Sciences" },
+      { who: "Cohen, Botch & Robertson", year: 2020, title: "The limits of color awareness during active, real-world vision", where: "PNAS" },
+      { who: "Zheng & Meister", year: 2025, title: "The unbearable slowness of being: why do we live at 10 bits/s?", where: "Neuron" },
+    ],
+  },
+  {
+    slug: "agency",
+    n: 3,
     part: "Mind",
     title: "Decisions and the feeling of agency",
     short: "Decisions and agency",
@@ -63,7 +86,7 @@ export const IDEAS: Idea[] = [
   },
   {
     slug: "self-model",
-    n: 3,
+    n: 4,
     part: "Mind",
     title: "Is the self a model constructed by the brain?",
     short: "The self as a model",
@@ -76,7 +99,7 @@ export const IDEAS: Idea[] = [
   },
   {
     slug: "simulate-everything",
-    n: 4,
+    n: 5,
     part: "Computation",
     title: "If we had infinite computing power, could we simulate everything?",
     short: "Simulating everything",
@@ -90,7 +113,7 @@ export const IDEAS: Idea[] = [
   },
   {
     slug: "simulated-brain",
-    n: 5,
+    n: 6,
     part: "Computation",
     title: "If we perfectly simulate a brain, is it conscious?",
     short: "Simulating a brain",
@@ -102,7 +125,7 @@ export const IDEAS: Idea[] = [
   },
   {
     slug: "is-computation-fundamental",
-    n: 6,
+    n: 7,
     part: "Computation",
     title: "Is computation really fundamental?",
     short: "Is computation fundamental?",
@@ -113,7 +136,7 @@ export const IDEAS: Idea[] = [
   },
   {
     slug: "what-is-fundamental",
-    n: 7,
+    n: 8,
     part: "Reality",
     title: "If computation is not fundamental, what is?",
     short: "What is fundamental?",
@@ -128,7 +151,7 @@ export const IDEAS: Idea[] = [
   },
   {
     slug: "structure",
-    n: 8,
+    n: 9,
     part: "Reality",
     title: "Why does the universe look so structured?",
     short: "Why so structured?",
@@ -136,7 +159,7 @@ export const IDEAS: Idea[] = [
   },
   {
     slug: "fine-tuning",
-    n: 9,
+    n: 10,
     part: "Reality",
     title: "Fine-tuning and the appearance of design",
     short: "Fine-tuning and design",
@@ -148,7 +171,7 @@ export const IDEAS: Idea[] = [
   },
   {
     slug: "underneath",
-    n: 10,
+    n: 11,
     part: "Reality",
     title: "The question underneath all of these questions",
     short: "The question underneath",

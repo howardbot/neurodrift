@@ -83,6 +83,84 @@ export default function Ideas() {
         <OpenQuestion>What role does conscious awareness play inside a much larger system of unconscious neural computation?</OpenQuestion>
       </Note>
 
+      <Note idea={ideaBySlug("seeing")}>
+        <p>
+          Looking around, the world seems present all at once: in colour, in detail, everywhere I look. I suspect this is one of the
+          brain&apos;s most convincing constructions. At every step from the world to awareness, most of what is there is left out:
+        </p>
+        <Chain across steps={["the world", "light the eyes can catch", "what the retina sends on", "what the brain processes", "what I notice"]} />
+        <Sub>A narrow slice of the world</Sub>
+        <Claim kind="evidence">
+          <p>
+            Human eyes respond to light between about 380 and 750 nanometres, a thin band of the electromagnetic spectrum. Bees see
+            ultraviolet; pit vipers sense the infrared glow of warm bodies. The biologist Jakob von Uexküll called each animal&apos;s slice of
+            the world its <i>Umwelt</i>.
+          </p>
+        </Claim>
+        <Sub>A bottleneck at the back of the eye</Sub>
+        <Claim kind="evidence">
+          <p>
+            Each retina has about a hundred million photoreceptors but only about a million ganglion cells, whose fibres form the optic
+            nerve, so the image is compressed roughly a hundredfold before it leaves the eye. Recordings from guinea pig retinas suggest that
+            the human optic nerve carries on the order of ten million bits per second, about the speed of an early Ethernet connection.
+          </p>
+          <p>
+            Sharp, colourful vision exists only at the fovea, which covers about two degrees of the visual field, roughly a thumbnail at
+            arm&apos;s length. Detail and colour fall off steeply outside it. Where the optic nerve leaves each eye there is a blind spot that
+            the brain fills in, and the eyes jump about three times a second to build up a scene, with vision suppressed during each jump.
+          </p>
+        </Claim>
+        <Sub>Even less reaches awareness</Sub>
+        <Claim kind="evidence">
+          <p>
+            In a well-known 1999 experiment, people counting basketball passes in a video were asked afterwards whether they had noticed
+            anything unusual. Across conditions, almost half had missed an unexpected event, such as a person in a gorilla suit walking
+            through the scene. In 2020, people exploring scenes in virtual reality were often unaware that colour had been removed from
+            everything except where they were looking: almost a third failed to notice even when less than 5% of the display was in colour.
+          </p>
+          <p>
+            Estimates of how fast people produce information through behaviour (typing, speaking, playing video games, solving a
+            Rubik&apos;s cube, memorising) come out at around ten bits per second, while the photoreceptors of a single eye take in on the
+            order of a billion. The estimate is debated, but the gap spans many orders of magnitude.
+          </p>
+          <Relation>light reaching the eye ≫ what the optic nerve carries ≫ what I can report</Relation>
+        </Claim>
+        <Claim kind="interpretation">
+          <p>
+            Whether experience itself is as sparse as what we can report is contested. In 1960 George Sperling flashed grids of letters
+            and found that people could report any row he cued just afterwards, but not the whole grid: for a moment, more seemed to be seen
+            than could be reported. Some take this as evidence that experience overflows what we can access. Others argue that outside the
+            focus of attention we experience a gist, summary statistics such as the average colour or texture of a scene, rather than detail.
+          </p>
+        </Claim>
+        <Sub>Seeing as a guess</Sub>
+        <Claim kind="evidence">
+          <p>
+            Most of the brain&apos;s energy goes to its own ongoing activity. Responding to a task adds only a few percent to what it is
+            already using.
+          </p>
+        </Claim>
+        <Claim kind="interpretation">
+          <p>
+            One influential account treats perception as inference: the brain continually predicts its input and mainly passes on the
+            errors in those predictions (predictive coding). On this view, the senses correct a model the brain is already running, rather
+            than painting a picture from scratch.
+          </p>
+        </Claim>
+        <Claim kind="speculation">
+          <p>
+            Perhaps what I call seeing is less a window than a model: sharp only where I am looking, filled in elsewhere from expectation
+            and summary. The richness may be real as a capacity rather than as content. Anything I turn my eyes to becomes detailed, so the
+            world never seems to lack detail; the world itself serves as an &ldquo;outside memory&rdquo;, in Kevin O&apos;Regan&apos;s phrase.
+          </p>
+        </Claim>
+        <OpenQuestion>How much of seeing is the world, and how much is the brain&apos;s best guess about it?</OpenQuestion>
+        <p>
+          This connects back to the first note. If awareness is a narrow interface, vision may be the clearest case of it: a small,
+          constructed summary that feels like the whole world.
+        </p>
+      </Note>
+
       <Note idea={ideaBySlug("agency")}>
         <p>Does the feeling “I decided to do this” accurately reflect how decisions are generated?</p>
         <Claim kind="evidence">
@@ -426,6 +504,7 @@ export default function Ideas() {
         <ol className="card list-decimal space-y-1.5 py-4 pl-10 pr-5 text-[15px] marker:font-mono marker:text-xs marker:text-zinc-400">
           <li>What is consciousness?</li>
           <li>What is the “self”?</li>
+          <li>How much of what we see comes from the world, and how much from the brain?</li>
           <li>Does conscious awareness cause decisions, observe them, or take part in a larger distributed process?</li>
           <li>Can every physical system be simulated?</li>
           <li>Is the universe fundamentally computable?</li>
