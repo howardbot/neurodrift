@@ -21,7 +21,8 @@ export default function BrainMapGuide() {
         <p>
           The outer layer of the brain, the cortex, is a sheet a few millimetres thick, crumpled to fit inside the skull. It is not uniform:
           neighbouring patches of it do different jobs. Neuroscientists name these patches — V1, V3A, M1 — and find them using landmarks
-          such as the grooves in the folded surface, each called a <Term id="sulcus">sulcus</Term>.
+          such as the grooves in the folded surface, each called a <Term id="sulcus">sulcus</Term>, and the ridges between them, each a{" "}
+          <Term id="gyrus">gyrus</Term>.
         </p>
         <p>
           The brain below is a real one: the average of 152 adult brain scans, with its folds intact. It shows twenty-one areas, from the
@@ -35,7 +36,7 @@ export default function BrainMapGuide() {
         label="Interactive · brain map"
         caption={
           <>
-            The 3D brain is the MNI ICBM 2009c average human brain (© 1993–2004 Louis Collins, McConnell Brain Imaging Centre, Montreal
+            The 3D brain is the <Term id="mni-space">MNI</Term> ICBM 2009c average human brain (© 1993–2004 Louis Collins, McConnell Brain Imaging Centre, Montreal
             Neurological Institute, McGill University), with regions from the CerebrA atlas (Manera et al., 2020; public domain). Areas
             without an atlas label (V3A, MT, CIP, PMd and FEF) are drawn around published coordinates, and every area is approximate: real
             ones vary from person to person. The flat map is a schematic primate brain seen from the left, front to the left. BCI pins
@@ -66,8 +67,8 @@ export default function BrainMapGuide() {
       <Section eyebrow="Two routes" title="“Where and how” versus “what”">
         <p>
           In the 1980s and 1990s, researchers proposed that vision splits into two broad streams. One runs up into the parietal lobe and is
-          about space and action — where things are and how to interact with them. The other runs down into the temporal lobe and is about
-          recognising what things are. Switch on &ldquo;Seeing → knowing what&rdquo; on the map to compare them. Real brains blur the line, but the idea
+          about space and action — where things are and how to interact with them. The other, the <Term id="ventral-stream">ventral stream</Term>, runs down into the
+          temporal lobe and is about recognising what things are. Switch on &ldquo;Seeing → knowing what&rdquo; on the map to compare them. Real brains blur the line, but the idea
           still organises much of vision research.
         </p>
       </Section>
@@ -77,7 +78,7 @@ export default function BrainMapGuide() {
           Switch on the body map. Along the motor strip (M1) and the touch strip just behind it (S1), the body is laid out in order: legs at
           the top, then arm, hand, face and, lowest of all, mouth and throat. In the 1930s and 1940s the neurosurgeon Wilder Penfield charted
           this map by gently stimulating the exposed cortex of awake patients during epilepsy surgery. Drawn to scale, it becomes the
-          homunculus, a little figure with huge hands and lips, because the parts we control most finely get the most cortex.
+          <Term id="homunculus">homunculus</Term>, a little figure with huge hands and lips, because the parts we control most finely get the most cortex.
         </p>
         <p>
           The map largely survives paralysis. Years after a spinal cord injury, or with ALS, trying to move a hand still activates the hand
@@ -89,7 +90,7 @@ export default function BrainMapGuide() {
       <Section eyebrow="From hearing to speaking" title="Two famous areas, and a messier truth">
         <p>
           In the 1860s and 1870s Paul Broca and Carl Wernicke linked producing language and understanding it to two areas, usually in the
-          left hemisphere, joined by a bundle of fibres, the arcuate fasciculus. Switch on &ldquo;Hearing → speaking&rdquo; to follow the
+          left hemisphere, joined by a bundle of fibres, the <Term id="arcuate-fasciculus">arcuate fasciculus</Term>. Switch on &ldquo;Hearing → speaking&rdquo; to follow the
           classic route: sound reaches the auditory cortex, is understood around Wernicke&apos;s area, and is turned into speech through
           Broca&apos;s area and the speech motor cortex.
         </p>
@@ -120,9 +121,11 @@ export default function BrainMapGuide() {
       <Section eyebrow="Where BCIs listen" title={`${BCI_SITES.length} programs, area by area`}>
         <p>
           Most implanted BCIs sit in a few places: the hand, leg and speech parts of the motor strip, where intended movements are still
-          clear after paralysis; the touch strip, to send sensation back; the visual cortex, to give blind people some sight; and deep
+          clear after paralysis; the touch strip, to send sensation back through{" "}
+          <Term id="intracortical-microstimulation">microstimulation</Term>; the visual cortex, to give blind people some sight; and deep
           structures, for therapy. A few programs record from planning areas in the parietal lobe instead, which carry the goal of a
-          movement rather than its details.
+          movement rather than its details. Not all of them need open-brain surgery: an <Term id="endovascular-bci">endovascular</Term>{" "}
+          BCI reaches motor cortex from inside a blood vessel.
         </p>
         <p className="text-sm text-zinc-500">
           Results as reported in each source; checked {checked}. The{" "}

@@ -75,7 +75,7 @@ export const GLOSSARY = {
   },
   "brain-computer-interface": {
     term: "Brain–computer interface",
-    definition: "A system that records brain activity and translates it into commands for a computer cursor, robotic arm or other device.",
+    definition: "A system that records brain activity and translates it into commands for a computer cursor, robotic arm or other device. Some also work the other way, stimulating the brain to restore a sense of touch or sight, or to treat disease.",
     usedIn: ["/research/cross-day-decoding", "/learn/electrodes", "/learn/brain-map", "/learn/sorting-methods", "/learn/family-tree", "/learn/decoders", "/learn/drift", "/learn/bcis-today"],
   },
   cca: {
@@ -185,7 +185,7 @@ export const GLOSSARY = {
   },
   "utah-array": {
     term: "Utah array",
-    definition: "A 4 × 4 mm bed of 100 silicon needles, each 1–1.5 mm long, pressed into the cortex. It records spikes at 100 places at once and is the sensor in most human brain–computer interface trials.",
+    definition: "A 4 × 4 mm bed of 100 silicon needles, each 1–1.5 mm long, pressed into the cortex. It records spikes at 100 places at once and is the sensor in most academic human brain–computer interface studies.",
     usedIn: ["/learn/brain-map", "/learn/electrodes", "/learn/sorting-methods"],
   },
   "dorsal-stream": {
@@ -245,8 +245,43 @@ export const GLOSSARY = {
   },
   "deep-brain-stimulation": {
     term: "Deep brain stimulation",
-    definition: "Electrodes placed deep in the brain that deliver steady electrical pulses, used mainly to reduce the tremor and stiffness of Parkinson's disease.",
+    definition: "Electrodes placed deep in the brain that deliver electrical pulses, used mainly to reduce the tremor and stiffness of Parkinson's disease. Newer adaptive systems also read the brain's own signals and adjust the stimulation to match.",
     usedIn: ["/learn/bcis-today", "/learn/brain-map"],
+  },
+  gyrus: {
+    term: "Gyrus",
+    definition: "A ridge on the folded surface of the brain (plural: gyri), between two grooves, or sulci. The precentral gyrus, just in front of the central sulcus, holds the primary motor cortex.",
+    usedIn: ["/learn/brain-map"],
+  },
+  "ventral-stream": {
+    term: "Ventral stream",
+    definition: "The 'what' pathway: a chain of visual areas running from the back of the brain down into the temporal lobe, specialised for recognising objects and faces.",
+    usedIn: ["/learn/brain-map"],
+  },
+  homunculus: {
+    term: "Homunculus",
+    definition: "'Little man': the body drawn in proportion to how much motor or touch cortex each part gets, so the hands, lips and tongue are huge and the back and legs small. Based on Wilder Penfield's stimulation maps.",
+    usedIn: ["/learn/brain-map"],
+  },
+  "arcuate-fasciculus": {
+    term: "Arcuate fasciculus",
+    definition: "A bundle of nerve fibres that arcs around the end of the lateral fissure, linking language areas in the temporal lobe with those in the frontal lobe.",
+    usedIn: ["/learn/brain-map"],
+  },
+  "mni-space": {
+    term: "MNI space",
+    definition: "A standard set of coordinates for the human brain, based on the Montreal Neurological Institute's averages of many brain scans. A point is given in millimetres (x left to right, y back to front, z bottom to top), so it names roughly the same place in any brain fitted to the template.",
+    usedIn: ["/learn/brain-map"],
+  },
+  "intracortical-microstimulation": {
+    term: "Intracortical microstimulation",
+    definition: "Passing tiny electrical currents through electrodes in the cortex to activate the neurons around them. In the touch cortex it can make a person feel touch on their own hand; in the visual cortex, see spots of light.",
+    usedIn: ["/learn/brain-map"],
+  },
+  "endovascular-bci": {
+    term: "Endovascular BCI",
+    definition: "A brain–computer interface whose electrodes sit inside a blood vessel next to the brain, delivered through a vein like a heart stent, so no open-brain surgery is needed. Synchron's Stentrode is the best-known example.",
+    usedIn: ["/learn/brain-map"],
   },
 } satisfies Record<string, GlossaryEntry>;
 
