@@ -1,6 +1,9 @@
 import { ScrollProgress } from "@/components/motion";
 import { Chain, Claim, Contents, Legend, Note, OpenQuestion, Relation, Sub } from "@/components/ideas/IdeaBits";
-import { HeroGlow } from "@/components/showcase/Story";
+import { ButterflyEffect, CellularAutomaton } from "@/components/ideas/ComputationDemos";
+import { LibetClock } from "@/components/ideas/LibetClock";
+import { BandwidthChart, BlindSpot, FoveaWindow } from "@/components/ideas/SeeingDemos";
+import { Figure, HeroGlow } from "@/components/showcase/Story";
 import { ideaBySlug } from "@/content/ideas";
 import { PROFILE } from "@/content/profile";
 
@@ -110,6 +113,18 @@ export default function Ideas() {
             the brain fills in, and the eyes jump about three times a second to build up a scene, with vision suppressed during each jump.
           </p>
         </Claim>
+        <Figure
+          label="Interactive · your fovea"
+          caption="An illustration, not a model of your eye: real sharpness falls off gradually from the centre, and colour fades more slowly than this. “Realistic” is about two degrees across when the screen is about 50 cm away."
+        >
+          <FoveaWindow />
+        </Figure>
+        <Figure
+          label="Interactive · find your blind spot"
+          caption="Works on any screen. Each eye's blind spot lies about 15 degrees to the side of where you look, so the dot vanishes at roughly 3.7 times the gap between cross and dot."
+        >
+          <BlindSpot />
+        </Figure>
         <Sub>Even less reaches awareness</Sub>
         <Claim kind="evidence">
           <p>
@@ -125,6 +140,12 @@ export default function Ideas() {
           </p>
           <Relation>light reaching the eye ≫ what the optic nerve carries ≫ what I can report</Relation>
         </Claim>
+        <Figure
+          label="Interactive · information rates"
+          caption="Estimates, not measurements of one person. Photoreceptor and behaviour rates are from Zheng and Meister (2025), whose 10 bits per second is debated; the optic-nerve rate is extrapolated from guinea pig retina (Koch et al., 2006)."
+        >
+          <BandwidthChart />
+        </Figure>
         <Claim kind="interpretation">
           <p>
             Whether experience itself is as sparse as what we can report is contested. In 1960 George Sperling flashed grids of letters
@@ -177,6 +198,12 @@ export default function Ideas() {
             fluctuations drifting towards a threshold, rather than a decision that has already been made.
           </p>
         </Claim>
+        <Figure
+          label="Interactive · a Libet clock"
+          caption="Your urge time is your own judgement, made as Libet's participants made theirs: by watching a spot that circles once every 2.56 seconds. The brain-activity times are averages for spontaneous presses from Libet et al. (1983), and the curve shows only the shape of the readiness potential; later work suggests that part of it is ongoing noise building to a threshold (Schurger et al., 2012)."
+        >
+          <LibetClock />
+        </Figure>
         <p>
           None of this proves that free will is an illusion. But it does suggest that conscious awareness may enter the decision process later
           than intuition suggests.
@@ -257,6 +284,12 @@ export default function Ideas() {
             single measurement.
           </p>
         </Claim>
+        <Figure
+          label="Interactive · two forecasts"
+          caption="A simulation of Lorenz's (1963) weather model with its classic parameters, stepped forward with the fourth-order Runge–Kutta method. The time each extra digit buys follows from the system's largest Lyapunov exponent, about 0.9."
+        >
+          <ButterflyEffect />
+        </Figure>
         <Sub>Quantum mechanics</Sub>
         <Claim kind="evidence">
           <p>Standard quantum mechanics predicts probabilities for measurement outcomes, and those probabilities match experiment extremely well.</p>
@@ -294,6 +327,12 @@ export default function Ideas() {
           </p>
           <Relation>simulation ≠ prediction</Relation>
         </Claim>
+        <Figure
+          label="Interactive · cellular automata"
+          caption="Elementary cellular automata in Stephen Wolfram's numbering. That Rule 30 has no shortcut is not proven; none is known."
+        >
+          <CellularAutomaton />
+        </Figure>
       </Note>
 
       <Note idea={ideaBySlug("simulated-brain")}>
