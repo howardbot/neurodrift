@@ -1,5 +1,9 @@
 # Handoff: next round of website work
 
+> **Historical (2026-10-16).** Most of the items below have since been done, and the site has grown
+> well beyond what this describes (Places, Ideas, a 3D brain map, an About timeline). Kept for its
+> production notes and conventions; see the README for what the site is now.
+
 **For:** a Claude Code session that can only see this GitHub repository.
 **From:** the session that deploys the site and can reach the live server (2026-10-16, `main` at `1eac281`).
 
