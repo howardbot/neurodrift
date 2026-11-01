@@ -72,6 +72,7 @@ export const GUIDES: Guide[] = [
     hook: "Twenty-one areas on a real 3D brain you can turn: what each does, how signals travel from seeing to doing and from hearing to speaking, and where brain–computer interfaces record.",
     minutes: 10,
     group: "The brain",
+    featured: true,
   },
   {
     slug: "seeing-3d",
@@ -80,7 +81,6 @@ export const GUIDES: Guide[] = [
     hook: "Each eye sees a slightly different picture. Drag an object to see how the difference changes, then find a shape hidden in random dots that only both eyes together can see.",
     minutes: 6,
     group: "The brain",
-    featured: true,
   },
   {
     slug: "bcis-today",

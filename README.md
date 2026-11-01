@@ -2,13 +2,22 @@
 
 **Measure neural representation drift and decoder stability across recording sessions.**
 
-The site is also Qin Liu's personal website: a home page (`/`) and an About page (`/about`)
-with research experience, selected work, education and contact, plus a plain-language
-research showcase (`/research/*`) — four projects explained for readers outside
-neuroscience, each with an interactive toy illustration. Only already-public results are
-shown; unpublished projects describe questions and methods. Personal details live in one
-file, [`frontend/content/profile.ts`](frontend/content/profile.ts); the repository is
-public, so only details meant to be public belong there.
+The site is also Qin Liu's personal website. Besides the NeuroDrift tool it has:
+
+- **Personal pages:** Home (`/`); About (`/about`), with a timeline of study, labs and awards,
+  research experience, selected work and contact; Places (`/places`), a dotted globe of cities
+  visited with their provinces and states shaded; and Ideas (`/ideas`), notes on consciousness,
+  computation and reality in which every claim is labelled evidence, interpretation or
+  speculation, with interactive figures.
+- **Research showcase** (`/research/*`): four projects explained for readers outside
+  neuroscience, each with an interactive toy illustration.
+- **Field guide** (`/learn/*`): nine interactive explainers, from electrodes and decoders to a 3D
+  brain map that places 18 brain–computer interface programs and the state of the field today.
+- **Glossary** (`/glossary`): every underlined term on the site, with the pages that use it.
+
+Only already-public results are shown; unpublished projects describe questions and methods.
+Personal details live in one file, [`frontend/content/profile.ts`](frontend/content/profile.ts);
+the repository is public, so only details meant to be public belong there.
 
 NeuroDrift is a lightweight web application for studying the cross-session stability of
 neural population representations and linear neural decoders. Upload one `.npz` file per
@@ -40,7 +49,7 @@ representational drift, and the software makes no causal claims.
 ## Architecture
 
 ```text
-Browser ──► nginx ──► /        Next.js 15 (TypeScript, Tailwind, Plotly)
+Browser ──► nginx ──► /        Next.js 15 (TypeScript, Tailwind, Plotly, three.js)
                   └─► /api/*   FastAPI ──► PostgreSQL   (metadata, compact JSON results)
                                   │    ──► filesystem   (/data/projects/<uuid>/sessions/<uuid>/raw.npz)
                                   └──► Redis ──► RQ worker (cross-session experiments)
@@ -273,6 +282,18 @@ or with `POST /api/experiments/{id}/rerun`: it is reset to `pending` with its st
 configuration and seed and queued again. Re-running is refused (`422`) if one of its sessions
 has since been deleted.
 
+## Generated site data
+
+Three data files behind the website are built by hand-run scripts from public datasets, never at
+build or run time. The datasets themselves are not committed; each script's header says where to
+download them.
+
+| Output | Script | Source | Licence |
+| --- | --- | --- | --- |
+| `frontend/content/globeLand.ts` | `frontend/scripts/make-globe-land.mjs` | Natural Earth 1:50m land, via `world-atlas` | Public domain |
+| `frontend/content/globeRegions.ts` | `frontend/scripts/make-globe-regions.mjs` | Natural Earth 1:10m states and provinces | Public domain |
+| `frontend/public/brain3d/brain-v1.bin` | `frontend/scripts/make-brain-3d.py` | MNI ICBM 2009c template, CerebrA atlas | MNI copyright notice (kept in `public/brain3d/NOTICE.txt`); CerebrA CC0 |
+
 ## Roadmap
 
 | Milestone | Scope | Status |
@@ -290,5 +311,5 @@ has since been deleted.
 
 ```bash
 cd backend && pytest          # validation, QC, decoding sanity checks, experiment lifecycle, exports, report, re-run
-cd frontend && npm test       # formatting, API error handling, stability-explorer helpers
+cd frontend && npm test       # formatting, API errors, stability explorer, site content, globe, 3D brain model, Ideas simulations
 ```

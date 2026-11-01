@@ -208,8 +208,8 @@ export default function Home() {
       <section id="field-guide" className="mb-20">
         <SectionHeading eyebrow="Field guide" title="How do you listen to a brain?">
           {NUMBER_WORDS[GUIDES.length] ?? GUIDES.length} short, interactive explainers behind everything above: how neurons are recorded and sorted, how decoders turn
-          spikes into movement and why they drift, how we see in 3D, and who is building brain–computer interfaces today. Three to start
-          with:
+          spikes into movement and why they drift, where it all happens on a 3D brain, how we see in 3D, and who is building brain–computer
+          interfaces today. Three to start with:
         </SectionHeading>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {GUIDES.filter((g) => g.featured).map((g, i) => (

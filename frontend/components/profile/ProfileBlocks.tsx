@@ -172,7 +172,15 @@ export function SiteFooter() {
             <GitHubIcon className="h-3.5 w-3.5" />
             GitHub
           </a>
-          <Link href="/about" className="inline-flex min-h-8 items-center hover:text-accent-600 dark:hover:text-accent-300">About</Link>
+          {[
+            ["/about", "About"],
+            ["/ideas", "Ideas"],
+            ["/places", "Places"],
+          ].map(([href, label]) => (
+            <Link key={href} href={href!} className="inline-flex min-h-8 items-center hover:text-accent-600 dark:hover:text-accent-300">
+              {label}
+            </Link>
+          ))}
         </div>
       </div>
     </footer>
