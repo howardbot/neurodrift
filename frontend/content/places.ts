@@ -41,6 +41,7 @@ export const PLACES: Place[] = [
   { id: "san-antonio", region: "US-TX", name: "San Antonio", area: "Texas", country: "United States", lat: 29.4241, lon: -98.4936 },
   { id: "los-angeles", region: "US-CA", name: "Los Angeles", area: "California", country: "United States", lat: 34.0522, lon: -118.2437 },
   { id: "san-francisco", region: "US-CA", name: "San Francisco", area: "California", country: "United States", lat: 37.7749, lon: -122.4194 },
+  { id: "little-rock", region: "US-AR", name: "Little Rock", area: "Arkansas", country: "United States", lat: 34.7465, lon: -92.2896 },
   { id: "cancun", region: "MX-ROO", name: "Cancún", area: "Quintana Roo", country: "Mexico", lat: 21.1619, lon: -86.8515 },
   { id: "vancouver", region: "CA-BC", name: "Vancouver", area: "British Columbia", country: "Canada", lat: 49.2827, lon: -123.1207 },
   { id: "abu-dhabi", region: "AE-AZ", name: "Abu Dhabi", country: "United Arab Emirates", lat: 24.4539, lon: 54.3773 },
